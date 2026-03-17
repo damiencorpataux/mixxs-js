@@ -218,9 +218,11 @@ document.getElementById('waveform2').addEventListener('click', e => mixer.seekOn
 
 document.getElementById('waveform1').addEventListener('wheel', e => {
   mixer.waveform1?.onWheel(e, mixer.deck1?.isPlaying ?? false);
+  mixer.syncZoom(1);
 }, { passive: false });
 document.getElementById('waveform2').addEventListener('wheel', e => {
   mixer.waveform2?.onWheel(e, mixer.deck2?.isPlaying ?? false);
+  mixer.syncZoom(2);
 }, { passive: false });
 
 // ── Pan knobs ─────────────────────────────────────────────────

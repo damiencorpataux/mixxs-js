@@ -145,7 +145,19 @@ class MixerController {
     deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
   }
 
-  // ── Beat analysis ─────────────────────────────────────────────
+  // ── Zoom sync ─────────────────────────────────────────────────
+
+  /**
+   * After a zoom change on one waveform, apply the same visible-seconds
+   * window to the other so beat grids stay visually aligned.
+   */
+  syncZoom(sourceNum) {
+    const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
+    const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
+    if (!src || !dest) return;
+    const sec = src.getVisibleSec();
+    if (sec !== null) dest.setVisibleSec(sec);
+  }
 
   async analyzeDeck(deckNum) {
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
