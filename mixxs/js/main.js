@@ -155,6 +155,10 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
   });
 }
 
+// ── Prevent browser from navigating when a file is dropped outside a drop zone
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop',     e => e.preventDefault());
+
 // ── file:// warning ───────────────────────────────────────────
 if (window.location.protocol === 'file:') {
   document.getElementById('fileProtocolWarning').style.display = 'block';
