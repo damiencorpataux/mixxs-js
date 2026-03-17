@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DJMIX</title>
+  <title>MIXXS</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,175 +11,218 @@
 
 <!-- ── FILE:// WARNING ───────────────────────────────────────── -->
 <div id="fileProtocolWarning" style="display:none; background:#7c2d12; border-bottom:1px solid #ea580c; padding:10px 24px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; color:#fed7aa;">
-  ⚠ &nbsp;DJMIX must be served over HTTP — audio device enumeration is blocked on <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">file://</code>.
-  &nbsp;Run <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">npx serve .</code> or <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">python3 -m http.server 8080</code> in the project folder, then open <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">localhost</code> in your browser.
+  ⚠ &nbsp;MIXXS must be served over HTTP — audio device enumeration is blocked on <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">file://</code>.
+  &nbsp;Run <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">npx serve mixxs</code> or <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">python3 -m http.server 8080 --directory mixxs</code> then open <code style="background:rgba(0,0,0,0.3); padding:1px 5px;">localhost</code>.
 </div>
 
 <!-- ── HEADER ────────────────────────────────────────────────── -->
 <header>
-  <div class="logo">DJ<span>MIX</span></div>
+  <div class="logo">MI<span class="logo-xs">XX</span><span>S</span></div>
+  <div class="header-center">
+    <span class="master-label">MASTER</span>
+    <div class="knob-widget knob-inline">
+      <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
+      <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
+      <input type="number" class="knob-val-input" id="masterVolVal" min="0" max="100" step="1" value="80">
+    </div>
+  </div>
   <div class="header-right">
     <div class="status-inline">
       <div class="status-item">MASTER <span id="statusMaster">DEFAULT</span></div>
       <div class="status-item">CUE <span id="statusCue">DEFAULT</span></div>
     </div>
     <button class="btn-settings" id="btnSettings">⚙ DEVICES</button>
+    <button class="btn-export"   id="btnExport">⬇ EXPORT</button>
   </div>
 </header>
 
 <!-- ── MAIN ──────────────────────────────────────────────────── -->
 <main>
-  <div class="decks-row">
 
-    <!-- ── DECK A ─────────────────────────────────────────────── -->
-    <div class="deck" id="deckA">
-      <div class="deck-header">
-        <div class="deck-label">DECK A</div>
-        <div class="track-name" id="trackName1">NO TRACK LOADED</div>
+  <!-- ── WAVEFORMS (full-width stacked) ─────────────────────── -->
+  <div class="waveforms-section">
+
+    <!-- Deck A waveform -->
+    <div class="waveform-row" id="waveformRow1">
+      <div class="waveform-header">
+        <span class="deck-label">DECK A</span>
+        <span class="track-name" id="trackName1">NO TRACK LOADED</span>
         <button class="btn-load" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
-
       <div class="waveform-wrap" id="waveWrap1">
         <canvas class="waveform" id="waveform1"></canvas>
         <div class="waveform-empty" id="waveEmpty1">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading1">DECODING…</div>
       </div>
+    </div>
 
-      <div class="time-display" id="time1">0:00 / 0:00</div>
-
-      <div class="transport">
-        <button class="btn-transport" id="play1" title="Play / Pause">▶</button>
-        <button class="btn-transport" id="stop1" title="Stop">■</button>
-        <button class="btn-cue" id="cue1">CUE</button>
-      </div>
-
-      <div class="controls-grid">
-        <div class="control-row">
-          <div class="control-label">VOLUME %</div>
-          <div class="slider-row">
-            <input type="range" id="vol1" min="0" max="1" step="0.01" value="0.8">
-            <input type="number" class="control-val-input" id="volVal1" min="0" max="100" step="1" value="80">
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">PAN %</div>
-          <div class="slider-row">
-            <input type="range" id="pan1" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="control-val-input" id="panVal1" min="-100" max="100" step="1" value="0">
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">SPEED</div>
-          <div class="slider-row">
-            <input type="range" id="speed1" min="0.5" max="2" step="0.001" value="1">
-            <input type="number" class="control-val-input" id="speedVal1" min="0.5" max="2" step="0.001" value="1.000">
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">BPM</div>
-          <div class="bpm-row">
-            <input type="number" class="bpm-input" id="bpm1" value="—" min="40" max="240" step="0.01" readonly>
-            <button class="btn-sync" id="syncFrom1" title="Tempo-match + phase-snap deck B to deck A">SYNC →B</button>
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">NUDGE</div>
-          <div class="bpm-row">
-            <button class="btn-nudge" id="nudgeBack1" title="Back 1 beat">◀ 1</button>
-            <button class="btn-nudge" id="nudgeFwd1"  title="Forward 1 beat">1 ▶</button>
-          </div>
-        </div>
-      </div>
-    </div><!-- /deck A -->
-
-    <!-- ── DECK B ─────────────────────────────────────────────── -->
-    <div class="deck" id="deckB">
-      <div class="deck-header">
-        <div class="deck-label">DECK B</div>
-        <div class="track-name" id="trackName2">NO TRACK LOADED</div>
+    <!-- Deck B waveform -->
+    <div class="waveform-row" id="waveformRow2">
+      <div class="waveform-header">
+        <span class="deck-label">DECK B</span>
+        <span class="track-name" id="trackName2">NO TRACK LOADED</span>
         <button class="btn-load" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
-
       <div class="waveform-wrap" id="waveWrap2">
         <canvas class="waveform" id="waveform2"></canvas>
         <div class="waveform-empty" id="waveEmpty2">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading2">DECODING…</div>
       </div>
+    </div>
 
-      <div class="time-display" id="time2">0:00 / 0:00</div>
+  </div><!-- /waveforms-section -->
 
+  <!-- ── CONTROLS: deck A | mixer | deck B ──────────────────── -->
+  <div class="controls-section">
+
+    <!-- ── DECK A ───────────────────────────────────────────── -->
+    <div class="deck-panel" id="deckPanel1">
+
+      <!-- Filename above overview -->
+      <div class="deck-filename" id="deckFilename1">NO TRACK LOADED</div>
+
+      <!-- Overview waveform -->
+      <div class="overview-wrap" id="overviewWrap1">
+        <canvas class="overview-canvas" id="overview1"></canvas>
+        <div class="overview-empty" id="overviewEmpty1">DROP AUDIO FILE TO LOAD</div>
+      </div>
+
+      <!-- Detected BPM left, time right -->
+      <div class="deck-info-row">
+        <div class="bpm-display">
+          <input type="number" class="bpm-input" id="bpm1" placeholder="—" min="40" max="240" step="0.01" readonly>
+          <span class="bpm-label">BPM</span>
+        </div>
+        <span class="time-display" id="time1">0:00 / 0:00</span>
+      </div>
+
+      <!-- Transport: play stop --- nudge< nudge> sync -->
+      <div class="transport">
+        <button class="btn-transport" id="play1" title="Play / Pause">▶</button>
+        <button class="btn-transport" id="stop1" title="Stop">■</button>
+        <span class="transport-spacer"></span>
+        <button class="btn-nudge" id="nudgeBack1" title="Back 1 beat">◀</button>
+        <button class="btn-nudge" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
+        <button class="btn-sync btn-sync-transport" id="syncFrom1" title="Tempo + phase sync deck B to A">SYNC →B</button>
+      </div>
+
+      <div class="deck-controls">
+        <div class="control-row">
+          <div class="speed-bpm-labels">
+            <span class="control-label">SPEED</span>
+            <span class="control-label">CURRENT BPM</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="speed1" min="0.5" max="2" step="0.001" value="1">
+            <div class="speed-vals">
+              <input type="number" class="control-val-input" id="speedVal1" min="0.5" max="2" step="0.001" value="1.000">
+              <input type="number" class="control-val-input" id="currentBpm1" min="40" max="360" step="0.01" placeholder="—">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /deck A -->
+
+    <!-- ── MIXER ─────────────────────────────────────────────── -->
+    <div class="mixer-panel">
+
+      <!-- CUE + pan knobs -->
+      <div class="mixer-cue-pans">
+        <div class="cue-pan-col">
+          <button class="btn-cue" id="cue1">CUE A</button>
+          <div class="knob-widget">
+            <div class="knob-label-top">PAN A</div>
+            <canvas class="knob-canvas" id="panKnob1" width="48" height="48"></canvas>
+            <input type="range" id="pan1" min="-1" max="1" step="0.01" value="0">
+            <input type="number" class="knob-val-input" id="panVal1" value="0" min="-100" max="100" step="1">
+          </div>
+        </div>
+        <div class="cue-pan-col">
+          <button class="btn-cue" id="cue2">CUE B</button>
+          <div class="knob-widget">
+            <div class="knob-label-top">PAN B</div>
+            <canvas class="knob-canvas" id="panKnob2" width="48" height="48"></canvas>
+            <input type="range" id="pan2" min="-1" max="1" step="0.01" value="0">
+            <input type="number" class="knob-val-input" id="panVal2" value="0" min="-100" max="100" step="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume knobs -->
+      <div class="mixer-vols">
+        <div class="knob-widget">
+          <div class="knob-label-top">VOL A</div>
+          <canvas class="knob-canvas" id="volKnob1" width="56" height="56"></canvas>
+          <input type="range" id="vol1" min="0" max="1" step="0.01" value="0.8">
+          <input type="number" class="knob-val-input" id="volVal1" value="80" min="0" max="100" step="1">
+        </div>
+        <div class="knob-widget">
+          <div class="knob-label-top">VOL B</div>
+          <canvas class="knob-canvas" id="volKnob2" width="56" height="56"></canvas>
+          <input type="range" id="vol2" min="0" max="1" step="0.01" value="0.8">
+          <input type="number" class="knob-val-input" id="volVal2" value="80" min="0" max="100" step="1">
+        </div>
+      </div>
+
+      <!-- Crossfader -->
+      <div class="mixer-xfader">
+        <div class="xfader-labels"><span>A</span><span>XFADER</span><span>B</span></div>
+        <input type="range" id="crossfader" min="0" max="1" step="0.001" value="0.5">
+      </div>
+
+    </div><!-- /mixer -->
+
+    <!-- ── DECK B ───────────────────────────────────────────── -->
+    <div class="deck-panel" id="deckPanel2">
+
+      <!-- Filename above overview -->
+      <div class="deck-filename" id="deckFilename2">NO TRACK LOADED</div>
+
+      <!-- Overview waveform -->
+      <div class="overview-wrap" id="overviewWrap2">
+        <canvas class="overview-canvas" id="overview2"></canvas>
+        <div class="overview-empty" id="overviewEmpty2">DROP AUDIO FILE TO LOAD</div>
+      </div>
+
+      <!-- Detected BPM left, time right -->
+      <div class="deck-info-row">
+        <div class="bpm-display">
+          <input type="number" class="bpm-input" id="bpm2" placeholder="—" min="40" max="240" step="0.01" readonly>
+          <span class="bpm-label">BPM</span>
+        </div>
+        <span class="time-display" id="time2">0:00 / 0:00</span>
+      </div>
+
+      <!-- Transport: play stop --- nudge< nudge> sync -->
       <div class="transport">
         <button class="btn-transport" id="play2" title="Play / Pause">▶</button>
         <button class="btn-transport" id="stop2" title="Stop">■</button>
-        <button class="btn-cue" id="cue2">CUE</button>
+        <span class="transport-spacer"></span>
+        <button class="btn-nudge" id="nudgeBack2" title="Back 1 beat">◀</button>
+        <button class="btn-nudge" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
+        <button class="btn-sync btn-sync-transport" id="syncFrom2" title="Tempo + phase sync deck A to B">SYNC →A</button>
       </div>
 
-      <div class="controls-grid">
+      <div class="deck-controls">
         <div class="control-row">
-          <div class="control-label">VOLUME %</div>
-          <div class="slider-row">
-            <input type="range" id="vol2" min="0" max="1" step="0.01" value="0.8">
-            <input type="number" class="control-val-input" id="volVal2" min="0" max="100" step="1" value="80">
+          <div class="speed-bpm-labels">
+            <span class="control-label">SPEED</span>
+            <span class="control-label">CURRENT BPM</span>
           </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">PAN %</div>
-          <div class="slider-row">
-            <input type="range" id="pan2" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="control-val-input" id="panVal2" min="-100" max="100" step="1" value="0">
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">SPEED</div>
           <div class="slider-row">
             <input type="range" id="speed2" min="0.5" max="2" step="0.001" value="1">
-            <input type="number" class="control-val-input" id="speedVal2" min="0.5" max="2" step="0.001" value="1.000">
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">BPM</div>
-          <div class="bpm-row">
-            <input type="number" class="bpm-input" id="bpm2" value="—" min="40" max="240" step="0.01" readonly>
-            <button class="btn-sync" id="syncFrom2" title="Tempo-match + phase-snap deck A to deck B">SYNC →A</button>
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">NUDGE</div>
-          <div class="bpm-row">
-            <button class="btn-nudge" id="nudgeBack2" title="Back 1 beat">◀ 1</button>
-            <button class="btn-nudge" id="nudgeFwd2"  title="Forward 1 beat">1 ▶</button>
+            <div class="speed-vals">
+              <input type="number" class="control-val-input" id="speedVal2" min="0.5" max="2" step="0.001" value="1.000">
+              <input type="number" class="control-val-input" id="currentBpm2" min="40" max="360" step="0.01" placeholder="—">
+            </div>
           </div>
         </div>
       </div>
     </div><!-- /deck B -->
 
-  </div><!-- /decks-row -->
-
-  <!-- ── BOTTOM BAR ─────────────────────────────────────────── -->
-  <div class="bottom-bar">
-
-    <div class="master-section">
-      <div class="master-label">MASTER VOL</div>
-      <div class="master-controls">
-        <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
-        <div class="control-val" id="masterVolVal">80%</div>
-      </div>
-    </div>
-
-    <div class="xfader-section" style="min-width:260px">
-      <div class="xfader-labels">
-        <span>A</span><span>CROSSFADER</span><span>B</span>
-      </div>
-      <input type="range" id="crossfader" min="0" max="1" step="0.001" value="0.5">
-    </div>
-
-    <div class="action-section">
-      <button class="btn-export" id="btnExport">⬇ EXPORT MIX</button>
-    </div>
-
-  </div>
+  </div><!-- /controls-section -->
 
 </main>
 
@@ -189,19 +232,14 @@
     <div class="modal-title">AUDIO DEVICES</div>
     <div class="modal-field">
       <label>MASTER OUTPUT</label>
-      <select id="masterDevice">
-        <option value="">Default Output</option>
-      </select>
+      <select id="masterDevice"><option value="">Default Output</option></select>
     </div>
     <div class="modal-field">
       <label>CUE / HEADPHONE OUTPUT</label>
-      <select id="cueDevice">
-        <option value="">Default Output</option>
-      </select>
+      <select id="cueDevice"><option value="">Default Output</option></select>
     </div>
     <p class="modal-note">
-      Requires Chrome / Edge 110+. Connect multiple audio outputs before opening
-      this panel. setSinkId() is used to route master and cue to separate devices.
+      Requires Chrome / Edge 110+. Connect multiple audio outputs before opening this panel.
     </p>
     <div class="modal-actions">
       <button class="btn-modal" id="btnModalClose">CANCEL</button>
@@ -210,13 +248,14 @@
   </div>
 </div>
 
-<!-- ── SCRIPTS — loaded in dependency order ───────────────────── -->
+<!-- ── SCRIPTS ────────────────────────────────────────────────── -->
 <script src="js/AudioEngine.js"></script>
 <script src="js/CueBus.js"></script>
 <script src="js/ChannelController.js"></script>
 <script src="js/CrossfaderController.js"></script>
 <script src="js/Deck.js"></script>
 <script src="js/WaveformRenderer.js"></script>
+<script src="js/OverviewRenderer.js"></script>
 <script src="js/FileLoader.js"></script>
 <script src="js/Exporter.js"></script>
 <script src="js/BeatAnalyzer.js"></script>

@@ -19,6 +19,8 @@ class MixerController {
     this.crossfader  = null;
     this.waveform1   = null;
     this.waveform2   = null;
+    this.overview1   = null;
+    this.overview2   = null;
     this.exporter    = new Exporter();
     this.initialized = false;
     this.rafId       = null;
@@ -45,6 +47,8 @@ class MixerController {
 
     this.waveform1 = new WaveformRenderer(document.getElementById('waveform1'));
     this.waveform2 = new WaveformRenderer(document.getElementById('waveform2'));
+    this.overview1 = new OverviewRenderer(document.getElementById('overview1'), t => this.deck1?.seek(t));
+    this.overview2 = new OverviewRenderer(document.getElementById('overview2'), t => this.deck2?.seek(t));
 
     this.deck1.onEnded = () => this._onDeckEnded(1);
     this.deck2.onEnded = () => this._onDeckEnded(2);
@@ -67,8 +71,16 @@ class MixerController {
       const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
       deck.load(buffer);
       waveform.load(buffer);
+      const overview = deckNum === 1 ? this.overview1 : this.overview2;
+      overview.load(buffer);
+      // Reset BPM displays until analysis completes
+      document.getElementById(`bpm${deckNum}`).value = '';
+      document.getElementById(`currentBpm${deckNum}`).value = '';
       emptyEl.style.display = 'none';
+      const overviewEmpty = document.getElementById(`overviewEmpty${deckNum}`);
+      if (overviewEmpty) overviewEmpty.style.display = 'none';
       document.getElementById(`trackName${deckNum}`).textContent = file.name;
+      document.getElementById(`deckFilename${deckNum}`).textContent = file.name;
       this._updateTimeDisplay(deckNum, 0, buffer.duration);
 
       // ── Auto-analyze BPM asynchronously ──
@@ -144,8 +156,14 @@ class MixerController {
     deck.bpm       = result.bpm;  // full precision for sync ratio
     const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
     waveform.setBeatGrid(result);
+    const overview = deckNum === 1 ? this.overview1 : this.overview2;
+    overview.setBeatGrid(result);
     // Round to 2 decimals for display only — grid uses full float precision
     document.getElementById(`bpm${deckNum}`).value = result.bpm.toFixed(2);
+    // Current BPM = detected × current speed (speed is 1.0 at load time)
+    const speed = parseFloat(document.getElementById(`speed${deckNum}`)?.value || 1);
+    const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
+    if (currentBpmEl) currentBpmEl.value = (result.bpm * speed).toFixed(2);
     return result;
   }
 
@@ -175,6 +193,9 @@ class MixerController {
     slave.setPlaybackRate(rate);
     document.getElementById(`speed${slaveNum}`).value     = rate;
     document.getElementById(`speedVal${slaveNum}`).value  = rate.toFixed(3);
+    // Update current BPM display for slave
+    const currentBpmEl = document.getElementById(`currentBpm${slaveNum}`);
+    if (currentBpmEl && slave.bpm) currentBpmEl.value = (slave.bpm * rate).toFixed(2);
 
     // ── Step 2: Phase snap ──
     if (master.beatGrid && slave.beatGrid && slave.buffer) {
@@ -225,11 +246,13 @@ class MixerController {
       if (this.deck1?.buffer) {
         const t1 = this.deck1.getCurrentTime();
         this.waveform1.draw(t1, this.deck1.isPlaying);
+        this.overview1.draw(t1);
         this._updateTimeDisplay(1, t1, this.deck1.buffer.duration);
       }
       if (this.deck2?.buffer) {
         const t2 = this.deck2.getCurrentTime();
         this.waveform2.draw(t2, this.deck2.isPlaying);
+        this.overview2.draw(t2);
         this._updateTimeDisplay(2, t2, this.deck2.buffer.duration);
       }
       this.rafId = requestAnimationFrame(loop);
