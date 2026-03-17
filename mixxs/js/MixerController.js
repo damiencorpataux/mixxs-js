@@ -61,19 +61,41 @@ class MixerController {
 
   async loadFile(deckNum, file) {
     this._init();
-    const loadingEl = document.getElementById(`loading${deckNum}`);
-    const emptyEl   = document.getElementById(`waveEmpty${deckNum}`);
+
+    // Cancel any in-progress load for this deck
+    this._cancelLoad(deckNum);
+    const cancelled = { value: false };
+    this[`_loadCancel${deckNum}`] = cancelled;
+
+    const loadingEl  = document.getElementById(`loading${deckNum}`);
+    const emptyEl    = document.getElementById(`waveEmpty${deckNum}`);
+    const cancelBtn  = document.getElementById(`cancelLoad${deckNum}`);
+    const labelEl    = loadingEl.querySelector('span');
+
+    const dismiss = () => {
+      loadingEl.classList.remove('active');
+      if (labelEl) labelEl.textContent = 'DECODING…';
+    };
+
+    if (cancelBtn) cancelBtn.onclick = () => {
+      cancelled.value = true;
+      dismiss();
+    };
+
     loadingEl.classList.add('active');
-    loadingEl.textContent = 'DECODING…';
+    if (labelEl) labelEl.textContent = 'DECODING…';
+
     try {
-      const buffer   = await this.fileLoader.load(file);
+      const buffer = await this.fileLoader.load(file);
+      if (cancelled.value) return;
+
       const deck     = deckNum === 1 ? this.deck1     : this.deck2;
       const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
+      const overview = deckNum === 1 ? this.overview1 : this.overview2;
       deck.load(buffer);
       waveform.load(buffer);
-      const overview = deckNum === 1 ? this.overview1 : this.overview2;
       overview.load(buffer);
-      // Reset BPM displays until analysis completes
+
       document.getElementById(`bpm${deckNum}`).value = '';
       document.getElementById(`currentBpm${deckNum}`).value = '';
       emptyEl.style.display = 'none';
@@ -83,19 +105,25 @@ class MixerController {
       document.getElementById(`deckFilename${deckNum}`).textContent = file.name;
       this._updateTimeDisplay(deckNum, 0, deck.getRealDuration());
 
-      // ── Auto-analyze BPM asynchronously ──
-      loadingEl.textContent = 'ANALYZING…';
-      this.analyzeDeck(deckNum).then(result => {
-        loadingEl.classList.remove('active');
-        loadingEl.textContent = 'DECODING…'; // reset for next load
+      // ── Auto-analyze BPM ──
+      if (labelEl) labelEl.textContent = 'ANALYZING…';
+      this.analyzeDeck(deckNum).then(() => {
+        if (!cancelled.value) dismiss();
       }).catch(() => {
-        loadingEl.classList.remove('active');
-        loadingEl.textContent = 'DECODING…';
+        if (!cancelled.value) dismiss();
       });
     } catch (err) {
-      loadingEl.classList.remove('active');
-      alert(`Failed to decode audio: ${err.message}`);
+      if (!cancelled.value) {
+        dismiss();
+        alert(`Failed to decode audio: ${err.message}`);
+      }
     }
+  }
+
+  _cancelLoad(deckNum) {
+    const token = this[`_loadCancel${deckNum}`];
+    if (token) token.value = true;
+    this[`_loadCancel${deckNum}`] = null;
   }
 
   // ── Transport ─────────────────────────────────────────────────

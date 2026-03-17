@@ -191,6 +191,19 @@ canvas.waveform {
   color: var(--amber);
 }
 .deck-loading.active { display: flex; }
+.btn-cancel-load {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  margin-left: 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-cancel-load:hover { border-color: var(--red); color: var(--red); }
 
 /* ── CONTROLS SECTION ────────────────────────────────────────── */
 .controls-section {
