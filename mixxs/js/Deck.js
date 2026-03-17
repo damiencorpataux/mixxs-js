@@ -86,6 +86,17 @@ class Deck {
     return Math.min(this.startOffset + elapsed, this.buffer.duration);
   }
 
+  /** Wall-clock seconds elapsed — current track position adjusted for playback rate. */
+  getRealCurrentTime() {
+    return this.getCurrentTime() / this.playbackRate;
+  }
+
+  /** Wall-clock duration — how long the track takes to play at current speed. */
+  getRealDuration() {
+    if (!this.buffer) return 0;
+    return this.buffer.duration / this.playbackRate;
+  }
+
   setPlaybackRate(rate) {
     this.playbackRate = rate;
     if (this.source) this.source.playbackRate.value = rate;

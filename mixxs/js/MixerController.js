@@ -81,7 +81,7 @@ class MixerController {
       if (overviewEmpty) overviewEmpty.style.display = 'none';
       document.getElementById(`trackName${deckNum}`).textContent = file.name;
       document.getElementById(`deckFilename${deckNum}`).textContent = file.name;
-      this._updateTimeDisplay(deckNum, 0, buffer.duration);
+      this._updateTimeDisplay(deckNum, 0, deck.getRealDuration());
 
       // ── Auto-analyze BPM asynchronously ──
       loadingEl.textContent = 'ANALYZING…';
@@ -248,13 +248,13 @@ class MixerController {
         const t1 = this.deck1.getCurrentTime();
         this.waveform1.draw(t1, this.deck1.isPlaying);
         this.overview1.draw(t1);
-        this._updateTimeDisplay(1, t1, this.deck1.buffer.duration);
+        this._updateTimeDisplay(1, this.deck1.getRealCurrentTime(), this.deck1.getRealDuration());
       }
       if (this.deck2?.buffer) {
         const t2 = this.deck2.getCurrentTime();
         this.waveform2.draw(t2, this.deck2.isPlaying);
         this.overview2.draw(t2);
-        this._updateTimeDisplay(2, t2, this.deck2.buffer.duration);
+        this._updateTimeDisplay(2, this.deck2.getRealCurrentTime(), this.deck2.getRealDuration());
       }
       this.rafId = requestAnimationFrame(loop);
     };
