@@ -178,37 +178,26 @@ class MixerController {
    *
    * Falls back to manual BPM field values if beatGrid is not yet available.
    */
-  sync(masterDeckNum) {
-    const master   = masterDeckNum === 1 ? this.deck1 : this.deck2;
-    const slave    = masterDeckNum === 1 ? this.deck2 : this.deck1;
-    const slaveNum = masterDeckNum === 1 ? 2 : 1;
-    if (!master || !slave) return;
+  /**
+   * Sync: adjust the clicked deck's speed to match the other deck's BPM.
+   * Clicking SYNC on deck 1 → deck 1 adjusts to match deck 2's BPM.
+   * Clicking SYNC on deck 2 → deck 2 adjusts to match deck 1's BPM.
+   */
+  sync(deckNum) {
+    const thisDeck  = deckNum === 1 ? this.deck1 : this.deck2;
+    const otherDeck = deckNum === 1 ? this.deck2 : this.deck1;
+    if (!thisDeck || !otherDeck) return;
 
-    const masterBpm = master.beatGrid?.bpm ?? master.bpm;
-    const slaveBpm  = slave.beatGrid?.bpm  ?? slave.bpm;
-    if (!slaveBpm) return;
+    const thisBpm  = thisDeck.beatGrid?.bpm  ?? thisDeck.bpm;
+    const otherBpm = otherDeck.beatGrid?.bpm ?? otherDeck.bpm;
+    if (!thisBpm || !otherBpm) return;
 
-    // ── Step 1: Tempo match ──
-    const rate = masterBpm / slaveBpm;
-    slave.setPlaybackRate(rate);
-    document.getElementById(`speed${slaveNum}`).value     = rate;
-    document.getElementById(`speedVal${slaveNum}`).value  = rate.toFixed(3);
-    // Update current BPM display for slave
-    const currentBpmEl = document.getElementById(`currentBpm${slaveNum}`);
-    if (currentBpmEl && slave.bpm) currentBpmEl.value = (slave.bpm * rate).toFixed(2);
-
-    // ── Step 2: Phase snap ──
-    if (master.beatGrid && slave.beatGrid && slave.buffer) {
-      const seekTime = BeatAnalyzer.phaseSnapTime(
-        master.getCurrentTime(),
-        master.beatGrid.bpm,
-        master.beatGrid.offset,
-        slave.beatGrid.bpm,
-        slave.beatGrid.offset,
-        slave.buffer.duration
-      );
-      slave.seek(seekTime);
-    }
+    const rate = otherBpm / thisBpm;
+    thisDeck.setPlaybackRate(rate);
+    document.getElementById(`speed${deckNum}`).value    = rate;
+    document.getElementById(`speedVal${deckNum}`).value = rate.toFixed(3);
+    const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
+    if (currentBpmEl && thisDeck.bpm) currentBpmEl.value = (thisDeck.bpm * rate).toFixed(2);
   }
 
   // ── Export ────────────────────────────────────────────────────
