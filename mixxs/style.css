@@ -465,7 +465,7 @@ canvas.overview-canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
   color: var(--muted);
   pointer-events: none;
@@ -492,8 +492,34 @@ canvas.overview-canvas {
   color: var(--muted);
 }
 
-/* Filename above overview */
-.deck-filename {
+/* A/B letter highlight in deck labels */
+.deck-ab {
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+
+/* Combined label + filename row above overview in deck panel */
+.deck-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+/* Deck A: filename left, label right */
+.deck-top-row--left  { flex-direction: row; }
+/* Deck B: label left, filename right */
+.deck-top-row--right { flex-direction: row; }
+
+/* Filename in top row: truncate */
+.deck-top-row .deck-filename {
+  flex: 1;
+  padding: 0;
+}
+/* Deck B filename is on the right side → right-align text */
+.deck-top-row--right .deck-filename {
+  text-align: right;
+}
   font-size: 9px;
   color: var(--muted);
   letter-spacing: 1px;

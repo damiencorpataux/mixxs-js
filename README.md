@@ -1,8 +1,8 @@
-# DJMIX
+# MIXXS
+
+▶️ [Try it online](https://www.mien.ch/mixxs-js/mixxs/)
 
 A browser-based DJ mixer. No install, no server, no dependencies — just open `index.html` and play.
-
-[Try it here](https://www.mien.ch/mixxs-js/mixxs/) !
 
 ![Chrome](https://img.shields.io/badge/Chrome-110+-orange) ![Edge](https://img.shields.io/badge/Edge-110+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 

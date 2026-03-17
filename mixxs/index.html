@@ -17,7 +17,7 @@
 
 <!-- ── HEADER ────────────────────────────────────────────────── -->
 <header>
-  <div class="logo">MI<span class="logo-xs">XX</span><span>S</span></div>
+  <div class="logo">MIX<span class="logo-xs">XS</span></div>
   <div class="header-center">
     <span class="master-label">MASTER</span>
     <div class="knob-widget knob-inline">
@@ -45,7 +45,7 @@
     <!-- Deck A waveform -->
     <div class="waveform-row" id="waveformRow1">
       <div class="waveform-header">
-        <span class="deck-label">DECK A</span>
+        <span class="deck-label">DECK <span class="deck-ab">A</span></span>
         <span class="track-name" id="trackName1">NO TRACK LOADED</span>
         <button class="btn-load" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
@@ -60,7 +60,7 @@
     <!-- Deck B waveform -->
     <div class="waveform-row" id="waveformRow2">
       <div class="waveform-header">
-        <span class="deck-label">DECK B</span>
+        <span class="deck-label">DECK <span class="deck-ab">B</span></span>
         <span class="track-name" id="trackName2">NO TRACK LOADED</span>
         <button class="btn-load" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
@@ -80,8 +80,11 @@
     <!-- ── DECK A ───────────────────────────────────────────── -->
     <div class="deck-panel" id="deckPanel1">
 
-      <!-- Filename above overview -->
-      <div class="deck-filename" id="deckFilename1">NO TRACK LOADED</div>
+      <!-- Deck label + filename row: filename left, label right (mixer is on the right) -->
+      <div class="deck-top-row deck-top-row--left">
+        <div class="deck-filename" id="deckFilename1">NO TRACK LOADED</div>
+        <span class="deck-label">DECK <span class="deck-ab">A</span></span>
+      </div>
 
       <!-- Overview waveform -->
       <div class="overview-wrap" id="overviewWrap1">
@@ -177,8 +180,11 @@
     <!-- ── DECK B ───────────────────────────────────────────── -->
     <div class="deck-panel" id="deckPanel2">
 
-      <!-- Filename above overview -->
-      <div class="deck-filename" id="deckFilename2">NO TRACK LOADED</div>
+      <!-- Deck label + filename row: label left, filename right (mixer is on the left) -->
+      <div class="deck-top-row deck-top-row--right">
+        <span class="deck-label">DECK <span class="deck-ab">B</span></span>
+        <div class="deck-filename" id="deckFilename2">NO TRACK LOADED</div>
+      </div>
 
       <!-- Overview waveform -->
       <div class="overview-wrap" id="overviewWrap2">
