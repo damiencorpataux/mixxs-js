@@ -60,6 +60,7 @@ class MixerController {
     const loadingEl = document.getElementById(`loading${deckNum}`);
     const emptyEl   = document.getElementById(`waveEmpty${deckNum}`);
     loadingEl.classList.add('active');
+    loadingEl.textContent = 'DECODING…';
     try {
       const buffer   = await this.fileLoader.load(file);
       const deck     = deckNum === 1 ? this.deck1     : this.deck2;
@@ -69,10 +70,19 @@ class MixerController {
       emptyEl.style.display = 'none';
       document.getElementById(`trackName${deckNum}`).textContent = file.name;
       this._updateTimeDisplay(deckNum, 0, buffer.duration);
+
+      // ── Auto-analyze BPM asynchronously ──
+      loadingEl.textContent = 'ANALYZING…';
+      this.analyzeDeck(deckNum).then(result => {
+        loadingEl.classList.remove('active');
+        loadingEl.textContent = 'DECODING…'; // reset for next load
+      }).catch(() => {
+        loadingEl.classList.remove('active');
+        loadingEl.textContent = 'DECODING…';
+      });
     } catch (err) {
-      alert(`Failed to decode audio: ${err.message}`);
-    } finally {
       loadingEl.classList.remove('active');
+      alert(`Failed to decode audio: ${err.message}`);
     }
   }
 
@@ -116,24 +126,68 @@ class MixerController {
 
   seekOnCanvas(deckNum, event) {
     const deck     = deckNum === 1 ? this.deck1 : this.deck2;
-    const canvas   = event.currentTarget;
+    const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
     if (!deck?.buffer) return;
-    const rect  = canvas.getBoundingClientRect();
-    const ratio = (event.clientX - rect.left) / rect.width;
-    deck.seek(ratio * deck.buffer.duration);
+    const canvas = event.currentTarget;
+    const rect   = canvas.getBoundingClientRect();
+    deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
   }
 
-  // ── BPM sync ──────────────────────────────────────────────────
+  // ── Beat analysis ─────────────────────────────────────────────
 
-  syncBpm(masterDeckNum) {
+  async analyzeDeck(deckNum) {
+    const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (!deck?.buffer) return;
+    const analyzer = new BeatAnalyzer();
+    const result   = await analyzer.analyze(deck.buffer);
+    deck.beatGrid  = result;
+    deck.bpm       = result.bpm;  // full precision for sync ratio
+    const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
+    waveform.setBeatGrid(result);
+    // Round to 2 decimals for display only — grid uses full float precision
+    document.getElementById(`bpm${deckNum}`).value = result.bpm.toFixed(2);
+    return result;
+  }
+
+  // ── BPM + phase sync ──────────────────────────────────────────
+
+  /**
+   * Full sync: tempo-match slave deck to master, then phase-snap.
+   *
+   * Step 1 — Tempo: adjust slave playbackRate = masterBPM / slaveBPM
+   * Step 2 — Phase: seek slave to the beat index that aligns with master's
+   *           current position, using BeatAnalyzer.phaseSnapTime()
+   *
+   * Falls back to manual BPM field values if beatGrid is not yet available.
+   */
+  sync(masterDeckNum) {
     const master   = masterDeckNum === 1 ? this.deck1 : this.deck2;
     const slave    = masterDeckNum === 1 ? this.deck2 : this.deck1;
     const slaveNum = masterDeckNum === 1 ? 2 : 1;
-    if (!master?.bpm || !slave?.bpm || slave.bpm === 0) return;
-    const rate = master.bpm / slave.bpm;
+    if (!master || !slave) return;
+
+    const masterBpm = master.beatGrid?.bpm ?? master.bpm;
+    const slaveBpm  = slave.beatGrid?.bpm  ?? slave.bpm;
+    if (!slaveBpm) return;
+
+    // ── Step 1: Tempo match ──
+    const rate = masterBpm / slaveBpm;
     slave.setPlaybackRate(rate);
-    document.getElementById(`speed${slaveNum}`).value = rate;
-    document.getElementById(`speedVal${slaveNum}`).textContent = rate.toFixed(2) + '×';
+    document.getElementById(`speed${slaveNum}`).value     = rate;
+    document.getElementById(`speedVal${slaveNum}`).value  = rate.toFixed(3);
+
+    // ── Step 2: Phase snap ──
+    if (master.beatGrid && slave.beatGrid && slave.buffer) {
+      const seekTime = BeatAnalyzer.phaseSnapTime(
+        master.getCurrentTime(),
+        master.beatGrid.bpm,
+        master.beatGrid.offset,
+        slave.beatGrid.bpm,
+        slave.beatGrid.offset,
+        slave.buffer.duration
+      );
+      slave.seek(seekTime);
+    }
   }
 
   // ── Export ────────────────────────────────────────────────────
@@ -169,12 +223,14 @@ class MixerController {
   _startRAF() {
     const loop = () => {
       if (this.deck1?.buffer) {
-        this.waveform1.draw(this.deck1.getCurrentTime());
-        this._updateTimeDisplay(1, this.deck1.getCurrentTime(), this.deck1.buffer.duration);
+        const t1 = this.deck1.getCurrentTime();
+        this.waveform1.draw(t1, this.deck1.isPlaying);
+        this._updateTimeDisplay(1, t1, this.deck1.buffer.duration);
       }
       if (this.deck2?.buffer) {
-        this.waveform2.draw(this.deck2.getCurrentTime());
-        this._updateTimeDisplay(2, this.deck2.getCurrentTime(), this.deck2.buffer.duration);
+        const t2 = this.deck2.getCurrentTime();
+        this.waveform2.draw(t2, this.deck2.isPlaying);
+        this._updateTimeDisplay(2, t2, this.deck2.buffer.duration);
       }
       this.rafId = requestAnimationFrame(loop);
     };

@@ -2,6 +2,8 @@
 
 A browser-based DJ mixer. No install, no server, no dependencies — just open `index.html` and play.
 
+[Try it here](https://www.mien.ch/mixxs-js/mixxs/) !
+
 ![Chrome](https://img.shields.io/badge/Chrome-110+-orange) ![Edge](https://img.shields.io/badge/Edge-110+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -25,6 +27,8 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 git clone https://github.com/damiencorpataux/mixxs-js.git
 cd mixxs-js
 ```
+
+Then serve it locally — opening `index.html` directly via `file://` won't work because Chrome restricts audio device enumeration on that protocol.
 
 **Node:**
 ```bash
@@ -92,8 +96,6 @@ FileLoader → AudioBuffer
 | Edge 110+ | ✅ | ✅ |
 | Firefox | ✅ | ⚠️ partial |
 | Safari | ✅ | ❌ |
-
-Note on using multi-device outputs for master and cue: opening `index.html` directly via `file://` won't work because Chrome restricts audio device enumeration on that protocol.
 
 ---
 

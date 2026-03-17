@@ -192,7 +192,7 @@ canvas.waveform {
 /* ── CONTROLS ───────────────────────────────────────────────── */
 .controls-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
 }
 .control-row {
@@ -206,11 +206,22 @@ canvas.waveform {
   color: var(--muted);
   text-transform: uppercase;
 }
-.control-val {
+.control-val-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--amber);
   font-family: var(--font-display);
   font-size: 10px;
-  color: var(--amber);
+  width: 54px;
+  padding: 2px 4px;
+  text-align: center;
+  outline: none;
+  flex-shrink: 0;
+  -moz-appearance: textfield;
 }
+.control-val-input::-webkit-outer-spin-button,
+.control-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.control-val-input:focus { border-color: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.2); }
 .slider-row {
   display: flex;
   align-items: center;
@@ -262,6 +273,12 @@ input[type="number"].bpm-input {
 input[type="number"].bpm-input::-webkit-outer-spin-button,
 input[type="number"].bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 input[type="number"].bpm-input:focus { border-color: var(--amber); }
+input[type="number"].bpm-input[readonly] {
+  color: var(--muted);
+  border-color: transparent;
+  cursor: default;
+  background: transparent;
+}
 .btn-sync {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -274,6 +291,22 @@ input[type="number"].bpm-input:focus { border-color: var(--amber); }
   transition: all .15s;
 }
 .btn-sync:hover { border-color: var(--green); color: var(--green); }
+
+/* ── NUDGE BUTTONS ──────────────────────────────────────────── */
+.btn-nudge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all .15s;
+  flex: 1;
+}
+.btn-nudge:hover { border-color: var(--amber); color: var(--amber); }
+.btn-nudge:active { background: var(--amber-dk); }
 
 /* ── BOTTOM BAR ─────────────────────────────────────────────── */
 .bottom-bar {

@@ -13,11 +13,6 @@ function fmtTime(s) {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 }
 
-function panLabel(v) {
-  if (Math.abs(v) < 0.02) return 'C';
-  return v < 0 ? `L${Math.round(-v * 100)}` : `R${Math.round(v * 100)}`;
-}
-
 // ── file:// protocol warning ──────────────────────────────────
 if (window.location.protocol === 'file:') {
   document.getElementById('fileProtocolWarning').style.display = 'block';
@@ -68,52 +63,94 @@ document.getElementById('stop2').addEventListener('click', () => mixer.stopDeck(
 document.getElementById('cue1').addEventListener('click', () => mixer.toggleCue(1));
 document.getElementById('cue2').addEventListener('click', () => mixer.toggleCue(2));
 
-// ── Waveform seek ─────────────────────────────────────────────────
+// ── Waveform seek + zoom ──────────────────────────────────────────
 
 document.getElementById('waveform1').addEventListener('click', e => mixer.seekOnCanvas(1, e));
 document.getElementById('waveform2').addEventListener('click', e => mixer.seekOnCanvas(2, e));
 
-// ── Per-deck controls ─────────────────────────────────────────────
+// Wheel zoom — passive:false so we can preventDefault (stops page scroll)
+document.getElementById('waveform1').addEventListener('wheel', e => {
+  mixer.waveform1?.onWheel(e, mixer.deck1?.isPlaying ?? false);
+}, { passive: false });
+document.getElementById('waveform2').addEventListener('wheel', e => {
+  mixer.waveform2?.onWheel(e, mixer.deck2?.isPlaying ?? false);
+}, { passive: false });
+
+// ── Per-deck controls (bidirectional slider ↔ number input) ──────
 
 [1, 2].forEach(n => {
-  document.getElementById(`vol${n}`).addEventListener('input', e => {
-    const v = parseFloat(e.target.value);
+  const volSlider  = document.getElementById(`vol${n}`);
+  const volInput   = document.getElementById(`volVal${n}`);
+  const panSlider  = document.getElementById(`pan${n}`);
+  const panInput   = document.getElementById(`panVal${n}`);
+  const spdSlider  = document.getElementById(`speed${n}`);
+  const spdInput   = document.getElementById(`speedVal${n}`);
+
+  // ── Volume ──
+  volSlider.addEventListener('input', () => {
+    const v = parseFloat(volSlider.value);
     mixer[`channel${n}`]?.setVolume(v);
-    document.getElementById(`volVal${n}`).textContent = Math.round(v * 100) + '%';
+    volInput.value = Math.round(v * 100);
+  });
+  volInput.addEventListener('blur', () => {
+    const pct = Math.max(0, Math.min(100, parseFloat(volInput.value) || 0));
+    const v   = pct / 100;
+    volInput.value   = pct;
+    volSlider.value  = v;
+    mixer[`channel${n}`]?.setVolume(v);
   });
 
-  document.getElementById(`pan${n}`).addEventListener('input', e => {
-    const v = parseFloat(e.target.value);
+  // ── Pan ──
+  panSlider.addEventListener('input', () => {
+    const v = parseFloat(panSlider.value);
     mixer[`channel${n}`]?.setPan(v);
-    document.getElementById(`panVal${n}`).textContent = panLabel(v);
+    panInput.value = Math.round(v * 100);
+  });
+  panInput.addEventListener('blur', () => {
+    const pct = Math.max(-100, Math.min(100, parseFloat(panInput.value) || 0));
+    const v   = pct / 100;
+    panInput.value  = pct;
+    panSlider.value = v;
+    mixer[`channel${n}`]?.setPan(v);
   });
 
-  document.getElementById(`speed${n}`).addEventListener('input', e => {
-    const v = parseFloat(e.target.value);
+  // ── Speed ──
+  spdSlider.addEventListener('input', () => {
+    const v = parseFloat(spdSlider.value);
     mixer[`deck${n}`]?.setPlaybackRate(v);
-    document.getElementById(`speedVal${n}`).textContent = v.toFixed(2) + '×';
+    spdInput.value = v.toFixed(3);
+  });
+  spdInput.addEventListener('blur', () => {
+    const v = Math.max(0.5, Math.min(2, parseFloat(spdInput.value) || 1));
+    spdInput.value  = v.toFixed(3);
+    spdSlider.value = v;
+    mixer[`deck${n}`]?.setPlaybackRate(v);
   });
 
-  document.getElementById(`bpm${n}`).addEventListener('change', e => {
-    if (mixer[`deck${n}`]) mixer[`deck${n}`].bpm = parseFloat(e.target.value);
+  // Enter key triggers blur (applies value without clicking away)
+  [volInput, panInput, spdInput].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); });
   });
 });
 
-// ── BPM sync ──────────────────────────────────────────────────────
+// ── BPM sync (full: tempo + phase) ───────────────────────────────
 
 document.getElementById('syncFrom1').addEventListener('click', () => {
   mixer._init();
-  mixer.deck1.bpm = parseFloat(document.getElementById('bpm1').value);
-  mixer.deck2.bpm = parseFloat(document.getElementById('bpm2').value);
-  mixer.syncBpm(1);
+  mixer.sync(1);
 });
 
 document.getElementById('syncFrom2').addEventListener('click', () => {
   mixer._init();
-  mixer.deck1.bpm = parseFloat(document.getElementById('bpm1').value);
-  mixer.deck2.bpm = parseFloat(document.getElementById('bpm2').value);
-  mixer.syncBpm(2);
+  mixer.sync(2);
 });
+
+// ── Nudge buttons ─────────────────────────────────────────────────
+
+document.getElementById('nudgeBack1').addEventListener('click',  () => mixer.deck1?.nudge(-1));
+document.getElementById('nudgeFwd1').addEventListener('click',   () => mixer.deck1?.nudge(+1));
+document.getElementById('nudgeBack2').addEventListener('click',  () => mixer.deck2?.nudge(-1));
+document.getElementById('nudgeFwd2').addEventListener('click',   () => mixer.deck2?.nudge(+1));
 
 // ── Crossfader ────────────────────────────────────────────────────
 

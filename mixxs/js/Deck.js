@@ -5,18 +5,22 @@
 //  It is recreated transparently on every play() call.
 //  The current playback position is tracked manually via
 //  AudioContext.currentTime deltas.
+//
+//  beatGrid: { bpm, offset } — set by BeatAnalyzer after file load.
+//  Used by MixerController for phase-aligned sync.
 // ═══════════════════════════════════════════════════════════════
 class Deck {
   constructor(ctx, channelController) {
-    this.ctx      = ctx;
-    this.channel  = channelController;
-    this.buffer   = null;
-    this.source   = null;
-    this.startCtxTime = 0;   // ctx.currentTime recorded at last play()
-    this.startOffset  = 0;   // buffer position at last play()
+    this.ctx          = ctx;
+    this.channel      = channelController;
+    this.buffer       = null;
+    this.source       = null;
+    this.startCtxTime = 0;    // ctx.currentTime recorded at last play()
+    this.startOffset  = 0;    // buffer position at last play()
     this.isPlaying    = false;
     this.playbackRate = 1.0;
     this.bpm          = 120;
+    this.beatGrid     = null; // { bpm, offset } — populated by BeatAnalyzer
     this.onEnded      = null; // optional UI callback
   }
 
@@ -24,6 +28,24 @@ class Deck {
     if (this.isPlaying) this.stop();
     this.buffer      = audioBuffer;
     this.startOffset = 0;
+    this.beatGrid    = null;  // cleared until BeatAnalyzer populates it
+  }
+
+  /** Returns the index of the nearest beat at the current playback position. */
+  getCurrentBeatIndex() {
+    if (!this.beatGrid) return null;
+    return BeatAnalyzer.nearestBeatIndex(
+      this.getCurrentTime(), this.beatGrid.bpm, this.beatGrid.offset
+    );
+  }
+
+  /** Seek forward or backward by `beats` beats (e.g. +1 or -1). */
+  nudge(beats) {
+    if (!this.buffer) return;
+    const beatDuration = this.beatGrid
+      ? 60 / this.beatGrid.bpm
+      : 60 / this.bpm;
+    this.seek(this.getCurrentTime() + beats * beatDuration);
   }
 
   play() {
