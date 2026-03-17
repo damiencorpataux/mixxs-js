@@ -6,6 +6,8 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 
 ![Chrome](https://img.shields.io/badge/Chrome-110+-orange) ![Edge](https://img.shields.io/badge/Edge-110+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
+![App screenshot](docs/mixxs.png)
+
 ---
 
 ## Features
