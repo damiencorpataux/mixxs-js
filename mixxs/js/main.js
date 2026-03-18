@@ -131,7 +131,10 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
   });
 
   const commit = () => {
-    const displayVal  = parseFloat(displayInput.value);
+    const raw = displayInput.value;
+    // Handle -∞ display value (volume at 0)
+    if (raw === '-∞' || raw === '-Infinity') { apply(parseFloat(rangeInput.min)); editSnapshot = null; return; }
+    const displayVal  = parseFloat(raw);
     if (isNaN(displayVal)) { cancel(); return; }
     apply(clamp(internalFn(displayVal)));
     editSnapshot = null;
@@ -225,6 +228,13 @@ document.getElementById('waveform2').addEventListener('wheel', e => {
   mixer.syncZoom(2);
 }, { passive: false });
 
+// ── dB utilities ──────────────────────────────────────────────
+const linearToDb = v => v <= 0 ? '-∞' : (20 * Math.log10(v)).toFixed(1);
+const dbToLinear = db => {
+  const v = Math.pow(10, parseFloat(db) / 20);
+  return Math.max(0, Math.min(1, v));
+};
+
 // ── EQ knobs ──────────────────────────────────────────────────
 // Gain in dB: -12 to +12, display as dB value, double-click resets to 0
 [1, 2].forEach(n => {
@@ -243,22 +253,22 @@ document.getElementById('waveform2').addEventListener('wheel', e => {
     );
   });
 });
-// Volume: internal 0..1, display 0..100
+// Volume: internal 0..1, display in dB
 setupKnob(
   document.getElementById('volKnob1'),
   document.getElementById('vol1'),
   document.getElementById('volVal1'),
   v => mixer.channel1?.setVolume(v),
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 setupKnob(
   document.getElementById('volKnob2'),
   document.getElementById('vol2'),
   document.getElementById('volVal2'),
   v => mixer.channel2?.setVolume(v),
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 
 // ── Speed sliders + current BPM ───────────────────────────────
@@ -364,8 +374,8 @@ setupKnob(
   document.getElementById('masterVol'),
   document.getElementById('masterVolVal'),
   v => { if (mixer.audioEngine.masterGain) mixer.audioEngine.masterGain.gain.value = v; },
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 
 // ── Export ────────────────────────────────────────────────────
