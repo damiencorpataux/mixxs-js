@@ -26,6 +26,13 @@
       <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
       <input type="number" class="knob-val-input" id="masterVolVal" min="-60" max="0" step="0.1" value="-1.9">
     </div>
+    <span class="master-label" style="margin-left:12px">CLICK</span>
+    <button class="btn-transport" id="btnClick" title="Toggle click track">♩</button>
+    <div class="knob-widget knob-inline">
+      <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
+      <input type="range" id="clickVol" min="0" max="1" step="0.01" value="0.5">
+      <input type="number" class="knob-val-input" id="clickVolVal" min="-60" max="0" step="0.1" value="-6.0">
+    </div>
   </div>
   <div class="header-right">
     <div class="status-inline">
@@ -316,6 +323,7 @@
 <script src="js/FileLoader.js"></script>
 <script src="js/Exporter.js"></script>
 <script src="js/BeatAnalyzer.js"></script>
+<script src="js/Clicktrack.js"></script>
 <script src="js/MixerController.js"></script>
 <script src="js/main.js"></script>
 

@@ -446,6 +446,21 @@ const LOOP_STEPS = [1, 2, 4, 8, 16, 32, 64];
 });
 document.getElementById('btnExport').addEventListener('click', () => mixer.exportMix());
 
+// ── Click track ───────────────────────────────────────────────
+document.getElementById('btnClick').addEventListener('click', e => {
+  mixer._init();
+  mixer.toggleClick(e.currentTarget);
+});
+
+setupKnob(
+  document.getElementById('clickKnob'),
+  document.getElementById('clickVol'),
+  document.getElementById('clickVolVal'),
+  v => mixer.clicktrack?.setVolume(v),
+  v => linearToDb(v),
+  d => dbToLinear(d)
+);
+
 // ── Settings modal ────────────────────────────────────────────
 const modal = document.getElementById('modalOverlay');
 document.getElementById('btnSettings').addEventListener('click', async () => {

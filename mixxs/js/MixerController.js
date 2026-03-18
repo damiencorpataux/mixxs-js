@@ -22,6 +22,7 @@ class MixerController {
     this.overview1   = null;
     this.overview2   = null;
     this.exporter    = new Exporter();
+    this.clicktrack  = null;
     this.initialized = false;
     this.rafId       = null;
   }
@@ -45,6 +46,7 @@ class MixerController {
       this.audioEngine.masterGain
     );
 
+    this.clicktrack = new Clicktrack(this.audioEngine.masterContext);
     this.waveform1 = new WaveformRenderer(document.getElementById('waveform1'));
     this.waveform2 = new WaveformRenderer(document.getElementById('waveform2'));
     this.overview1 = new OverviewRenderer(document.getElementById('overview1'), t => this.deck1?.seek(t));
@@ -198,6 +200,17 @@ class MixerController {
    * After a zoom change on one waveform, apply the same visible-seconds
    * window to the other so beat grids stay visually aligned.
    */
+  toggleClick(btn) {
+    if (!this.initialized) this._init();
+    if (this.clicktrack.enabled) {
+      this.clicktrack.disable();
+      btn.classList.remove('active');
+    } else {
+      this.clicktrack.enable();
+      btn.classList.add('active');
+    }
+  }
+
   syncZoom(sourceNum) {
     const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
     const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
@@ -291,6 +304,11 @@ class MixerController {
 
   _startRAF() {
     const loop = () => {
+      // Click track — follow whichever deck is playing (deck1 priority)
+      if (this.clicktrack) {
+        const masterDeck = this.deck1?.isPlaying ? this.deck1 : this.deck2;
+        this.clicktrack.tick(masterDeck);
+      }
       if (this.deck1?.buffer) {
         this.deck1.checkLoop();
         const t1      = this.deck1.getCurrentTime();
