@@ -130,6 +130,14 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
     displayInput.select();
   });
 
+  // Arrow keys apply immediately without waiting for blur
+  displayInput.addEventListener('input', () => {
+    const raw = displayInput.value;
+    if (raw === '-∞' || raw === '-Infinity') return;
+    const displayVal = parseFloat(raw);
+    if (!isNaN(displayVal)) apply(clamp(internalFn(displayVal)));
+  });
+
   const commit = () => {
     const raw = displayInput.value;
     // Handle -∞ display value (volume at 0)
@@ -291,6 +299,7 @@ setupKnob(
 
   spdSlider.addEventListener('input', () => applySpeed(parseFloat(spdSlider.value)));
 
+  spdInput.addEventListener('input', () => applySpeed(parseFloat(spdInput.value) || 1));
   spdInput.addEventListener('blur', () => {
     applySpeed(parseFloat(spdInput.value) || 1);
   });
@@ -300,13 +309,17 @@ setupKnob(
   });
 
   // Current BPM input: editing sets speed = typed / detectedBpm
+  currentBpmEl.addEventListener('input', () => {
+    const typed      = parseFloat(currentBpmEl.value);
+    const detectedBpm = mixer[`deck${n}`]?.bpm;
+    if (!isNaN(typed) && detectedBpm) applySpeed(typed / detectedBpm);
+  });
   currentBpmEl.addEventListener('blur', () => {
     const typed       = parseFloat(currentBpmEl.value);
     const detectedBpm = mixer[`deck${n}`]?.bpm;
     if (!isNaN(typed) && detectedBpm) {
       applySpeed(typed / detectedBpm);
     } else {
-      // Restore
       const detectedBpm2 = mixer[`deck${n}`]?.bpm;
       if (detectedBpm2) currentBpmEl.value = (detectedBpm2 * parseFloat(spdSlider.value)).toFixed(2);
     }
