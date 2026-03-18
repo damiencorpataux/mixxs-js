@@ -93,6 +93,9 @@ class MixerController {
       const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
       const overview = deckNum === 1 ? this.overview1 : this.overview2;
       deck.load(buffer);
+      deck.setPlaybackRate(1.0);
+      document.getElementById(`speed${deckNum}`).value    = 1;
+      document.getElementById(`speedVal${deckNum}`).value = '1.000';
       waveform.load(buffer);
       overview.load(buffer);
 
@@ -229,7 +232,7 @@ class MixerController {
     if (!thisDeck || !otherDeck) return;
 
     const thisBpm  = thisDeck.beatGrid?.bpm  ?? thisDeck.bpm;
-    const otherBpm = otherDeck.beatGrid?.bpm ?? otherDeck.bpm;
+    const otherBpm = (otherDeck.beatGrid?.bpm ?? otherDeck.bpm) * otherDeck.playbackRate;
     if (!thisBpm || !otherBpm) return;
 
     const rate = otherBpm / thisBpm;
