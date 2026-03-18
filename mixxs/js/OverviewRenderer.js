@@ -29,6 +29,7 @@ class OverviewRenderer {
     this.buffer = audioBuffer;
     this._fitCanvas();
     this._computePeaks();
+    this._computeSpectrum();
     this.draw(0);
   }
 
@@ -67,7 +68,7 @@ class OverviewRenderer {
     // ── Waveform columns ──────────────────────────────────────
     for (let i = 0; i < W; i++) {
       const { min, max } = this.peaks[i];
-      ctx.strokeStyle = i < playheadX ? C.played : C.unplayed;
+      ctx.strokeStyle = i < playheadX ? C.unplayed : C.played;
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(i + 0.5, amp + min * amp * 0.9);
@@ -96,7 +97,7 @@ class OverviewRenderer {
       }
     }
 
-    // ── Playhead ──────────────────────────────────────────────
+    // ── Playhead — extends 4px beyond canvas vertically ──────────
     ctx.beginPath();
     ctx.moveTo(playheadX + 0.5, 0);
     ctx.lineTo(playheadX + 0.5, H);
@@ -125,6 +126,46 @@ class OverviewRenderer {
         if (v > max) max = v;
       }
       this.peaks.push({ min, max });
+    }
+  }
+
+  _computeSpectrum() {
+    const data = this.buffer.getChannelData(0);
+    const sr   = this.buffer.sampleRate;
+    const W    = this.canvas.width;
+    const step = Math.ceil(data.length / W);
+
+    const alphaLow = 1 - Math.exp(-2 * Math.PI * 200  / sr);
+    const alphaMid = 1 - Math.exp(-2 * Math.PI * 2000 / sr);
+
+    let yLow = 0, yMid = 0;
+    const bassArr = new Float32Array(W);
+    const trebArr = new Float32Array(W);
+
+    for (let i = 0; i < W; i++) {
+      let sumBass = 0, sumTreb = 0;
+      const base = i * step;
+      for (let j = 0; j < step; j++) {
+        const x  = data[base + j] || 0;
+        yLow     = yLow + alphaLow * (x - yLow);
+        yMid     = yMid + alphaMid * (x - yMid);
+        const hi = x - yMid;
+        sumBass += yLow * yLow;
+        sumTreb += hi   * hi;
+      }
+      bassArr[i] = Math.sqrt(sumBass / step);
+      trebArr[i] = Math.sqrt(sumTreb / step);
+    }
+
+    let maxBass = 1e-9, maxTreb = 1e-9;
+    for (let i = 0; i < W; i++) {
+      if (bassArr[i] > maxBass) maxBass = bassArr[i];
+      if (trebArr[i] > maxTreb) maxTreb = trebArr[i];
+    }
+
+    this.spectrum = new Array(W);
+    for (let i = 0; i < W; i++) {
+      this.spectrum[i] = { r: bassArr[i] / maxBass, b: trebArr[i] / maxTreb };
     }
   }
 }

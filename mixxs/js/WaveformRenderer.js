@@ -49,6 +49,7 @@ class WaveformRenderer {
     this.zoom   = 1;
     this._fitCanvas();
     this._computePeaks();
+    this._computeSpectrum();
     this._buildHatchPattern();
     this.draw(0, false);
   }
@@ -141,8 +142,7 @@ class WaveformRenderer {
     ctx.fillRect(Math.max(0, startX), 0, Math.max(0, endX - startX), H);
 
     // ── Waveform columns ──────────────────────────────────────────
-    // Geometry uses snappedCentre (stable, pixel-aligned).
-    // Played/unplayed colour split uses real currentTime (accurate).
+    const light = document.documentElement.dataset.theme === 'light';
     for (let i = 0; i < W; i++) {
       const tStart = snappedCentre + ((i)     / W - 0.5) * visibleSec;
       const tEnd   = snappedCentre + ((i + 1) / W - 0.5) * visibleSec;
@@ -157,14 +157,12 @@ class WaveformRenderer {
 
       let min, max;
       if (idx1 <= idx0 + 1) {
-        // High zoom: pixel covers < 1 bucket → interpolate
         const alpha = rawStart - idx0;
         const p0    = this.peaks[Math.min(idx0,     PEAK_RESOLUTION - 1)];
         const p1    = this.peaks[Math.min(idx0 + 1, PEAK_RESOLUTION - 1)];
         min = p0.min + (p1.min - p0.min) * alpha;
         max = p0.max + (p1.max - p0.max) * alpha;
       } else {
-        // Low zoom: pixel covers multiple buckets → aggregate
         min = 0; max = 0;
         for (let k = idx0; k <= idx1; k++) {
           const p = this.peaks[k];
@@ -173,7 +171,34 @@ class WaveformRenderer {
         }
       }
 
-      ctx.strokeStyle = tStart < currentTime ? C.played : C.unplayed;
+      // Spectral color — average spectrum buckets covered by this pixel
+      let sr = 0, sb = 0, sc = 0;
+      for (let k = idx0; k <= idx1; k++) {
+        const s = this.spectrum[Math.min(k, PEAK_RESOLUTION - 1)];
+        sr += s.r; sb += s.b; sc++;
+      }
+      sr /= sc; sb /= sc;
+
+      // Map bands to RGB — green (mid) suppressed so bass=red and treble=blue are clear.
+      // No normalization: keep absolute ratios so quiet/busy sections differ in brightness.
+      // Per-band normalized: each band 0–1 relative to its own max.
+      // This preserves spectral character regardless of which band is louder overall.
+      // Brightness comes from the peak amplitude, not the band energy.
+      const played = tStart < currentTime;
+      let col;
+      if (!played) {
+        // Upcoming — bright spectral color
+        const R = Math.round(sr * 255);
+        const B = Math.round(sb * 255);
+        col = `rgb(${R},0,${B})`;
+      } else {
+        // Already played — 50% dim
+        const R = Math.round(sr * 192);
+        const B = Math.round(sb * 192);
+        col = `rgb(${R},0,${B})`;
+      }
+
+      ctx.strokeStyle = col;
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(i + 0.5, amp + min * amp * 0.95);
@@ -240,7 +265,7 @@ class WaveformRenderer {
       }
     }
 
-    // ── Fixed playhead at centre ──
+    // ── Fixed playhead at centre — extends 4px beyond canvas ──
     const cx = Math.floor(W / 2);
     ctx.beginPath();
     ctx.moveTo(cx, 0);
@@ -306,6 +331,61 @@ class WaveformRenderer {
         if (v > max) max = v;
       }
       this.peaks.push({ min, max });
+    }
+  }
+
+  /**
+   * Compute per-bucket spectral energy in three bands using single-pole IIR filters.
+   * Stores this.spectrum[] — array of {r, g, b} normalised 0..1 per bucket.
+   *
+   * Bass  (red)  : lowpass  ~250 Hz
+   * Mid   (green): bandpass ~250–2500 Hz (= full − bass − treble)
+   * Treble(blue) : highpass ~2500 Hz
+   */
+  _computeSpectrum() {
+    const data = this.buffer.getChannelData(0);
+    const sr   = this.buffer.sampleRate;
+    const step = Math.ceil(data.length / PEAK_RESOLUTION);
+
+    // Two lowpass filters — treble = signal minus wide lowpass
+    const alphaLow  = 1 - Math.exp(-2 * Math.PI * 200  / sr); // bass  < 200 Hz
+    const alphaMid  = 1 - Math.exp(-2 * Math.PI * 2000 / sr); // everything < 2kHz
+
+    let yLow = 0, yMid = 0;
+    const bassArr = new Float32Array(PEAK_RESOLUTION);
+    const trebArr = new Float32Array(PEAK_RESOLUTION);
+
+    for (let i = 0; i < PEAK_RESOLUTION; i++) {
+      let sumBass = 0, sumTreb = 0;
+      const base = i * step;
+      for (let j = 0; j < step; j++) {
+        const x  = data[base + j] || 0;
+        yLow     = yLow + alphaLow * (x - yLow);
+        yMid     = yMid + alphaMid * (x - yMid);
+        const hi = x - yMid; // everything above ~2kHz
+        sumBass += yLow * yLow;
+        sumTreb += hi   * hi;
+      }
+      bassArr[i] = Math.sqrt(sumBass / step);
+      trebArr[i] = Math.sqrt(sumTreb / step);
+    }
+
+    // ── Per-band normalisation ────────────────────────────────────
+    // Each band normalized to its own max so spectral character is preserved
+    // regardless of which band has more absolute energy.
+    // Brightness is then driven by peak amplitude (from _computePeaks).
+    let maxBass = 1e-9, maxTreb = 1e-9;
+    for (let i = 0; i < PEAK_RESOLUTION; i++) {
+      if (bassArr[i] > maxBass) maxBass = bassArr[i];
+      if (trebArr[i] > maxTreb) maxTreb = trebArr[i];
+    }
+
+    this.spectrum = new Array(PEAK_RESOLUTION);
+    for (let i = 0; i < PEAK_RESOLUTION; i++) {
+      this.spectrum[i] = {
+        r: bassArr[i] / maxBass,
+        b: trebArr[i] / maxTreb,
+      };
     }
   }
 
