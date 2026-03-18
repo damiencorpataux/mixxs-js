@@ -22,6 +22,10 @@ class Deck {
     this.bpm          = 120;
     this.beatGrid     = null; // { bpm, offset } — populated by BeatAnalyzer
     this.onEnded      = null; // optional UI callback
+    // Loop
+    this.loop         = false;
+    this.loopIn       = 0;
+    this.loopBeats    = 4;
   }
 
   load(audioBuffer) {
@@ -100,6 +104,36 @@ class Deck {
   setPlaybackRate(rate) {
     this.playbackRate = rate;
     if (this.source) this.source.playbackRate.value = rate;
+  }
+
+  /** Activate loop: snap loopIn to nearest beat, compute loopOut. */
+  startLoop(beats) {
+    if (!this.buffer) return;
+    this.loopBeats = beats;
+    const beatDur  = this.beatGrid ? 60 / this.beatGrid.bpm : 60 / this.bpm;
+    const offset   = this.beatGrid?.offset ?? 0;
+    const t        = this.getCurrentTime();
+    // Nearest beat index
+    const n        = Math.round((t - offset) / beatDur);
+    this.loopIn    = Math.max(0, offset + n * beatDur);
+    this.loop      = true;
+  }
+
+  stopLoop() {
+    this.loop = false;
+  }
+
+  /**
+   * Called every RAF frame. If looping and playhead has passed loopOut,
+   * seek back to loopIn.
+   */
+  checkLoop() {
+    if (!this.loop || !this.isPlaying) return;
+    const beatDur = this.beatGrid ? 60 / this.beatGrid.bpm : 60 / this.bpm;
+    const loopOut = this.loopIn + this.loopBeats * beatDur;
+    if (this.getCurrentTime() >= loopOut) {
+      this.seek(this.loopIn);
+    }
   }
 
   // ── Private ──────────────────────────────────────────────────

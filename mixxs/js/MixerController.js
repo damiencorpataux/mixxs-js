@@ -22,6 +22,7 @@ class MixerController {
     this.overview1   = null;
     this.overview2   = null;
     this.exporter    = new Exporter();
+    this.clicktrack  = null;
     this.initialized = false;
     this.rafId       = null;
   }
@@ -45,6 +46,7 @@ class MixerController {
       this.audioEngine.masterGain
     );
 
+    this.clicktrack = new Clicktrack(this.audioEngine.masterContext);
     this.waveform1 = new WaveformRenderer(document.getElementById('waveform1'));
     this.waveform2 = new WaveformRenderer(document.getElementById('waveform2'));
     this.overview1 = new OverviewRenderer(document.getElementById('overview1'), t => this.deck1?.seek(t));
@@ -97,6 +99,10 @@ class MixerController {
       document.getElementById(`speed${deckNum}`).value    = 1;
       document.getElementById(`speedVal${deckNum}`).value = '1.000';
       waveform.load(buffer);
+      // Sync zoom to the other deck's current visible seconds
+      const otherWaveform = deckNum === 1 ? this.waveform2 : this.waveform1;
+      const otherSec = otherWaveform?.getVisibleSec();
+      if (otherSec !== null && otherSec !== undefined) waveform.setVisibleSec(otherSec);
       overview.load(buffer);
 
       document.getElementById(`bpm${deckNum}`).value = '';
@@ -134,6 +140,7 @@ class MixerController {
   togglePlay(deckNum) {
     this._init();
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (!deck?.buffer) return;
     const btn  = document.getElementById(`play${deckNum}`);
     if (deck.isPlaying) {
       deck.pause();
@@ -176,12 +183,34 @@ class MixerController {
     deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
   }
 
-  // ── Zoom sync ─────────────────────────────────────────────────
+  toggleLoop(deckNum, beats) {
+    const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (!deck?.buffer) return;
+    const btn = document.getElementById(`loop${deckNum}`);
+    if (deck.loop) {
+      deck.stopLoop();
+      btn?.classList.remove('active');
+    } else {
+      deck.startLoop(beats);
+      btn?.classList.add('active');
+    }
+  }
 
   /**
    * After a zoom change on one waveform, apply the same visible-seconds
    * window to the other so beat grids stay visually aligned.
    */
+  toggleClick(btn) {
+    if (!this.initialized) this._init();
+    if (this.clicktrack.enabled) {
+      this.clicktrack.disable();
+      btn.classList.remove('active');
+    } else {
+      this.clicktrack.enable();
+      btn.classList.add('active');
+    }
+  }
+
   syncZoom(sourceNum) {
     const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
     const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
@@ -275,14 +304,27 @@ class MixerController {
 
   _startRAF() {
     const loop = () => {
+      // Click track — follow whichever deck is playing (deck1 priority)
+      if (this.clicktrack) {
+        const masterDeck = this.deck1?.isPlaying ? this.deck1 : this.deck2;
+        this.clicktrack.tick(masterDeck);
+      }
       if (this.deck1?.buffer) {
-        const t1 = this.deck1.getCurrentTime();
+        this.deck1.checkLoop();
+        const t1      = this.deck1.getCurrentTime();
+        const beatDur1 = this.deck1.beatGrid ? 60 / this.deck1.beatGrid.bpm : 60 / this.deck1.bpm;
+        this.waveform1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
+        this.overview1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
         this.waveform1.draw(t1, this.deck1.isPlaying);
         this.overview1.draw(t1);
         this._updateTimeDisplay(1, this.deck1.getRealCurrentTime(), this.deck1.getRealDuration());
       }
       if (this.deck2?.buffer) {
-        const t2 = this.deck2.getCurrentTime();
+        this.deck2.checkLoop();
+        const t2      = this.deck2.getCurrentTime();
+        const beatDur2 = this.deck2.beatGrid ? 60 / this.deck2.beatGrid.bpm : 60 / this.deck2.bpm;
+        this.waveform2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
+        this.overview2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
         this.waveform2.draw(t2, this.deck2.isPlaying);
         this.overview2.draw(t2);
         this._updateTimeDisplay(2, this.deck2.getRealCurrentTime(), this.deck2.getRealDuration());

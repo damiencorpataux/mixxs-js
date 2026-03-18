@@ -11,7 +11,10 @@ class OverviewRenderer {
     this.ctx2d    = canvas.getContext('2d');
     this.buffer   = null;
     this.peaks    = null;
-    this.beatGrid = null;
+    this.beatGrid  = null;
+    this.loopActive = false;
+    this.loopIn     = 0;
+    this.loopOut    = 0;
     this.onSeek   = onSeek || null;
 
     canvas.addEventListener('click', e => {
@@ -31,6 +34,12 @@ class OverviewRenderer {
 
   setBeatGrid(beatGrid) {
     this.beatGrid = beatGrid;
+  }
+
+  setLoop(active, loopIn, loopOut) {
+    this.loopActive = active;
+    this.loopIn     = loopIn;
+    this.loopOut    = loopOut;
   }
 
   draw(currentTime) {
@@ -64,6 +73,20 @@ class OverviewRenderer {
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth   = 1;
     ctx.stroke();
+
+    // ── Loop region overlay ──────────────────────────────────
+    if (this.loopActive && this.buffer) {
+      const xIn  = Math.floor((this.loopIn  / this.buffer.duration) * W);
+      const xOut = Math.floor((this.loopOut / this.buffer.duration) * W);
+      if (xOut > xIn) {
+        ctx.fillStyle = 'rgba(34,197,94,0.2)';
+        ctx.fillRect(xIn, 0, xOut - xIn, H);
+        ctx.strokeStyle = 'rgba(34,197,94,0.9)';
+        ctx.lineWidth   = 1;
+        ctx.beginPath(); ctx.moveTo(xIn + 0.5, 0);  ctx.lineTo(xIn + 0.5, H);  ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xOut + 0.5, 0); ctx.lineTo(xOut + 0.5, H); ctx.stroke();
+      }
+    }
 
     // ── Playhead ──────────────────────────────────────────────
     ctx.beginPath();

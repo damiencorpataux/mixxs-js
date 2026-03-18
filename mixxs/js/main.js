@@ -130,8 +130,19 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
     displayInput.select();
   });
 
+  // Arrow keys apply immediately without waiting for blur
+  displayInput.addEventListener('input', () => {
+    const raw = displayInput.value;
+    if (raw === '-∞' || raw === '-Infinity') return;
+    const displayVal = parseFloat(raw);
+    if (!isNaN(displayVal)) apply(clamp(internalFn(displayVal)));
+  });
+
   const commit = () => {
-    const displayVal  = parseFloat(displayInput.value);
+    const raw = displayInput.value;
+    // Handle -∞ display value (volume at 0)
+    if (raw === '-∞' || raw === '-Infinity') { apply(parseFloat(rangeInput.min)); editSnapshot = null; return; }
+    const displayVal  = parseFloat(raw);
     if (isNaN(displayVal)) { cancel(); return; }
     apply(clamp(internalFn(displayVal)));
     editSnapshot = null;
@@ -225,6 +236,13 @@ document.getElementById('waveform2').addEventListener('wheel', e => {
   mixer.syncZoom(2);
 }, { passive: false });
 
+// ── dB utilities ──────────────────────────────────────────────
+const linearToDb = v => v <= 0 ? '-∞' : (20 * Math.log10(v)).toFixed(1);
+const dbToLinear = db => {
+  const v = Math.pow(10, parseFloat(db) / 20);
+  return Math.max(0, Math.min(1, v));
+};
+
 // ── EQ knobs ──────────────────────────────────────────────────
 // Gain in dB: -12 to +12, display as dB value, double-click resets to 0
 [1, 2].forEach(n => {
@@ -243,22 +261,22 @@ document.getElementById('waveform2').addEventListener('wheel', e => {
     );
   });
 });
-// Volume: internal 0..1, display 0..100
+// Volume: internal 0..1, display in dB
 setupKnob(
   document.getElementById('volKnob1'),
   document.getElementById('vol1'),
   document.getElementById('volVal1'),
   v => mixer.channel1?.setVolume(v),
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 setupKnob(
   document.getElementById('volKnob2'),
   document.getElementById('vol2'),
   document.getElementById('volVal2'),
   v => mixer.channel2?.setVolume(v),
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 
 // ── Speed sliders + current BPM ───────────────────────────────
@@ -281,6 +299,7 @@ setupKnob(
 
   spdSlider.addEventListener('input', () => applySpeed(parseFloat(spdSlider.value)));
 
+  spdInput.addEventListener('input', () => applySpeed(parseFloat(spdInput.value) || 1));
   spdInput.addEventListener('blur', () => {
     applySpeed(parseFloat(spdInput.value) || 1);
   });
@@ -290,13 +309,17 @@ setupKnob(
   });
 
   // Current BPM input: editing sets speed = typed / detectedBpm
+  currentBpmEl.addEventListener('input', () => {
+    const typed      = parseFloat(currentBpmEl.value);
+    const detectedBpm = mixer[`deck${n}`]?.bpm;
+    if (!isNaN(typed) && detectedBpm) applySpeed(typed / detectedBpm);
+  });
   currentBpmEl.addEventListener('blur', () => {
     const typed       = parseFloat(currentBpmEl.value);
     const detectedBpm = mixer[`deck${n}`]?.bpm;
     if (!isNaN(typed) && detectedBpm) {
       applySpeed(typed / detectedBpm);
     } else {
-      // Restore
       const detectedBpm2 = mixer[`deck${n}`]?.bpm;
       if (detectedBpm2) currentBpmEl.value = (detectedBpm2 * parseFloat(spdSlider.value)).toFixed(2);
     }
@@ -322,6 +345,12 @@ function wireBend(btnId, deckNum, direction) {
     const deck = mixer[`deck${deckNum}`];
     if (!deck) return;
     savedRate = deck.playbackRate;
+    // Snapshot position before changing rate so getCurrentTime()
+    // stays accurate (it uses startOffset + elapsed * playbackRate)
+    if (deck.isPlaying) {
+      deck.startOffset  = deck.getCurrentTime();
+      deck.startCtxTime = deck.ctx.currentTime;
+    }
     const bent = Math.max(0.5, Math.min(2, savedRate * (1 + direction * BEND_FACTOR)));
     deck.setPlaybackRate(bent);
     btn.classList.add('active');
@@ -330,6 +359,11 @@ function wireBend(btnId, deckNum, direction) {
   const stop = () => {
     const deck = mixer[`deck${deckNum}`];
     if (!deck || savedRate === null) return;
+    // Snapshot again before restoring rate
+    if (deck.isPlaying) {
+      deck.startOffset  = deck.getCurrentTime();
+      deck.startCtxTime = deck.ctx.currentTime;
+    }
     deck.setPlaybackRate(savedRate);
     savedRate = null;
     btn.classList.remove('active');
@@ -364,12 +398,68 @@ setupKnob(
   document.getElementById('masterVol'),
   document.getElementById('masterVolVal'),
   v => { if (mixer.audioEngine.masterGain) mixer.audioEngine.masterGain.gain.value = v; },
-  v => Math.round(v * 100),
-  d => d / 100
+  v => linearToDb(v),
+  d => dbToLinear(d)
 );
 
-// ── Export ────────────────────────────────────────────────────
+// ── Loop ──────────────────────────────────────────────────────
+const LOOP_STEPS = [1, 2, 4, 8, 16, 32, 64];
+
+[1, 2].forEach(n => {
+  const beatsInput = document.getElementById(`loopBeats${n}`);
+  const loopBtn    = document.getElementById(`loop${n}`);
+
+  // Power-of-2 stepping with arrow keys
+  beatsInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const cur = parseInt(beatsInput.value) || 4;
+      const idx = LOOP_STEPS.indexOf(cur);
+      if (e.key === 'ArrowUp'   && idx < LOOP_STEPS.length - 1)
+        beatsInput.value = LOOP_STEPS[idx + 1];
+      if (e.key === 'ArrowDown' && idx > 0)
+        beatsInput.value = LOOP_STEPS[idx - 1];
+      if (e.key === 'ArrowUp'   && idx === -1)
+        beatsInput.value = LOOP_STEPS[0];
+      // If loop is active, restart with new beat count
+      const deck = mixer[`deck${n}`];
+      if (deck?.loop) {
+        deck.loopBeats = parseInt(beatsInput.value);
+      }
+    }
+  });
+
+  loopBtn.addEventListener('click', () => {
+    const beats = parseInt(beatsInput.value) || 4;
+    mixer.toggleLoop(n, beats);
+  });
+
+  // Loop nudge: shift loopIn ±1 beat (loopOut follows)
+  const nudgeLoop = (dir) => {
+    const deck = mixer[`deck${n}`];
+    if (!deck?.loop) return;
+    const beatDur = deck.beatGrid ? 60 / deck.beatGrid.bpm : 60 / deck.bpm;
+    deck.loopIn = Math.max(0, Math.min(deck.buffer.duration, deck.loopIn + dir * beatDur));
+  };
+  document.getElementById(`loopNudgeBack${n}`).addEventListener('click', () => nudgeLoop(-1));
+  document.getElementById(`loopNudgeFwd${n}`).addEventListener('click',  () => nudgeLoop(+1));
+});
 document.getElementById('btnExport').addEventListener('click', () => mixer.exportMix());
+
+// ── Click track ───────────────────────────────────────────────
+document.getElementById('btnClick').addEventListener('click', e => {
+  mixer._init();
+  mixer.toggleClick(e.currentTarget);
+});
+
+setupKnob(
+  document.getElementById('clickKnob'),
+  document.getElementById('clickVol'),
+  document.getElementById('clickVolVal'),
+  v => mixer.clicktrack?.setVolume(v),
+  v => linearToDb(v),
+  d => dbToLinear(d)
+);
 
 // ── Settings modal ────────────────────────────────────────────
 const modal = document.getElementById('modalOverlay');
