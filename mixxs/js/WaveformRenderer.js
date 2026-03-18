@@ -54,6 +54,22 @@ class WaveformRenderer {
     this.zoom    = next < ZOOM_MIN * 1.15 ? ZOOM_MIN : Math.min(ZOOM_MAX, next);
   }
 
+  /** Returns the number of seconds currently visible across the full canvas width. */
+  getVisibleSec() {
+    if (!this.buffer) return null;
+    return this.buffer.duration / this.zoom;
+  }
+
+  /**
+   * Set zoom so that exactly `sec` seconds are visible.
+   * Used to synchronise the two waveform renderers.
+   */
+  setVisibleSec(sec) {
+    if (!this.buffer || sec <= 0) return;
+    const next = this.buffer.duration / sec;
+    this.zoom  = next < ZOOM_MIN * 1.15 ? ZOOM_MIN : Math.min(ZOOM_MAX, next);
+  }
+
   // ── Seek helper ───────────────────────────────────────────────
 
   /**

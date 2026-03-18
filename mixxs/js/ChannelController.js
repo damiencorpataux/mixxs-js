@@ -58,4 +58,14 @@ class ChannelController {
   setVolume(v) { this.fader.gain.value = v; }
   setPan(v)    { this.panner.pan.value = v; }
   setCue(on)   { this.cueSend.gain.value = on ? 1 : 0; }
+
+  /**
+   * Set EQ gain in dB for a band.
+   * band: 'low' | 'mid' | 'high'
+   * gainDb: -12 to +12 (0 = flat)
+   */
+  setEq(band, gainDb) {
+    const node = band === 'low' ? this.eqLow : band === 'mid' ? this.eqMid : this.eqHigh;
+    if (node) node.gain.value = gainDb;
+  }
 }
