@@ -16,6 +16,27 @@
   --font-mono:    'JetBrains Mono', monospace;
 }
 
+/* ── LIGHT MODE ──────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:       #f0f0f0;
+  --panel:    #e2e2e2;
+  --surface:  #d4d4d4;
+  --border:   #b8b8b8;
+  --amber:    #b45309;
+  --amber-dk: #fde68a;
+  --text:     #1a1a1a;
+  --muted:    #777777;
+}
+
+[data-theme="light"] canvas.waveform,
+[data-theme="light"] .waveform-wrap,
+[data-theme="light"] canvas.overview-canvas,
+[data-theme="light"] .overview-wrap { background: #e8e8e8; }
+
+[data-theme="light"] .logo { text-shadow: 0 0 20px rgba(180,83,9,0.3); }
+[data-theme="light"] .logo .logo-xs { text-shadow: 0 0 10px rgba(0,0,0,0.2); color: #333; }
+[data-theme="light"] .deck-ab { color: #1a1a1a; text-shadow: none; }
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -405,7 +426,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 14px 20px;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  background: #0e0e0e;
+  background: var(--bg);
   min-width: 170px;
 }
 
