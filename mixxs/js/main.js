@@ -402,6 +402,16 @@ setupKnob(
   d => dbToLinear(d)
 );
 
+// ── Cue level knob ────────────────────────────────────────────
+setupKnob(
+  document.getElementById('cueKnob'),
+  document.getElementById('cueVol'),
+  document.getElementById('cueVolVal'),
+  v => mixer.cueBus?.setVolume(v),
+  v => linearToDb(v),
+  d => dbToLinear(d)
+);
+
 // ── Loop ──────────────────────────────────────────────────────
 const LOOP_STEPS = [1, 2, 4, 8, 16, 32, 64];
 
