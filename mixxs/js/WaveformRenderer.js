@@ -29,10 +29,19 @@ class WaveformRenderer {
     this.zoom        = 1;
     this._hatchPat   = null;
     this.beatGrid    = null; // { bpm, offset } — set by MixerController after analysis
+    this.loopActive  = false;
+    this.loopIn      = 0;
+    this.loopOut     = 0;
   }
 
   setBeatGrid(beatGrid) {
     this.beatGrid = beatGrid;
+  }
+
+  setLoop(active, loopIn, loopOut) {
+    this.loopActive = active;
+    this.loopIn     = loopIn;
+    this.loopOut    = loopOut;
   }
 
   load(audioBuffer) {
@@ -204,6 +213,29 @@ class WaveformRenderer {
         ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H);
         ctx.strokeStyle = 'rgba(255,255,255,0.18)';
         ctx.lineWidth   = 1;
+        ctx.stroke();
+      }
+    }
+
+    // ── Loop region overlay ──
+    if (this.loopActive && this.buffer) {
+      const xIn  = Math.round(((this.loopIn  - snappedCentre) / visibleSec + 0.5) * W);
+      const xOut = Math.round(((this.loopOut - snappedCentre) / visibleSec + 0.5) * W);
+      if (xOut > xIn) {
+        // Translucent green fill
+        ctx.fillStyle = 'rgba(34,197,94,0.15)';
+        ctx.fillRect(xIn, 0, xOut - xIn, H);
+        // Loop-in marker
+        ctx.beginPath();
+        ctx.moveTo(xIn + 0.5, 0); ctx.lineTo(xIn + 0.5, H);
+        ctx.strokeStyle = 'rgba(34,197,94,0.9)';
+        ctx.lineWidth   = 2;
+        ctx.stroke();
+        // Loop-out marker
+        ctx.beginPath();
+        ctx.moveTo(xOut + 0.5, 0); ctx.lineTo(xOut + 0.5, H);
+        ctx.strokeStyle = 'rgba(34,197,94,0.9)';
+        ctx.lineWidth   = 2;
         ctx.stroke();
       }
     }

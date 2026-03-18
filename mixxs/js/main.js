@@ -402,7 +402,48 @@ setupKnob(
   d => dbToLinear(d)
 );
 
-// ── Export ────────────────────────────────────────────────────
+// ── Loop ──────────────────────────────────────────────────────
+const LOOP_STEPS = [1, 2, 4, 8, 16, 32, 64];
+
+[1, 2].forEach(n => {
+  const beatsInput = document.getElementById(`loopBeats${n}`);
+  const loopBtn    = document.getElementById(`loop${n}`);
+
+  // Power-of-2 stepping with arrow keys
+  beatsInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const cur = parseInt(beatsInput.value) || 4;
+      const idx = LOOP_STEPS.indexOf(cur);
+      if (e.key === 'ArrowUp'   && idx < LOOP_STEPS.length - 1)
+        beatsInput.value = LOOP_STEPS[idx + 1];
+      if (e.key === 'ArrowDown' && idx > 0)
+        beatsInput.value = LOOP_STEPS[idx - 1];
+      if (e.key === 'ArrowUp'   && idx === -1)
+        beatsInput.value = LOOP_STEPS[0];
+      // If loop is active, restart with new beat count
+      const deck = mixer[`deck${n}`];
+      if (deck?.loop) {
+        deck.loopBeats = parseInt(beatsInput.value);
+      }
+    }
+  });
+
+  loopBtn.addEventListener('click', () => {
+    const beats = parseInt(beatsInput.value) || 4;
+    mixer.toggleLoop(n, beats);
+  });
+
+  // Loop nudge: shift loopIn ±1 beat (loopOut follows)
+  const nudgeLoop = (dir) => {
+    const deck = mixer[`deck${n}`];
+    if (!deck?.loop) return;
+    const beatDur = deck.beatGrid ? 60 / deck.beatGrid.bpm : 60 / deck.bpm;
+    deck.loopIn = Math.max(0, Math.min(deck.buffer.duration, deck.loopIn + dir * beatDur));
+  };
+  document.getElementById(`loopNudgeBack${n}`).addEventListener('click', () => nudgeLoop(-1));
+  document.getElementById(`loopNudgeFwd${n}`).addEventListener('click',  () => nudgeLoop(+1));
+});
 document.getElementById('btnExport').addEventListener('click', () => mixer.exportMix());
 
 // ── Settings modal ────────────────────────────────────────────

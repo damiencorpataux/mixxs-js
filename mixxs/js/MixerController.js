@@ -181,7 +181,18 @@ class MixerController {
     deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
   }
 
-  // ── Zoom sync ─────────────────────────────────────────────────
+  toggleLoop(deckNum, beats) {
+    const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (!deck?.buffer) return;
+    const btn = document.getElementById(`loop${deckNum}`);
+    if (deck.loop) {
+      deck.stopLoop();
+      btn?.classList.remove('active');
+    } else {
+      deck.startLoop(beats);
+      btn?.classList.add('active');
+    }
+  }
 
   /**
    * After a zoom change on one waveform, apply the same visible-seconds
@@ -281,13 +292,21 @@ class MixerController {
   _startRAF() {
     const loop = () => {
       if (this.deck1?.buffer) {
-        const t1 = this.deck1.getCurrentTime();
+        this.deck1.checkLoop();
+        const t1      = this.deck1.getCurrentTime();
+        const beatDur1 = this.deck1.beatGrid ? 60 / this.deck1.beatGrid.bpm : 60 / this.deck1.bpm;
+        this.waveform1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
+        this.overview1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
         this.waveform1.draw(t1, this.deck1.isPlaying);
         this.overview1.draw(t1);
         this._updateTimeDisplay(1, this.deck1.getRealCurrentTime(), this.deck1.getRealDuration());
       }
       if (this.deck2?.buffer) {
-        const t2 = this.deck2.getCurrentTime();
+        this.deck2.checkLoop();
+        const t2      = this.deck2.getCurrentTime();
+        const beatDur2 = this.deck2.beatGrid ? 60 / this.deck2.beatGrid.bpm : 60 / this.deck2.bpm;
+        this.waveform2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
+        this.overview2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
         this.waveform2.draw(t2, this.deck2.isPlaying);
         this.overview2.draw(t2);
         this._updateTimeDisplay(2, this.deck2.getRealCurrentTime(), this.deck2.getRealDuration());
