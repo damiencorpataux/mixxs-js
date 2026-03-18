@@ -67,6 +67,12 @@ class MixerController {
     // Cancel any in-progress load for this deck
     this._cancelLoad(deckNum);
     const cancelled = { value: false };
+    // Stop deck if playing, reset loop
+    this.stopDeck(deckNum);
+    const loopBtn = document.getElementById(`loop${deckNum}`);
+    if (loopBtn) loopBtn.classList.remove('active');
+    const deckForReset = deckNum === 1 ? this.deck1 : this.deck2;
+    if (deckForReset) { deckForReset.loop = false; deckForReset.loopIn = 0; }
     this[`_loadCancel${deckNum}`] = cancelled;
 
     const loadingEl  = document.getElementById(`loading${deckNum}`);
@@ -262,6 +268,7 @@ class MixerController {
 
     const thisBpm  = thisDeck.beatGrid?.bpm  ?? thisDeck.bpm;
     const otherBpm = (otherDeck.beatGrid?.bpm ?? otherDeck.bpm) * otherDeck.playbackRate;
+    if (!otherDeck.buffer) return;
     if (!thisBpm || !otherBpm) return;
 
     const rate = otherBpm / thisBpm;

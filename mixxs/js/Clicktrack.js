@@ -19,7 +19,7 @@ class Clicktrack {
     this.gainNode.gain.value = v;
   }
 
-  enable()  { this.enabled = true;  this._lastBeat = -1; }
+  enable()  { this.enabled = true; this._firstTick = true; }
   disable() { this.enabled = false; }
 
   /**
@@ -38,6 +38,7 @@ class Clicktrack {
 
     if (beatIndex !== this._lastBeat && beatIndex >= 0) {
       this._lastBeat = beatIndex;
+      if (this._firstTick) { this._firstTick = false; return; }
       this._fireClick();
     }
   }
