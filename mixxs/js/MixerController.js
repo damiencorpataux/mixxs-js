@@ -97,6 +97,10 @@ class MixerController {
       document.getElementById(`speed${deckNum}`).value    = 1;
       document.getElementById(`speedVal${deckNum}`).value = '1.000';
       waveform.load(buffer);
+      // Sync zoom to the other deck's current visible seconds
+      const otherWaveform = deckNum === 1 ? this.waveform2 : this.waveform1;
+      const otherSec = otherWaveform?.getVisibleSec();
+      if (otherSec !== null && otherSec !== undefined) waveform.setVisibleSec(otherSec);
       overview.load(buffer);
 
       document.getElementById(`bpm${deckNum}`).value = '';
