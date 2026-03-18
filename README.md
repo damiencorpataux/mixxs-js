@@ -12,14 +12,29 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 
 ## Features
 
-- **Two independent decks** — load any local audio file (MP3, WAV, FLAC, OGG…)
-- **Waveform visualizer** — click to seek, playhead tracks in real time
-- **Per-deck controls** — volume, pan, playback speed
-- **BPM sync** — set BPM on each deck, sync tempo with one click
-- **Crossfader** — equal-power curve for smooth transitions
-- **CUE / headphone monitoring** — pre-listen a deck privately before bringing it in
-- **Dual audio output routing** — send master and cue to separate physical devices
-- **Export** — render the current mix to a WAV file
+**Decks**
+- Two independent decks — load any local audio file (MP3, WAV, FLAC, OGG…)
+- Drag & drop files onto the deck, waveform, or anywhere on the deck surface
+- Zoomable waveform (scroll to zoom 0.5×–64×) with centered playhead and beat grid markers
+- Full-track overview waveform with moving playhead
+- BPM auto-detection — detected tempo displayed read-only per deck
+- Playback speed control with current BPM display (editable)
+- Momentary ±4% pitch bend buttons (hold to bend, release to restore)
+- Beat nudge buttons (◀ ▶) for fine phase alignment
+- Loop: set beat count (1 2 4 8 16 32 64), activate snaps to nearest beat, loop region shown on waveform
+- SYNC button: matches deck tempo to the other deck's current playing BPM
+
+**Mixer**
+- 3-band EQ per channel (High / Mid / Low, ±12 dB)
+- Per-channel volume knob (dB)
+- Equal-power crossfader
+- CUE / headphone pre-listen per channel
+- Master volume knob (dB)
+- Click track — beat-synced metronome with independent volume
+
+**Routing & Export**
+- Dual audio output — send master and cue to separate physical devices
+- Export mix to WAV (bakes in current gain, EQ, crossfader state)
 
 ---
 
@@ -63,13 +78,12 @@ To route master and cue to separate devices (e.g. speakers + headphones):
 
 ## Architecture
 
-The project is structured around a clear separation of concerns, mirroring the signal flow of a real DJ mixer:
-
 ```
 FileLoader → AudioBuffer
-                ├── WaveformRenderer   (visual)
-                └── Deck               (transport + speed)
-                        └── ChannelController   (gain, pan, EQ stubs, CUE send)
+                ├── WaveformRenderer    (zoomable waveform, beat grid, loop overlay)
+                ├── OverviewRenderer    (full-track overview, loop overlay)
+                └── Deck                (transport, speed, loop, bend)
+                        └── ChannelController   (gain, EQ, CUE send)
                                     └── CrossfaderController
                                                 └── AudioEngine (master + export)
                                                         └── CueBus (headphone output)
@@ -77,16 +91,19 @@ FileLoader → AudioBuffer
 
 | File | Responsibility |
 |---|---|
-| `AudioEngine.js` | Manages two `AudioContext` instances and device routing |
+| `AudioEngine.js` | Two `AudioContext` instances, device routing via `setSinkId()` |
 | `CueBus.js` | MediaStream bridge from master context to cue context |
-| `ChannelController.js` | Per-channel gain, pan, EQ nodes, CUE send |
-| `CrossfaderController.js` | Equal-power crossfade between two channels |
-| `Deck.js` | Transport controls, playback rate, position tracking |
-| `WaveformRenderer.js` | Canvas waveform with peak precomputation |
+| `ChannelController.js` | Per-channel gain, 3-band EQ, CUE send |
+| `CrossfaderController.js` | Equal-power crossfade |
+| `Deck.js` | Transport, playback rate, loop, position tracking |
+| `BeatAnalyzer.js` | BPM detection + beat timestamp array from `AudioBuffer` |
+| `WaveformRenderer.js` | Zoomable canvas waveform, beat markers, loop overlay |
+| `OverviewRenderer.js` | Full-track overview waveform, loop overlay |
+| `Clicktrack.js` | Beat-synced metronome click via `OscillatorNode` |
 | `FileLoader.js` | File → decoded `AudioBuffer` |
-| `Exporter.js` | `OfflineAudioContext` mixdown → WAV download |
-| `MixerController.js` | Top-level orchestrator, RAF sync loop |
-| `main.js` | DOM event wiring |
+| `Exporter.js` | `OfflineAudioContext` mixdown → WAV |
+| `MixerController.js` | Top-level orchestrator, RAF loop |
+| `main.js` | DOM event wiring, knob drawing |
 
 ---
 
@@ -103,12 +120,10 @@ FileLoader → AudioBuffer
 
 ## Roadmap
 
-- [ ] 3-band EQ per channel (nodes already stubbed in)
-- [ ] Auto BPM detection
-- [ ] Beat phase sync
 - [ ] 3rd and 4th deck support
-- [ ] Loop controls
 - [ ] Hot cues
+- [ ] Auto BPM phase sync
+- [ ] Beat phase lock (continuous)
 
 ---
 
