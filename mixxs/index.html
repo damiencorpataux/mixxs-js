@@ -20,18 +20,24 @@
 <header>
   <div class="logo">MIX<span class="logo-xs">XS</span></div>
   <div class="header-center">
-    <span class="master-label">MASTER</span>
-    <div class="knob-widget knob-inline">
-      <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
-      <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
-      <input type="number" class="knob-val-input" id="masterVolVal" min="-60" max="0" step="0.1" value="-1.9">
-    </div>
-    <span class="master-label" style="margin-left:12px">CLICK</span>
+    <span class="master-label">CLICK</span>
     <button class="btn-transport" id="btnClick" title="Toggle click track">♩</button>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
       <input type="range" id="clickVol" min="0" max="1" step="0.01" value="0.5">
       <input type="number" class="knob-val-input" id="clickVolVal" min="-60" max="0" step="0.1" value="-6.0">
+    </div>
+    <span class="master-label" style="margin-left:12px">MASTER</span>
+    <div class="knob-widget knob-inline">
+      <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
+      <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
+      <input type="number" class="knob-val-input" id="masterVolVal" min="-60" max="0" step="0.1" value="-1.9">
+    </div>
+    <span class="master-label" style="margin-left:12px">CUE</span>
+    <div class="knob-widget knob-inline">
+      <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
+      <input type="range" id="cueVol" min="0" max="1" step="0.01" value="0.9">
+      <input type="number" class="knob-val-input" id="cueVolVal" min="-60" max="0" step="0.1" value="-0.9">
     </div>
   </div>
   <div class="header-right">
@@ -41,6 +47,7 @@
     </div>
     <button class="btn-settings" id="btnSettings">⚙ DEVICES</button>
     <button class="btn-export"   id="btnExport">⬇ EXPORT</button>
+    <button class="btn-settings" id="btnTheme" title="Toggle light/dark mode">☀</button>
   </div>
 </header>
 

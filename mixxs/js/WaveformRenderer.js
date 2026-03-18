@@ -106,11 +106,16 @@ class WaveformRenderer {
     const W = canvas.width;
     const H = canvas.height;
     const amp = H / 2;
+    const C   = this._colors();
+
+    // Rebuild hatch pattern if theme changed
+    const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    if (this._hatchTheme !== currentTheme) this._buildHatchPattern();
 
     ctx.clearRect(0, 0, W, H);
 
     if (!this.peaks || !this.buffer) {
-      ctx.fillStyle = '#0d0d0d';
+      ctx.fillStyle = C.bg;
       ctx.fillRect(0, 0, W, H);
       return;
     }
@@ -118,11 +123,6 @@ class WaveformRenderer {
     const centre     = this._centreTime(currentTime);
     const visibleSec = this.buffer.duration / this.zoom;
     const secPerPx   = visibleSec / W;
-
-    // Snap the view centre to the nearest pixel boundary.
-    // This means the waveform only moves when currentTime crosses a full pixel,
-    // eliminating sub-pixel jitter across all zoom levels.
-    // The playhead and played/unplayed split still use the real currentTime.
     const snappedCentre = Math.round(centre / secPerPx) * secPerPx;
 
     // ── Background pass ──────────────────────────────────────────
@@ -137,7 +137,7 @@ class WaveformRenderer {
       ctx.fillStyle = this._hatchPat;
       ctx.fillRect(endX, 0, W - endX, H);
     }
-    ctx.fillStyle = '#0d0d0d';
+    ctx.fillStyle = C.bg;
     ctx.fillRect(Math.max(0, startX), 0, Math.max(0, endX - startX), H);
 
     // ── Waveform columns ──────────────────────────────────────────
@@ -173,7 +173,7 @@ class WaveformRenderer {
         }
       }
 
-      ctx.strokeStyle = tStart < currentTime ? '#f59e0b' : '#3a2800';
+      ctx.strokeStyle = tStart < currentTime ? C.played : C.unplayed;
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(i + 0.5, amp + min * amp * 0.95);
@@ -184,7 +184,7 @@ class WaveformRenderer {
     // ── Centre baseline ──
     ctx.beginPath();
     ctx.moveTo(0, amp); ctx.lineTo(W, amp);
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = C.baseline;
     ctx.lineWidth   = 1;
     ctx.stroke();
 
@@ -211,7 +211,7 @@ class WaveformRenderer {
         const x = Math.round(((t - snappedCentre) / visibleSec + 0.5) * W);
         ctx.beginPath();
         ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H);
-        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.strokeStyle = C.beat;
         ctx.lineWidth   = 1;
         ctx.stroke();
       }
@@ -245,21 +245,21 @@ class WaveformRenderer {
     ctx.beginPath();
     ctx.moveTo(cx, 0);
     ctx.lineTo(cx, H);
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = C.playhead;
     ctx.lineWidth   = 2;
     ctx.stroke();
     // Subtle glow
     ctx.beginPath();
     ctx.moveTo(cx, 0);
     ctx.lineTo(cx, H);
-    ctx.strokeStyle = 'rgba(245,158,11,0.25)';
+    ctx.strokeStyle = C.glow;
     ctx.lineWidth   = 6;
     ctx.stroke();
 
     // ── Zoom level indicator ──
     if (this.zoom > 1) {
       ctx.font      = '10px "JetBrains Mono", monospace';
-      ctx.fillStyle = 'rgba(245,158,11,0.7)';
+      ctx.fillStyle = C.zoom;
       ctx.textAlign = 'right';
       ctx.fillText(`${this.zoom.toFixed(1)}×`, W - 6, 14);
       ctx.textAlign = 'left';
@@ -272,6 +272,20 @@ class WaveformRenderer {
   /** The track time that should appear at the horizontal centre */
   _centreTime(currentTime) {
     return currentTime;
+  }
+
+  _colors() {
+    const light = document.documentElement.dataset.theme === 'light';
+    return {
+      bg:       light ? '#e8e8e8' : '#0d0d0d',
+      played:   light ? '#b45309' : '#f59e0b',
+      unplayed: light ? '#c8b49a' : '#3a2800',
+      baseline: light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.04)',
+      beat:     light ? 'rgba(0,0,0,0.2)'  : 'rgba(255,255,255,0.18)',
+      playhead: light ? 'rgba(0,0,0,0.9)'  : 'rgba(255,255,255,0.9)',
+      glow:     light ? 'rgba(180,83,9,0.2)' : 'rgba(245,158,11,0.25)',
+      zoom:     light ? 'rgba(120,55,5,0.8)' : 'rgba(245,158,11,0.7)',
+    };
   }
 
   _fitCanvas() {
@@ -297,24 +311,24 @@ class WaveformRenderer {
 
   /** Build an offscreen canvas hatch pattern for non-playable regions */
   _buildHatchPattern() {
-    const size = 8;
-    const off  = document.createElement('canvas');
-    off.width  = size;
-    off.height = size;
-    const c    = off.getContext('2d');
+    const light = document.documentElement.dataset.theme === 'light';
+    const size  = 8;
+    const off   = document.createElement('canvas');
+    off.width   = size;
+    off.height  = size;
+    const c     = off.getContext('2d');
 
-    c.fillStyle = '#0a0a0a';
+    c.fillStyle   = light ? '#d8d8d8' : '#0a0a0a';
     c.fillRect(0, 0, size, size);
-
-    c.strokeStyle = 'rgba(255,255,255,0.12)';
+    c.strokeStyle = light ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)';
     c.lineWidth   = 2;
-    // Diagonal lines (top-left → bottom-right)
     c.beginPath();
     c.moveTo(0, size); c.lineTo(size, 0);
     c.moveTo(-size / 2, size / 2); c.lineTo(size / 2, -size / 2);
     c.moveTo(size / 2, size * 1.5); c.lineTo(size * 1.5, size / 2);
     c.stroke();
 
-    this._hatchPat = this.ctx2d.createPattern(off, 'repeat');
+    this._hatchPat   = this.ctx2d.createPattern(off, 'repeat');
+    this._hatchTheme = light ? 'light' : 'dark';
   }
 }
