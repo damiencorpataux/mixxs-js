@@ -170,6 +170,22 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
 document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('drop',     e => e.preventDefault());
 
+// ── Theme toggle ──────────────────────────────────────────────
+const themeBtn = document.getElementById('btnTheme');
+const applyTheme = (light) => {
+  document.documentElement.dataset.theme = light ? 'light' : '';
+  themeBtn.textContent = light ? '🌙' : '☀';
+  try { localStorage.setItem('mixxs-theme', light ? 'light' : 'dark'); } catch(_) {}
+};
+// Restore saved preference
+try {
+  applyTheme(localStorage.getItem('mixxs-theme') === 'light');
+} catch(_) { applyTheme(false); }
+
+themeBtn.addEventListener('click', () => {
+  applyTheme(document.documentElement.dataset.theme !== 'light');
+});
+
 // ── file:// warning ───────────────────────────────────────────
 if (window.location.protocol === 'file:') {
   document.getElementById('fileProtocolWarning').style.display = 'block';
@@ -398,6 +414,16 @@ setupKnob(
   document.getElementById('masterVol'),
   document.getElementById('masterVolVal'),
   v => { if (mixer.audioEngine.masterGain) mixer.audioEngine.masterGain.gain.value = v; },
+  v => linearToDb(v),
+  d => dbToLinear(d)
+);
+
+// ── Cue level knob ────────────────────────────────────────────
+setupKnob(
+  document.getElementById('cueKnob'),
+  document.getElementById('cueVol'),
+  document.getElementById('cueVolVal'),
+  v => mixer.cueBus?.setVolume(v),
   v => linearToDb(v),
   d => dbToLinear(d)
 );

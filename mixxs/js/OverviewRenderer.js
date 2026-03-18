@@ -47,9 +47,17 @@ class OverviewRenderer {
     const ctx    = this.ctx2d;
     const W = canvas.width, H = canvas.height;
     const amp = H / 2;
+    const light = document.documentElement.dataset.theme === 'light';
+    const C = {
+      bg:       light ? '#e8e8e8' : '#0a0a0a',
+      played:   light ? '#b45309' : '#f59e0b',
+      unplayed: light ? '#c8b49a' : '#3a2800',
+      baseline: light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.04)',
+      playhead: light ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)',
+    };
 
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#0a0a0a';
+    ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
 
     if (!this.peaks || !this.buffer) return;
@@ -59,7 +67,7 @@ class OverviewRenderer {
     // ── Waveform columns ──────────────────────────────────────
     for (let i = 0; i < W; i++) {
       const { min, max } = this.peaks[i];
-      ctx.strokeStyle = i < playheadX ? '#f59e0b' : '#3a2800';
+      ctx.strokeStyle = i < playheadX ? C.played : C.unplayed;
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(i + 0.5, amp + min * amp * 0.9);
@@ -70,7 +78,7 @@ class OverviewRenderer {
     // ── Centre baseline ───────────────────────────────────────
     ctx.beginPath();
     ctx.moveTo(0, amp); ctx.lineTo(W, amp);
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = C.baseline;
     ctx.lineWidth   = 1;
     ctx.stroke();
 
@@ -92,7 +100,7 @@ class OverviewRenderer {
     ctx.beginPath();
     ctx.moveTo(playheadX + 0.5, 0);
     ctx.lineTo(playheadX + 0.5, H);
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.strokeStyle = C.playhead;
     ctx.lineWidth   = 2;
     ctx.stroke();
   }
