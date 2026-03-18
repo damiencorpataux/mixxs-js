@@ -345,6 +345,12 @@ function wireBend(btnId, deckNum, direction) {
     const deck = mixer[`deck${deckNum}`];
     if (!deck) return;
     savedRate = deck.playbackRate;
+    // Snapshot position before changing rate so getCurrentTime()
+    // stays accurate (it uses startOffset + elapsed * playbackRate)
+    if (deck.isPlaying) {
+      deck.startOffset  = deck.getCurrentTime();
+      deck.startCtxTime = deck.ctx.currentTime;
+    }
     const bent = Math.max(0.5, Math.min(2, savedRate * (1 + direction * BEND_FACTOR)));
     deck.setPlaybackRate(bent);
     btn.classList.add('active');
@@ -353,6 +359,11 @@ function wireBend(btnId, deckNum, direction) {
   const stop = () => {
     const deck = mixer[`deck${deckNum}`];
     if (!deck || savedRate === null) return;
+    // Snapshot again before restoring rate
+    if (deck.isPlaying) {
+      deck.startOffset  = deck.getCurrentTime();
+      deck.startCtxTime = deck.ctx.currentTime;
+    }
     deck.setPlaybackRate(savedRate);
     savedRate = null;
     btn.classList.remove('active');
