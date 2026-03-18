@@ -17,7 +17,7 @@
 
 const PEAK_RESOLUTION = 8192;
 const ZOOM_MIN        = 0.5; // visible window = 2× track → full track always visible
-const ZOOM_MAX        = 32;
+const ZOOM_MAX        = 64;
 const ZOOM_STEP       = 1.16;
 
 class WaveformRenderer {
