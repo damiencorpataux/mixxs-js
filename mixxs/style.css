@@ -245,6 +245,9 @@ canvas.waveform {
 }
 .btn-transport:hover  { border-color: var(--amber); }
 .btn-transport.active { background: var(--amber); color: #000; border-color: var(--amber); }
+.btn-bend { color: var(--muted); font-size: 18px; }
+.btn-bend:hover  { border-color: var(--amber); color: var(--amber); }
+.btn-bend.active { background: var(--amber-dk); border-color: var(--amber); color: var(--amber); }
 .btn-cue {
   background: var(--surface);
   border: 1px solid var(--border);

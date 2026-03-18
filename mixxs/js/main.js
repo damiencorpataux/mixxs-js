@@ -311,7 +311,39 @@ setupKnob(
   });
 });
 
-// ── Nudge ─────────────────────────────────────────────────────
+// ── Pitch bend (momentary ±4%, Mixxx default) ─────────────────
+const BEND_FACTOR = 0.04; // 4%
+
+function wireBend(btnId, deckNum, direction) {
+  const btn = document.getElementById(btnId);
+  let savedRate = null;
+
+  const start = () => {
+    const deck = mixer[`deck${deckNum}`];
+    if (!deck) return;
+    savedRate = deck.playbackRate;
+    const bent = Math.max(0.5, Math.min(2, savedRate * (1 + direction * BEND_FACTOR)));
+    deck.setPlaybackRate(bent);
+    btn.classList.add('active');
+  };
+
+  const stop = () => {
+    const deck = mixer[`deck${deckNum}`];
+    if (!deck || savedRate === null) return;
+    deck.setPlaybackRate(savedRate);
+    savedRate = null;
+    btn.classList.remove('active');
+  };
+
+  btn.addEventListener('mousedown',  start);
+  btn.addEventListener('mouseup',    stop);
+  btn.addEventListener('mouseleave', stop);
+}
+
+wireBend('bendDown1', 1, -1);
+wireBend('bendUp1',   1, +1);
+wireBend('bendDown2', 2, -1);
+wireBend('bendUp2',   2, +1);
 document.getElementById('nudgeBack1').addEventListener('click', () => mixer.deck1?.nudge(-1));
 document.getElementById('nudgeFwd1').addEventListener('click',  () => mixer.deck1?.nudge(+1));
 document.getElementById('nudgeBack2').addEventListener('click', () => mixer.deck2?.nudge(-1));
