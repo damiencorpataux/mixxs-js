@@ -138,6 +138,7 @@ class MixerController {
   togglePlay(deckNum) {
     this._init();
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (!deck?.buffer) return;
     const btn  = document.getElementById(`play${deckNum}`);
     if (deck.isPlaying) {
       deck.pause();
