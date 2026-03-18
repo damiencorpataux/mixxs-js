@@ -132,24 +132,52 @@
     <!-- ── MIXER ─────────────────────────────────────────────── -->
     <div class="mixer-panel">
 
-      <!-- CUE + pan knobs -->
-      <div class="mixer-cue-pans">
-        <div class="cue-pan-col">
-          <button class="btn-cue" id="cue1">CUE A</button>
+      <!-- CUE buttons -->
+      <div class="mixer-cues">
+        <button class="btn-cue" id="cue1">CUE A</button>
+        <button class="btn-cue" id="cue2">CUE B</button>
+      </div>
+
+      <!-- EQ knobs: HIGH / MID / LOW per channel, side by side -->
+      <div class="mixer-eq">
+        <div class="eq-col">
           <div class="knob-widget">
-            <div class="knob-label-top">PAN A</div>
-            <canvas class="knob-canvas" id="panKnob1" width="48" height="48"></canvas>
-            <input type="range" id="pan1" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="knob-val-input" id="panVal1" value="0" min="-100" max="100" step="1">
+            <div class="knob-label-top">HI A</div>
+            <canvas class="knob-canvas" id="eqHiKnob1" width="48" height="48"></canvas>
+            <input type="range" id="eqHi1" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqHiVal1" value="0" min="-12" max="12" step="0.5">
+          </div>
+          <div class="knob-widget">
+            <div class="knob-label-top">MID A</div>
+            <canvas class="knob-canvas" id="eqMidKnob1" width="48" height="48"></canvas>
+            <input type="range" id="eqMid1" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqMidVal1" value="0" min="-12" max="12" step="0.5">
+          </div>
+          <div class="knob-widget">
+            <div class="knob-label-top">LOW A</div>
+            <canvas class="knob-canvas" id="eqLowKnob1" width="48" height="48"></canvas>
+            <input type="range" id="eqLow1" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqLowVal1" value="0" min="-12" max="12" step="0.5">
           </div>
         </div>
-        <div class="cue-pan-col">
-          <button class="btn-cue" id="cue2">CUE B</button>
+        <div class="eq-col">
           <div class="knob-widget">
-            <div class="knob-label-top">PAN B</div>
-            <canvas class="knob-canvas" id="panKnob2" width="48" height="48"></canvas>
-            <input type="range" id="pan2" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="knob-val-input" id="panVal2" value="0" min="-100" max="100" step="1">
+            <div class="knob-label-top">HI B</div>
+            <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
+            <input type="range" id="eqHi2" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqHiVal2" value="0" min="-12" max="12" step="0.5">
+          </div>
+          <div class="knob-widget">
+            <div class="knob-label-top">MID B</div>
+            <canvas class="knob-canvas" id="eqMidKnob2" width="48" height="48"></canvas>
+            <input type="range" id="eqMid2" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqMidVal2" value="0" min="-12" max="12" step="0.5">
+          </div>
+          <div class="knob-widget">
+            <div class="knob-label-top">LOW B</div>
+            <canvas class="knob-canvas" id="eqLowKnob2" width="48" height="48"></canvas>
+            <input type="range" id="eqLow2" min="-12" max="12" step="0.5" value="0">
+            <input type="number" class="knob-val-input" id="eqLowVal2" value="0" min="-12" max="12" step="0.5">
           </div>
         </div>
       </div>

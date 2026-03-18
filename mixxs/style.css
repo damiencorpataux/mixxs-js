@@ -450,6 +450,20 @@ input[type="range"]::-moz-range-thumb {
   cursor: text;
 }
 
+/* EQ section */
+.mixer-eq {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+.eq-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 /* Volume knobs */
 .mixer-vols {
   display: flex;
@@ -576,20 +590,14 @@ canvas.overview-canvas {
   font-size: 9px;
 }
 
-/* CUE + pan stacked per channel in mixer */
-.mixer-cue-pans {
+/* CUE buttons row */
+.mixer-cues {
   display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-.cue-pan-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.cue-pan-col .btn-cue {
+  gap: 8px;
   width: 100%;
+}
+.mixer-cues .btn-cue {
+  flex: 1;
   margin-left: 0;
   padding: 5px 8px;
   font-size: 9px;

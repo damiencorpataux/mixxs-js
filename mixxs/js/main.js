@@ -225,26 +225,24 @@ document.getElementById('waveform2').addEventListener('wheel', e => {
   mixer.syncZoom(2);
 }, { passive: false });
 
-// ── Pan knobs ─────────────────────────────────────────────────
-// Pan: internal -1..1, display -100..100
-setupKnob(
-  document.getElementById('panKnob1'),
-  document.getElementById('pan1'),
-  document.getElementById('panVal1'),
-  v => mixer.channel1?.setPan(v),
-  v => Math.round(v * 100),
-  d => d / 100
-);
-setupKnob(
-  document.getElementById('panKnob2'),
-  document.getElementById('pan2'),
-  document.getElementById('panVal2'),
-  v => mixer.channel2?.setPan(v),
-  v => Math.round(v * 100),
-  d => d / 100
-);
-
-// ── Volume knobs ──────────────────────────────────────────────
+// ── EQ knobs ──────────────────────────────────────────────────
+// Gain in dB: -12 to +12, display as dB value, double-click resets to 0
+[1, 2].forEach(n => {
+  [
+    { id: `eqHiKnob${n}`,  range: `eqHi${n}`,  val: `eqHiVal${n}`,  band: 'high' },
+    { id: `eqMidKnob${n}`, range: `eqMid${n}`, val: `eqMidVal${n}`, band: 'mid'  },
+    { id: `eqLowKnob${n}`, range: `eqLow${n}`, val: `eqLowVal${n}`, band: 'low'  },
+  ].forEach(({ id, range, val, band }) => {
+    setupKnob(
+      document.getElementById(id),
+      document.getElementById(range),
+      document.getElementById(val),
+      v => mixer[`channel${n}`]?.setEq(band, v),
+      v => v.toFixed(1),   // display in dB with 1 decimal
+      d => parseFloat(d)   // input is already in dB
+    );
+  });
+});
 // Volume: internal 0..1, display 0..100
 setupKnob(
   document.getElementById('volKnob1'),
