@@ -23,10 +23,19 @@ function initRange(range, cfg) {
 }
 
 /** Format seconds as m:ss */
+/** Format seconds as m:ss */
 function fmtTime(s) {
   const m   = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+/** Format seconds as m:ss.cc (centiseconds) for elapsed display */
+function fmtElapsed(s) {
+  const m   = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  const cs  = Math.floor((s % 1) * 100);
+  return `${m}:${sec.toString().padStart(2, '0')}.${cs.toString().padStart(2, '0')}`;
 }
 
 /** Sync a toggle button's .active class to a boolean state */

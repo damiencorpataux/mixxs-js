@@ -3,7 +3,7 @@
 //
 //  Owns: CUE buttons, crossfader, EQ/filter/volume knobs,
 //  header knobs (master/cue/click), waveform gestures,
-//  click track toggle, export button, settings modal.
+//  click track toggle, settings modal.
 // ═══════════════════════════════════════════════════════════════
 class MixerUI {
   constructor(mixer) {
@@ -14,7 +14,6 @@ class MixerUI {
     this._wireHeaderKnobs();
     this._wireWaveforms();
     this._wireClickTrack();
-    this._wireExport();
     this._wireSettingsModal();
   }
 
@@ -62,13 +61,13 @@ class MixerUI {
       });
 
       // Filter — -1 = lowpass, 0 = bypassed, +1 = highpass
+      // Arc color set via CSS: .filter-knob { --knob-arc: var(--teal) }
       initRange(el(`filter${n}`), filter);
       new Knob({
         canvas:     el(`filterKnob${n}`), range: el(`filter${n}`), display: el(`filterVal${n}`),
         onChange:   v  => mixer[`channel${n}`]?.setFilter(v),
         displayFn:  v  => v.toFixed(2),
         internalFn: d  => parseFloat(d),
-        color: '#2dd4bf',
       });
 
       // Volume — 0–100 %; audio layer receives v / 100 (0.0–1.0)
@@ -122,6 +121,9 @@ class MixerUI {
 
     [1, 2].forEach(n => {
       const canvas = el(`waveform${n}`);
+
+      // Prevent right-click context menu on waveform
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
 
       // ── Scroll wheel zoom ─────────────────────────────────────
       canvas.addEventListener('wheel', e => {

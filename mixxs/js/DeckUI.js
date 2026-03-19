@@ -59,7 +59,6 @@ class DeckUI {
   _wireTransport() {
     const { n, mixer } = this;
     this._el('play').addEventListener('click',      () => mixer.togglePlay(n));
-    this._el('stop').addEventListener('click',      () => mixer.stopDeck(n));
     this._el('nudgeBack').addEventListener('click', () => this.deck?.nudge(-1));
     this._el('nudgeFwd').addEventListener('click',  () => this.deck?.nudge(+1));
     this._el('syncFrom').addEventListener('click',  () => { mixer._init(); mixer.sync(n); });
@@ -227,7 +226,9 @@ class DeckUI {
 
     on('mixxs:timeupdate', ({ current, duration }) => {
       const el = this._el('time');
-      if (el) el.textContent = `${fmtTime(current)} / ${fmtTime(duration)}`;
+      if (!el) return;
+      const remaining = duration - current;
+      el.textContent = `${fmtElapsed(current)} / ${fmtTime(remaining)} / ${fmtTime(duration)}`;
     });
 
     on('mixxs:bpmupdate', ({ bpm, currentBpm }) => {
