@@ -50,7 +50,6 @@
       <div class="status-item">CUE <span id="statusCue">DEFAULT</span></div>
     </div>
     <button class="btn btn-pill btn-ghost btn-amber" id="btnSettings">⚙ DEVICES</button>
-    <button class="btn btn-pill btn-outlined" id="btnExport">⬇ EXPORT</button>
     <button class="btn btn-pill btn-ghost btn-amber" id="btnTheme" title="Toggle light/dark mode">☀</button>
   </div>
 </header>
@@ -65,6 +64,7 @@
       <div class="waveform-header">
         <span class="deck-label text-header">DECK <span class="deck-ab text-bright">A</span></span>
         <span class="track-filename text-muted" id="trackName1">NO TRACK LOADED</span>
+        <span class="time-display" id="time1">0:00.00 / 0:00 / 0:00</span>
         <button class="btn btn-pill btn-amber" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
@@ -82,6 +82,7 @@
       <div class="waveform-header">
         <span class="deck-label text-header">DECK <span class="deck-ab text-bright">B</span></span>
         <span class="track-filename text-muted" id="trackName2">NO TRACK LOADED</span>
+        <span class="time-display" id="time2">0:00.00 / 0:00 / 0:00</span>
         <button class="btn btn-pill btn-amber" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
@@ -115,7 +116,6 @@
 
       <div class="row transport">
         <button class="btn btn-sq btn-amber" id="play1"     title="Play / Pause">▶</button>
-        <button class="btn btn-sq btn-amber" id="stop1"     title="Stop">■</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
         <button class="btn btn-sq btn-amber" id="nudgeBack1" title="Back 1 beat">◀</button>
@@ -246,7 +246,6 @@
 
       <div class="row transport">
         <button class="btn btn-sq btn-amber" id="play2"     title="Play / Pause">▶</button>
-        <button class="btn btn-sq btn-amber" id="stop2"     title="Stop">■</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
         <button class="btn btn-sq btn-amber" id="nudgeBack2" title="Back 1 beat">◀</button>
@@ -309,7 +308,6 @@
 <script src="js/Deck.js"></script>
 <script src="js/WaveformRenderer.js"></script>
 <script src="js/FileLoader.js"></script>
-<script src="js/Exporter.js"></script>
 <script src="js/BeatAnalyzer.js"></script>
 <script src="js/Clicktrack.js"></script>
 <script src="js/MixerController.js"></script>

@@ -135,6 +135,9 @@ class Knob {
   _wire() {
     const { dragSensitivity, doubleTapMs } = MIXXS.knob;
 
+    // Prevent right-click context menu which breaks pressed state
+    this.canvas.addEventListener('contextmenu', e => e.preventDefault());
+
     // ── Drag to adjust value ─────────────────────────────────────
     // Uses absolute start position for smooth, drift-free dragging.
     let _dragStartY = 0, _dragStartVal = 0;

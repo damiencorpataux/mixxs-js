@@ -3,7 +3,7 @@
 //
 //  Owns: CUE buttons, crossfader, EQ/filter/volume knobs,
 //  header knobs (master/cue/click), waveform gestures,
-//  click track toggle, export button, settings modal.
+//  click track toggle, settings modal.
 // ═══════════════════════════════════════════════════════════════
 class MixerUI {
   constructor(mixer) {
@@ -14,7 +14,6 @@ class MixerUI {
     this._wireHeaderKnobs();
     this._wireWaveforms();
     this._wireClickTrack();
-    this._wireExport();
     this._wireSettingsModal();
   }
 
@@ -122,6 +121,9 @@ class MixerUI {
 
     [1, 2].forEach(n => {
       const canvas = el(`waveform${n}`);
+
+      // Prevent right-click context menu on waveform
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
 
       // ── Scroll wheel zoom ─────────────────────────────────────
       canvas.addEventListener('wheel', e => {

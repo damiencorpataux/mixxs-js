@@ -12,7 +12,6 @@
 //  mixxs:clickstate   { active }
 //  mixxs:loadprogress { deckNum, label, active, onCancel? }
 //  mixxs:loadend      { deckNum, filename }
-//  mixxs:exportstate  { busy }
 // ═══════════════════════════════════════════════════════════════
 class MixerController {
   constructor() {
@@ -28,7 +27,6 @@ class MixerController {
     this.waveform2    = null;
     this.overview1    = null;
     this.overview2    = null;
-    this.exporter     = new Exporter();
     this.clicktrack   = null;
     this.initialized  = false;
     this.rafId        = null;
