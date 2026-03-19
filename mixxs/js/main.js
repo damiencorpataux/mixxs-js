@@ -64,6 +64,12 @@ const applyTheme = (light) => {
   document.documentElement.dataset.theme = light ? 'light' : '';
   el('btnTheme').textContent = light ? '🌙' : '☀';
   try { localStorage.setItem('mixxs-theme', light ? 'light' : 'dark'); } catch(_) {}
+  // Redraw all knob canvases for the new theme
+  document.querySelectorAll('canvas.knob-canvas').forEach(c => {
+    const range = c.nextElementSibling?.type === 'range' ? c.nextElementSibling
+                : c.closest('.knob-widget, .knob-inline')?.querySelector('input[type="range"]');
+    if (range) Knob.draw(c, parseFloat(range.value), parseFloat(range.min), parseFloat(range.max));
+  });
 };
 try { applyTheme(localStorage.getItem('mixxs-theme') === 'light'); } catch(_) { applyTheme(false); }
 el('btnTheme').addEventListener('click', () =>

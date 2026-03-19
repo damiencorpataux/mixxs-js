@@ -65,21 +65,23 @@ class Knob {
     const norm   = (value - min) / (max - min);
     const angle  = startA + norm * sweep;
 
+    const light = document.documentElement.dataset.theme === 'light';
+
     ctx.clearRect(0, 0, W, H);
 
     // Body
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = '#161616';
+    ctx.fillStyle   = light ? '#d0d0d0' : '#161616';
     ctx.fill();
-    ctx.strokeStyle = '#303030';
+    ctx.strokeStyle = light ? '#b0b0b0' : '#303030';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     // Track (full range, dim)
     ctx.beginPath();
     ctx.arc(cx, cy, r - 6, startA, startA + sweep, false);
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -88,7 +90,7 @@ class Knob {
     ctx.beginPath();
     ctx.arc(cx + Math.cos(midA) * (r - 3), cy + Math.sin(midA) * (r - 3),
             1.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillStyle = light ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)';
     ctx.fill();
 
     // Value arc
@@ -102,7 +104,7 @@ class Knob {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(angle) * 4,       cy + Math.sin(angle) * 4);
     ctx.lineTo(cx + Math.cos(angle) * (r - 9), cy + Math.sin(angle) * (r - 9));
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.stroke();

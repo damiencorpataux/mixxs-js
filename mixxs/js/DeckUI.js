@@ -93,38 +93,37 @@ class DeckUI {
       });
   }
 
-  // ── Speed + current BPM inputs ────────────────────────────────
+  // ── Speed knob + current BPM inputs ──────────────────────────
 
   _wireSpeed() {
-    const { n, mixer }  = this;
-    const spdSlider     = this._el('speed');
+    const { n, mixer } = this;
+    const spdRange      = this._el('speed');
     const spdInput      = this._el('speedVal');
     const currentBpmEl  = this._el('currentBpm');
 
+    // Helper used by sync callbacks and currentBpm input
     const applySpeed = (v) => {
       v = Math.max(0.5, Math.min(2, v));
-      spdSlider.value = v;
-      spdInput.value  = v.toFixed(3);
-      mixer[`deck${n}`]?.setPlaybackRate(v);
-      const bpm = mixer[`deck${n}`]?.bpm;
-      if (bpm && currentBpmEl) currentBpmEl.value = (bpm * v).toFixed(1);
+      this._speedKnob?.setValue(v); // redraws knob, updates display, calls onChange
     };
     this.applySpeed = applySpeed;
 
-    spdSlider.addEventListener('input', () => applySpeed(parseFloat(spdSlider.value)));
-
-    let _spdArrow = false;
-    spdInput.addEventListener('keydown', e => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _spdArrow = true;
-      if (e.key === 'Enter')  { applySpeed(parseFloat(spdInput.value) || 1); spdInput.select(); }
-      if (e.key === 'Escape') { spdInput.value = parseFloat(spdSlider.value).toFixed(3); spdInput.blur(); }
+    // Speed knob — primary control, drives speedVal display
+    this._speedKnob = new Knob({
+      canvas:     document.getElementById(`speedKnob${n}`),
+      range:      spdRange,
+      display:    spdInput,
+      onChange:   v => {
+        mixer[`deck${n}`]?.setPlaybackRate(v);
+        const bpm = mixer[`deck${n}`]?.bpm;
+        if (bpm) currentBpmEl.value = (bpm * v).toFixed(1);
+      },
+      displayFn:  v => v.toFixed(3),
+      internalFn: d => Math.max(0.5, Math.min(2, parseFloat(d))),
     });
-    spdInput.addEventListener('input', () => {
-      if (!_spdArrow) return; _spdArrow = false;
-      applySpeed(parseFloat(spdInput.value) || 1);
-    });
-    spdInput.addEventListener('blur', () => applySpeed(parseFloat(spdInput.value) || 1));
 
+    // currentBpm input — typing here back-calculates speed
+    currentBpmEl.addEventListener('focus', () => currentBpmEl.select());
     let _bpmArrow = false;
     currentBpmEl.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _bpmArrow = true;
@@ -136,7 +135,7 @@ class DeckUI {
       }
       if (e.key === 'Escape') {
         const bpm = mixer[`deck${n}`]?.bpm;
-        if (bpm) currentBpmEl.value = (bpm * parseFloat(spdSlider.value)).toFixed(1);
+        if (bpm) currentBpmEl.value = (bpm * parseFloat(spdRange.value)).toFixed(1);
         currentBpmEl.blur();
       }
     });
@@ -150,7 +149,7 @@ class DeckUI {
       const typed = parseFloat(currentBpmEl.value);
       const bpm   = mixer[`deck${n}`]?.bpm;
       if (!isNaN(typed) && bpm) applySpeed(typed / bpm);
-      else if (bpm) currentBpmEl.value = (bpm * parseFloat(spdSlider.value)).toFixed(1);
+      else if (bpm) currentBpmEl.value = (bpm * parseFloat(spdRange.value)).toFixed(1);
     });
   }
 
@@ -214,11 +213,7 @@ class DeckUI {
     });
 
     on('mixxs:speedupdate', ({ rate }) => {
-      const slider = this._el('speed');
-      const input  = this._el('speedVal');
-      if (slider) slider.value = rate;
-      if (input)  input.value  = rate.toFixed(3);
-      // Also update currentBpm if bpm is known
+      this._speedKnob?.setValue(rate);
       const bpm = this.mixer[`deck${n}`]?.bpm;
       const cur = this._el('currentBpm');
       if (bpm && cur) cur.value = (bpm * rate).toFixed(1);

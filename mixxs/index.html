@@ -109,15 +109,6 @@
         <div class="overview-empty" id="overviewEmpty1">DROP AUDIO FILE TO LOAD</div>
       </div>
 
-      <!-- Detected BPM left, time right -->
-      <div class="deck-info-row">
-        <div class="bpm-display">
-          <input type="number" class="bpm-input" id="bpm1" placeholder="—" min="40" max="240" step="0.01" readonly>
-          <span class="bpm-label">BPM</span>
-        </div>
-        <span class="time-display" id="time1">0:00 / 0:00</span>
-      </div>
-
       <!-- Transport: play stop --- nudge< nudge> sync -->
       <div class="transport">
         <button class="btn-transport" id="play1" title="Play / Pause">▶</button>
@@ -127,30 +118,23 @@
         <span class="transport-spacer"></span>
         <button class="btn-nudge" id="nudgeBack1" title="Back 1 beat">◀</button>
         <button class="btn-nudge" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
+        <input type="number" class="bpm-input" id="bpm1" placeholder="—" min="40" max="240" step="0.1" readonly title="Detected BPM">
         <button class="btn-sync btn-sync-transport" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
       </div>
 
       <div class="deck-controls">
-        <div class="control-row">
-          <div class="speed-bpm-labels">
-            <span class="control-label">SPEED</span>
-            <span class="control-label">CURRENT BPM</span>
-          </div>
-          <div class="slider-row">
-            <input type="range" id="speed1" min="0.5" max="2" step="0.001" value="1">
-            <div class="speed-vals">
-              <input type="number" class="control-val-input" id="speedVal1" min="0.5" max="2" step="0.001" value="1.000">
-              <input type="number" class="control-val-input" id="currentBpm1" min="40" max="360" step="0.1" placeholder="—">
+        <div class="btn-row deck-bottom-row">
+          <button class="btn-nudge btn-loop" id="loop1" title="Toggle loop">↻</button>
+          <button class="btn-nudge" id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
+          <button class="btn-nudge" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
+          <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" min="1" max="64" step="1" title="Loop length in beats">
+          <input type="range" id="speed1" min="0.5" max="2" step="0.001" value="1" style="display:none">
+          <div class="speed-stack">
+            <canvas class="knob-canvas knob-speed" id="speedKnob1" width="36" height="36"></canvas>
+            <div class="speed-stack-vals">
+              <input type="number" class="control-val-input" id="currentBpm1" min="40" max="360" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
+              <input type="number" class="control-val-input" id="speedVal1" min="0.5" max="2" step="0.001" value="1.000" title="Playback speed (0.5 – 2.0)">
             </div>
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">LOOP</div>
-          <div class="btn-row">
-            <button class="btn-nudge btn-loop" id="loop1" title="Toggle loop">↻</button>
-            <button class="btn-nudge" id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
-            <button class="btn-nudge" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
-            <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" min="1" max="64" step="1"><span class="control-label" style="flex-shrink:0">beats</span>
           </div>
         </div>
       </div>
@@ -261,15 +245,6 @@
         <div class="overview-empty" id="overviewEmpty2">DROP AUDIO FILE TO LOAD</div>
       </div>
 
-      <!-- Detected BPM left, time right -->
-      <div class="deck-info-row">
-        <div class="bpm-display">
-          <input type="number" class="bpm-input" id="bpm2" placeholder="—" min="40" max="240" step="0.01" readonly>
-          <span class="bpm-label">BPM</span>
-        </div>
-        <span class="time-display" id="time2">0:00 / 0:00</span>
-      </div>
-
       <!-- Transport: play stop --- nudge< nudge> sync -->
       <div class="transport">
         <button class="btn-transport" id="play2" title="Play / Pause">▶</button>
@@ -279,30 +254,23 @@
         <span class="transport-spacer"></span>
         <button class="btn-nudge" id="nudgeBack2" title="Back 1 beat">◀</button>
         <button class="btn-nudge" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
+        <input type="number" class="bpm-input" id="bpm2" placeholder="—" min="40" max="240" step="0.1" readonly title="Detected BPM">
         <button class="btn-sync btn-sync-transport" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
       </div>
 
       <div class="deck-controls">
-        <div class="control-row">
-          <div class="speed-bpm-labels">
-            <span class="control-label">SPEED</span>
-            <span class="control-label">CURRENT BPM</span>
-          </div>
-          <div class="slider-row">
-            <input type="range" id="speed2" min="0.5" max="2" step="0.001" value="1">
-            <div class="speed-vals">
-              <input type="number" class="control-val-input" id="speedVal2" min="0.5" max="2" step="0.001" value="1.000">
-              <input type="number" class="control-val-input" id="currentBpm2" min="40" max="360" step="0.1" placeholder="—">
+        <div class="btn-row deck-bottom-row">
+          <button class="btn-nudge btn-loop" id="loop2" title="Toggle loop">↻</button>
+          <button class="btn-nudge" id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
+          <button class="btn-nudge" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
+          <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" min="1" max="64" step="1" title="Loop length in beats">
+          <input type="range" id="speed2" min="0.5" max="2" step="0.001" value="1" style="display:none">
+          <div class="speed-stack">
+            <canvas class="knob-canvas knob-speed" id="speedKnob2" width="36" height="36"></canvas>
+            <div class="speed-stack-vals">
+              <input type="number" class="control-val-input" id="currentBpm2" min="40" max="360" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
+              <input type="number" class="control-val-input" id="speedVal2" min="0.5" max="2" step="0.001" value="1.000" title="Playback speed (0.5 – 2.0)">
             </div>
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">LOOP</div>
-          <div class="btn-row">
-            <button class="btn-nudge btn-loop" id="loop2" title="Toggle loop">↻</button>
-            <button class="btn-nudge" id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
-            <button class="btn-nudge" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
-            <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" min="1" max="64" step="1"><span class="control-label" style="flex-shrink:0">beats</span>
           </div>
         </div>
       </div>

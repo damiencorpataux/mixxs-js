@@ -405,7 +405,20 @@ input[type="range"]::-moz-range-thumb {
 }
 .btn-sync:hover { border-color: var(--green); color: var(--green); }
 .btn-sync.active { background: var(--green); color: #000; border-color: var(--green); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
-.loop-beats-input { width: 44px !important; }
+.deck-bottom-row { width: 100%; }
+.speed-stack {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.speed-stack-vals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.speed-stack-vals .control-val-input { width: 58px; }
 .btn-loop { font-size: 16px; }
 .btn-loop.active { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.15); box-shadow: 0 0 10px rgba(34,197,94,0.3); }
 
