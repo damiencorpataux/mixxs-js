@@ -8,9 +8,6 @@ function fmtTime(s) {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 }
 const el          = id => document.getElementById(id);
-const linearToDb  = v  => v <= 0 ? '-96.0' : (20 * Math.log10(v)).toFixed(1);
-const dbToLinear  = db => Math.max(0, Math.min(1, Math.pow(10, parseFloat(db) / 20)));
-
 // Volume knobs: internal 0–100 (percent), displayed as integer
 const pctDisplay  = v  => Math.round(v).toString();
 const pctInternal = d  => Math.max(0, Math.min(100, parseFloat(d)));

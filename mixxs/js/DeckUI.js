@@ -75,7 +75,7 @@ class DeckUI {
             deck.startOffset  = deck.getCurrentTime();
             deck.startCtxTime = deck.ctx.currentTime;
           }
-          deck.setPlaybackRate(Math.max(0.5, Math.min(2, savedRate * (1 + dir * BEND_FACTOR))));
+          deck.setPlaybackRate(Math.max(0, Math.min(2, savedRate * (1 + dir * BEND_FACTOR))));
           btn.classList.add('active');
         };
         const stop = () => {
@@ -103,7 +103,7 @@ class DeckUI {
 
     // Helper used by sync callbacks and currentBpm input
     const applySpeed = (v) => {
-      v = Math.max(0.5, Math.min(2, v));
+      v = Math.max(0, Math.min(2, v));
       this._speedKnob?.setValue(v); // redraws knob, updates display, calls onChange
     };
     this.applySpeed = applySpeed;
@@ -119,7 +119,7 @@ class DeckUI {
         if (bpm) currentBpmEl.value = (bpm * v).toFixed(1);
       },
       displayFn:  v => v.toFixed(3),
-      internalFn: d => Math.max(0.5, Math.min(2, parseFloat(d))),
+      internalFn: d => Math.max(0, Math.min(2, parseFloat(d))),
     });
 
     // currentBpm input — typing here back-calculates speed
