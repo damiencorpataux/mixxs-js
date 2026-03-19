@@ -773,3 +773,134 @@ canvas.overview-canvas {
 }
 .btn-modal.primary { border-color: var(--amber); color: var(--amber); }
 .btn-modal:hover { opacity: 0.8; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Shared mobile touch targets ─────────────────────────────── */
+@media (pointer: coarse) {
+  .btn-transport, .btn-nudge, .btn-loop, .btn-sync, .btn-cue-round {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .btn-sync-transport { height: 44px; }
+  .btn-cue { min-height: 36px; }
+  /* Knob drag is fine — touch events handled separately */
+}
+
+/* ── PORTRAIT MOBILE (≤ 700px wide) ──────────────────────────── */
+@media (max-width: 700px) {
+
+  /* Header: compress, hide status text */
+  header { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+  .status-inline { display: none; }
+  .master-label  { display: none; }
+  .header-center { gap: 6px; }
+  .knob-inline .knob-canvas { width: 32px !important; height: 32px !important; }
+  .knob-inline .knob-val-input { width: 36px; font-size: 9px; }
+  .btn-settings, .btn-export { font-size: 8px; padding: 5px 8px; }
+
+  /* Waveforms: taller so they're usable */
+  .waveform-wrap { height: 80px; }
+
+  /* Controls: stack vertically — deck A, mixer, deck B */
+  .controls-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .deck-panel {
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .deck-panel:last-child { border-left: none; border-bottom: none; }
+
+  /* Mixer: horizontal layout to save vertical space */
+  .mixer-panel {
+    min-width: unset;
+    padding: 10px 12px;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .mixer-channels { gap: 0; }
+  .mixer-divider { margin: 0 4px; }
+
+  /* Shrink knobs in mixer on portrait */
+  .mixer-channel .knob-canvas { width: 38px !important; height: 38px !important; }
+  .mixer-vols .knob-canvas { width: 44px !important; height: 44px !important; }
+
+  /* Deck top row */
+  .deck-top-row { gap: 4px; }
+  .deck-filename { font-size: 8px; }
+
+  /* Overview */
+  .overview-wrap { height: 36px; }
+}
+
+/* ── LANDSCAPE MOBILE (≤ 900px wide, short screen) ───────────── */
+@media (max-width: 900px) and (max-height: 500px) {
+
+  /* Header: single compact row */
+  header { padding: 4px 10px; gap: 6px; }
+  .status-inline { display: none; }
+  .master-label  { font-size: 8px; }
+  .knob-inline .knob-canvas { width: 28px !important; height: 28px !important; }
+  .knob-inline .knob-val-input { width: 30px; font-size: 8px; }
+  .btn-settings, .btn-export { font-size: 7px; padding: 4px 6px; }
+  .logo { font-size: 13px; letter-spacing: 2px; }
+
+  /* Waveforms: reduce height */
+  .waveform-wrap { height: 55px; }
+  .waveform-header { padding: 2px 8px; }
+  .waveform-header .deck-label { font-size: 9px; }
+  .waveform-header .track-name { font-size: 9px; }
+
+  /* Controls: keep side-by-side grid but tighter */
+  .controls-section { grid-template-columns: 1fr auto 1fr; }
+
+  .deck-panel { padding: 6px 8px; gap: 5px; }
+
+  /* Smaller transport buttons */
+  .btn-transport { width: 32px; height: 32px; font-size: 11px; }
+  .btn-nudge { width: 32px; height: 32px; font-size: 11px; }
+  .btn-sync-transport { height: 32px; font-size: 8px; padding: 0 6px; }
+  .btn-loop { font-size: 13px; }
+
+  /* Overview */
+  .overview-wrap { height: 30px; }
+
+  /* Deck info row */
+  .deck-info-row { gap: 4px; }
+  .bpm-input { font-size: 11px; width: 52px; }
+  .time-display { font-size: 9px; }
+
+  /* Speed/BPM row: hide labels, compress */
+  .speed-bpm-labels { display: none; }
+  .speed-vals .control-val-input { width: 44px; font-size: 9px; }
+
+  /* Loop row: compress */
+  .loop-beats-input { width: 32px !important; }
+  .control-label { font-size: 7px; }
+
+  /* Mixer: tighter */
+  .mixer-panel { padding: 6px 8px; gap: 5px; min-width: 130px; }
+  .mixer-channel .knob-canvas { width: 34px !important; height: 34px !important; }
+  .mixer-vols .knob-canvas { width: 38px !important; height: 38px !important; }
+  .mixer-ch-header { font-size: 9px; padding: 2px 0; }
+  .mixer-divider { margin: 0 4px; }
+  .knob-label-top { font-size: 7px; }
+  .knob-val-input { font-size: 8px; width: 34px; }
+  .mixer-xfader { gap: 4px; }
+  .xfader-labels { font-size: 8px; }
+
+  /* Deck top row */
+  .deck-top-row { gap: 4px; }
+  .deck-filename { font-size: 8px; }
+  .deck-label { font-size: 9px; }
+}
