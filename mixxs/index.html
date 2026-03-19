@@ -26,20 +26,20 @@
     <button class="btn-transport" id="btnClick" title="Toggle click track">♩</button>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
-      <input type="range" id="clickVol" min="0" max="100" step="1" value="50">
-      <input type="number" class="knob-val-input" id="clickVolVal" min="0" max="100" step="1" value="50">
+      <input type="range"  id="clickVol"    step="1">
+      <input type="number" id="clickVolVal" step="1" class="knob-val-input">
     </div>
-    <span class="master-label" style="margin-left:12px">MASTER</span>
+    <span class="master-label header-label-gap">MASTER</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
-      <input type="range" id="masterVol" min="0" max="100" step="1" value="80">
-      <input type="number" class="knob-val-input" id="masterVolVal" min="0" max="100" step="1" value="80">
+      <input type="range"  id="masterVol"    step="1">
+      <input type="number" id="masterVolVal" step="1" class="knob-val-input">
     </div>
-    <span class="master-label" style="margin-left:12px">CUE</span>
+    <span class="master-label header-label-gap">CUE</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
-      <input type="range" id="cueVol" min="0" max="100" step="1" value="90">
-      <input type="number" class="knob-val-input" id="cueVolVal" min="0" max="100" step="1" value="90">
+      <input type="range"  id="cueVol"    step="1">
+      <input type="number" id="cueVolVal" step="1" class="knob-val-input">
     </div>
   </div>
   <div class="header-right">
@@ -97,43 +97,40 @@
     <!-- ── DECK A ───────────────────────────────────────────── -->
     <div class="deck-panel" id="deckPanel1">
 
-      <!-- Deck label + filename row: filename left, label right (mixer is on the right) -->
       <div class="deck-top-row deck-top-row--left">
         <div class="deck-filename" id="deckFilename1">NO TRACK LOADED</div>
         <span class="deck-label">DECK <span class="deck-ab">A</span></span>
       </div>
 
-      <!-- Overview waveform -->
       <div class="overview-wrap" id="overviewWrap1">
         <canvas class="overview-canvas" id="overview1"></canvas>
         <div class="overview-empty" id="overviewEmpty1">DROP AUDIO FILE TO LOAD</div>
       </div>
 
-      <!-- Transport: play stop --- nudge< nudge> sync -->
       <div class="transport">
-        <button class="btn-transport" id="play1" title="Play / Pause">▶</button>
-        <button class="btn-transport" id="stop1" title="Stop">■</button>
+        <button class="btn-transport"          id="play1"     title="Play / Pause">▶</button>
+        <button class="btn-transport"          id="stop1"     title="Stop">■</button>
         <button class="btn-transport btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
         <button class="btn-transport btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
         <span class="transport-spacer"></span>
         <button class="btn-nudge" id="nudgeBack1" title="Back 1 beat">◀</button>
         <button class="btn-nudge" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
-        <input type="number" class="bpm-input" id="bpm1" placeholder="—" min="40" max="240" step="0.1" readonly title="Detected BPM">
+        <input type="number" class="bpm-input" id="bpm1" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn-sync btn-sync-transport" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
       </div>
 
       <div class="deck-controls">
         <div class="btn-row deck-bottom-row">
-          <button class="btn-nudge btn-loop" id="loop1" title="Toggle loop">↻</button>
-          <button class="btn-nudge" id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
-          <button class="btn-nudge" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
-          <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" min="1" max="64" step="1" title="Loop length in beats">
-          <input type="range" id="speed1" min="0" max="2" step="0.001" value="1" style="display:none">
+          <button class="btn-nudge btn-loop" id="loop1"         title="Toggle loop">↻</button>
+          <button class="btn-nudge"          id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
+          <button class="btn-nudge"          id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
+          <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" step="1" title="Loop length in beats">
+          <input type="range" id="speed1" class="range-hidden">
           <div class="speed-stack">
             <canvas class="knob-canvas knob-speed" id="speedKnob1" width="48" height="48"></canvas>
             <div class="speed-stack-vals">
-              <input type="number" class="control-val-input" id="currentBpm1" min="40" max="360" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
-              <input type="number" class="control-val-input" id="speedVal1" min="0" max="2" step="0.001" value="1.000" title="Playback speed (0.5 – 2.0)">
+              <input type="number" class="control-val-input" id="currentBpm1" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
+              <input type="number" class="control-val-input" id="speedVal1"   step="0.001"               title="Playback speed">
             </div>
           </div>
         </div>
@@ -145,78 +142,77 @@
 
       <div class="mixer-channels">
 
-        <!-- Channel A: CUE | HI / FILTER | MID / VOL | LOW -->
+        <!-- Channel A (layout mirrored: EQ left, CUE/filter/vol right) -->
         <div class="mixer-channel">
           <div class="mixer-ch-header">A</div>
           <button class="btn-cue btn-cue-round" id="cue1" title="CUE A">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top">HI</div>
-            <canvas class="knob-canvas" id="eqHiKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqHi1" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqHiVal1" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqHiKnob1"  width="48" height="48"></canvas>
+            <input type="range"  id="eqHi1"    step="0.1">
+            <input type="number" id="eqHiVal1" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top filter-label">FILTER</div>
             <canvas class="knob-canvas" id="filterKnob1" width="48" height="48"></canvas>
-            <input type="range" id="filter1" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="knob-val-input filter-val" id="filterVal1" value="0" min="-1" max="1" step="0.01">
+            <input type="range"  id="filter1"    step="0.01">
+            <input type="number" id="filterVal1" step="0.01" class="knob-val-input filter-val">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">MID</div>
-            <canvas class="knob-canvas" id="eqMidKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqMid1" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqMidVal1" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqMidKnob1"  width="48" height="48"></canvas>
+            <input type="range"  id="eqMid1"    step="0.1">
+            <input type="number" id="eqMidVal1" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">VOL</div>
-            <canvas class="knob-canvas" id="volKnob1" width="64" height="64"></canvas>
-            <input type="range" id="vol1" min="0" max="100" step="1" value="80">
-            <input type="number" class="knob-val-input" id="volVal1" value="80" min="0" max="100" step="1">
+            <canvas class="knob-canvas" id="volKnob1"  width="64" height="64"></canvas>
+            <input type="range"  id="vol1"    step="1">
+            <input type="number" id="volVal1" step="1" class="knob-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">LOW</div>
-            <canvas class="knob-canvas" id="eqLowKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqLow1" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqLowVal1" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqLowKnob1"  width="48" height="48"></canvas>
+            <input type="range"  id="eqLow1"    step="0.1">
+            <input type="number" id="eqLowVal1" step="0.1" class="knob-val-input">
           </div>
         </div>
 
-        <!-- Vertical divider -->
         <div class="mixer-divider"></div>
 
-        <!-- Channel B: HI | CUE / MID | FILTER / LOW | VOL  (mirrored) -->
+        <!-- Channel B (normal layout: EQ left, CUE/filter/vol right) -->
         <div class="mixer-channel">
           <div class="mixer-ch-header">B</div>
           <div class="knob-widget">
             <div class="knob-label-top">HI</div>
-            <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqHi2" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqHiVal2" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqHiKnob2"  width="48" height="48"></canvas>
+            <input type="range"  id="eqHi2"    step="0.1">
+            <input type="number" id="eqHiVal2" step="0.1" class="knob-val-input">
           </div>
           <button class="btn-cue btn-cue-round" id="cue2" title="CUE B">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top">MID</div>
-            <canvas class="knob-canvas" id="eqMidKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqMid2" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqMidVal2" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqMidKnob2"  width="48" height="48"></canvas>
+            <input type="range"  id="eqMid2"    step="0.1">
+            <input type="number" id="eqMidVal2" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top filter-label">FILTER</div>
             <canvas class="knob-canvas" id="filterKnob2" width="48" height="48"></canvas>
-            <input type="range" id="filter2" min="-1" max="1" step="0.01" value="0">
-            <input type="number" class="knob-val-input filter-val" id="filterVal2" value="0" min="-1" max="1" step="0.01">
+            <input type="range"  id="filter2"    step="0.01">
+            <input type="number" id="filterVal2" step="0.01" class="knob-val-input filter-val">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">LOW</div>
-            <canvas class="knob-canvas" id="eqLowKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqLow2" min="-12" max="12" step="0.1" value="0">
-            <input type="number" class="knob-val-input" id="eqLowVal2" value="0" min="-12" max="12" step="0.1">
+            <canvas class="knob-canvas" id="eqLowKnob2"  width="48" height="48"></canvas>
+            <input type="range"  id="eqLow2"    step="0.1">
+            <input type="number" id="eqLowVal2" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">VOL</div>
-            <canvas class="knob-canvas" id="volKnob2" width="64" height="64"></canvas>
-            <input type="range" id="vol2" min="0" max="100" step="1" value="80">
-            <input type="number" class="knob-val-input" id="volVal2" value="80" min="0" max="100" step="1">
+            <canvas class="knob-canvas" id="volKnob2"  width="64" height="64"></canvas>
+            <input type="range"  id="vol2"    step="1">
+            <input type="number" id="volVal2" step="1" class="knob-val-input">
           </div>
         </div>
 
@@ -233,43 +229,40 @@
     <!-- ── DECK B ───────────────────────────────────────────── -->
     <div class="deck-panel" id="deckPanel2">
 
-      <!-- Deck label + filename row: label left, filename right (mixer is on the left) -->
       <div class="deck-top-row deck-top-row--right">
         <span class="deck-label">DECK <span class="deck-ab">B</span></span>
         <div class="deck-filename" id="deckFilename2">NO TRACK LOADED</div>
       </div>
 
-      <!-- Overview waveform -->
       <div class="overview-wrap" id="overviewWrap2">
         <canvas class="overview-canvas" id="overview2"></canvas>
         <div class="overview-empty" id="overviewEmpty2">DROP AUDIO FILE TO LOAD</div>
       </div>
 
-      <!-- Transport: play stop --- nudge< nudge> sync -->
       <div class="transport">
-        <button class="btn-transport" id="play2" title="Play / Pause">▶</button>
-        <button class="btn-transport" id="stop2" title="Stop">■</button>
+        <button class="btn-transport"          id="play2"     title="Play / Pause">▶</button>
+        <button class="btn-transport"          id="stop2"     title="Stop">■</button>
         <button class="btn-transport btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
         <button class="btn-transport btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
         <span class="transport-spacer"></span>
         <button class="btn-nudge" id="nudgeBack2" title="Back 1 beat">◀</button>
         <button class="btn-nudge" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
-        <input type="number" class="bpm-input" id="bpm2" placeholder="—" min="40" max="240" step="0.1" readonly title="Detected BPM">
+        <input type="number" class="bpm-input" id="bpm2" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn-sync btn-sync-transport" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
       </div>
 
       <div class="deck-controls">
         <div class="btn-row deck-bottom-row">
-          <button class="btn-nudge btn-loop" id="loop2" title="Toggle loop">↻</button>
-          <button class="btn-nudge" id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
-          <button class="btn-nudge" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
-          <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" min="1" max="64" step="1" title="Loop length in beats">
-          <input type="range" id="speed2" min="0" max="2" step="0.001" value="1" style="display:none">
+          <button class="btn-nudge btn-loop" id="loop2"          title="Toggle loop">↻</button>
+          <button class="btn-nudge"          id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
+          <button class="btn-nudge"          id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
+          <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" step="1" title="Loop length in beats">
+          <input type="range" id="speed2" class="range-hidden">
           <div class="speed-stack">
             <canvas class="knob-canvas knob-speed" id="speedKnob2" width="48" height="48"></canvas>
             <div class="speed-stack-vals">
-              <input type="number" class="control-val-input" id="currentBpm2" min="40" max="360" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
-              <input type="number" class="control-val-input" id="speedVal2" min="0" max="2" step="0.001" value="1.000" title="Playback speed (0.5 – 2.0)">
+              <input type="number" class="control-val-input" id="currentBpm2" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
+              <input type="number" class="control-val-input" id="speedVal2"   step="0.001"               title="Playback speed">
             </div>
           </div>
         </div>
@@ -296,13 +289,14 @@
       Requires Chrome / Edge 110+. Connect multiple audio outputs before opening this panel.
     </p>
     <div class="modal-actions">
-      <button class="btn-modal" id="btnModalClose">CANCEL</button>
+      <button class="btn-modal"         id="btnModalClose">CANCEL</button>
       <button class="btn-modal primary" id="btnModalApply">APPLY</button>
     </div>
   </div>
 </div>
 
 <!-- ── SCRIPTS ────────────────────────────────────────────────── -->
+<script src="js/Config.js"></script>
 <script src="js/AudioEngine.js"></script>
 <script src="js/CueBus.js"></script>
 <script src="js/ChannelController.js"></script>

@@ -6,10 +6,11 @@
 //  WaveformOverview — full-track strip with moving playhead
 // ═══════════════════════════════════════════════════════════════
 
-const PEAK_RESOLUTION = 8192;
-const ZOOM_MIN        = 0.5;
-const ZOOM_MAX        = 64;
-const ZOOM_STEP       = 1.16;
+// Waveform rendering constants — sourced from MIXXS config
+const PEAK_RESOLUTION = MIXXS.waveform.peakResolution;
+const ZOOM_MIN        = MIXXS.waveform.zoom.min;
+const ZOOM_MAX        = MIXXS.waveform.zoom.max;
+const ZOOM_STEP       = MIXXS.waveform.zoom.tickMultiplier;
 
 // ═══════════════════════════════════════════════════════════════
 //  WaveformBase  —  internal base class (not used directly)

@@ -523,6 +523,12 @@ input[type="range"]::-moz-range-thumb {
   cursor: ns-resize;
   touch-action: none;
 }
+
+/* Hidden range input — value store only, never visible */
+.range-hidden { display: none; }
+
+/* Gap between header knob groups */
+.header-label-gap { margin-left: 12px; }
 .knob-canvas:active { cursor: ns-resize; }
 /* Pan range hidden — canvas is the visual */
 .knob-widget input[type="range"] {

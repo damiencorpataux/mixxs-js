@@ -8,8 +8,10 @@
 //  mixxs:bpmupdate    { deckNum, bpm, currentBpm }
 //  mixxs:speedupdate  { deckNum, rate }
 //  mixxs:loopstate    { deckNum, active }
-//  mixxs:loadprogress { deckNum, label }      — overlay text
-//  mixxs:loadend      { deckNum, filename }   — file loaded OK
+//  mixxs:cuestate     { deckNum, active }
+//  mixxs:clickstate   { active }
+//  mixxs:loadprogress { deckNum, label, active, onCancel? }
+//  mixxs:loadend      { deckNum, filename }
 //  mixxs:exportstate  { busy }
 // ═══════════════════════════════════════════════════════════════
 class MixerController {
@@ -175,14 +177,14 @@ class MixerController {
 
   // ── Click track ───────────────────────────────────────────────
 
-  toggleClick(btn) {
+  toggleClick() {
     if (!this.initialized) this._init();
     if (this.clicktrack.enabled) {
       this.clicktrack.disable();
-      btn.classList.remove('active');
+      this.emit('mixxs:clickstate', { active: false });
     } else {
       this.clicktrack.enable();
-      btn.classList.add('active');
+      this.emit('mixxs:clickstate', { active: true });
     }
   }
 

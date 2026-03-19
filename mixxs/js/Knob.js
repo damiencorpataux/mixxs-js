@@ -1,20 +1,25 @@
 // ═══════════════════════════════════════════════════════════════
 //  Knob  —  reusable rotary knob widget
 //
-//  Wraps: canvas (visual) + range input (internal value) + number
-//  input (editable display).
+//  Wraps three DOM elements into a single interactive control:
+//    canvas  — the visual rotary knob (drawn by Knob.draw)
+//    range   — hidden <input type="range"> that owns min/max/default
+//    display — <input type="number"> for reading and typing values
 //
-//  Usage:
-//    new Knob({
-//      canvas, range, display,       // DOM elements
-//      onChange,                      // called with internal value
-//      displayFn,                     // internal → display string
-//      internalFn,                    // display string → internal
-//      color,                         // arc color (default amber)
-//    });
+//  The range element is the single source of truth for bounds:
+//    min, max, step, and defaultValue all come from its attributes.
 //
-//  Public methods:
-//    knob.setValue(v)  — set internal value and redraw
+//  Constructor options:
+//    canvas, range, display  — DOM elements (required)
+//    onChange(internalVal)   — called whenever the value changes
+//    displayFn(internalVal)  — converts internal value → display string
+//    internalFn(displayStr)  — converts display string → internal value
+//                              (clamping is handled automatically by Knob,
+//                               so this only needs to parse the string)
+//    color                   — arc color, default amber
+//
+//  Public API:
+//    knob.setValue(v)  — programmatically set value and redraw
 // ═══════════════════════════════════════════════════════════════
 class Knob {
   constructor({ canvas, range, display, onChange,
@@ -23,18 +28,27 @@ class Knob {
     this.range      = range;
     this.display    = display;
     this.onChange   = onChange;
-    this.displayFn  = displayFn  || (v => Math.round(v * 100));
-    this.internalFn = internalFn || (d => d / 100);
+    this.displayFn  = displayFn  ?? (v => v.toFixed(2));
+    this.internalFn = internalFn ?? (d => parseFloat(d));
     this.color      = color;
 
-    this._dragging     = false;
-    this._startY       = 0;
-    this._startVal     = 0;
     this._editSnapshot = null;
     this._arrowActive  = false;
 
+    // Register for theme-aware redraws (see applyTheme in main.js)
+    Knob._instances.push(this);
+
     this._wire();
     this.setValue(parseFloat(range.value)); // initial draw
+  }
+
+  // ── Static registry (used by applyTheme to redraw all knobs) ──
+
+  static _instances = [];
+
+  static redrawAll() {
+    Knob._instances.forEach(k =>
+      Knob.draw(k.canvas, parseFloat(k.range.value), k.min, k.max, k.color));
   }
 
   // ── Public ───────────────────────────────────────────────────
@@ -53,7 +67,7 @@ class Knob {
     this.onChange(v);
   }
 
-  // ── Static draw (usable standalone) ──────────────────────────
+  // ── Static draw ───────────────────────────────────────────────
 
   static draw(canvas, value, min, max, color = '#f59e0b') {
     const ctx = canvas.getContext('2d');
@@ -61,10 +75,11 @@ class Knob {
     const cx = W / 2, cy = H / 2;
     const r  = Math.min(W, H) / 2 - 3;
 
-    const startA = 0.75 * Math.PI; // 7:30 position
-    const sweep  = 1.5  * Math.PI; // 270°
-    const norm   = (value - min) / (max - min);
-    const angle  = startA + norm * sweep;
+    // 270° arc from 7:30 to 4:30 (clockwise)
+    const startAngle = 0.75 * Math.PI;
+    const sweepAngle = 1.5  * Math.PI;
+    const valueAngle = startAngle + ((value - min) / (max - min)) * sweepAngle;
+    const midAngle   = startAngle + 0.5 * sweepAngle; // 12 o'clock
 
     const light = document.documentElement.dataset.theme === 'light';
 
@@ -76,101 +91,105 @@ class Knob {
     ctx.fillStyle   = light ? '#b8b8b8' : '#161616';
     ctx.fill();
     ctx.strokeStyle = light ? '#999999' : '#303030';
-    ctx.lineWidth = 1;
+    ctx.lineWidth   = 1;
     ctx.stroke();
 
-    // Track (full range, dim)
+    // Full-range track (dim background arc)
     ctx.beginPath();
-    ctx.arc(cx, cy, r - 6, startA, startA + sweep, false);
+    ctx.arc(cx, cy, r - 6, startAngle, startAngle + sweepAngle, false);
     ctx.strokeStyle = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 3;
+    ctx.lineWidth   = 3;
     ctx.stroke();
 
-    // Centre mark (12 o'clock = neutral)
-    const midA = startA + 0.5 * sweep;
+    // Neutral mark at 12 o'clock
     ctx.beginPath();
-    ctx.arc(cx + Math.cos(midA) * (r - 3), cy + Math.sin(midA) * (r - 3),
-            1.5, 0, Math.PI * 2);
+    ctx.arc(cx + Math.cos(midAngle) * (r - 3),
+            cy + Math.sin(midAngle) * (r - 3), 1.5, 0, Math.PI * 2);
     ctx.fillStyle = light ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)';
     ctx.fill();
 
-    // Value arc
+    // Value arc (colored)
     ctx.beginPath();
-    ctx.arc(cx, cy, r - 6, startA, angle, false);
+    ctx.arc(cx, cy, r - 6, startAngle, valueAngle, false);
     ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
+    ctx.lineWidth   = 3;
     ctx.stroke();
 
-    // Indicator line
+    // Indicator line (pointer)
     ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(angle) * 4,       cy + Math.sin(angle) * 4);
-    ctx.lineTo(cx + Math.cos(angle) * (r - 9), cy + Math.sin(angle) * (r - 9));
+    ctx.moveTo(cx + Math.cos(valueAngle) * 4,       cy + Math.sin(valueAngle) * 4);
+    ctx.lineTo(cx + Math.cos(valueAngle) * (r - 9), cy + Math.sin(valueAngle) * (r - 9));
     ctx.strokeStyle = light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
+    ctx.lineWidth   = 2;
+    ctx.lineCap     = 'round';
     ctx.stroke();
-    ctx.lineCap = 'butt';
+    ctx.lineCap     = 'butt';
   }
 
   // ── Private ───────────────────────────────────────────────────
 
   _wire() {
-    // Drag — unified mouse + touch via pointerDrag utility (defined in main.js)
+    const { dragSensitivity, doubleTapMs } = MIXXS.knob;
+
+    // ── Drag to adjust value ─────────────────────────────────────
+    // Uses absolute start position for smooth, drift-free dragging.
     let _dragStartY = 0, _dragStartVal = 0;
     pointerDrag(
       this.canvas,
       (_x, y) => {
         _dragStartY   = y;
         const n       = this.range.valueAsNumber;
-        _dragStartVal = isNaN(n) ? this.min : n;
+        _dragStartVal = Number.isFinite(n) ? n : this.min;
       },
-      (_x,  y) => {
-        const span  = this.max - this.min;
-        const delta = -(( y - _dragStartY) / 150) * span;
+      (_x, y) => {
+        const delta = -((y - _dragStartY) / dragSensitivity) * (this.max - this.min);
         this.setValue(_dragStartVal + delta);
       },
       () => {}
     );
 
-    // Double-click / double-tap reset
+    // ── Double-click / double-tap to reset to default ────────────
     const defaultVal = parseFloat(this.range.defaultValue ?? this.range.value);
     this.canvas.addEventListener('dblclick', () => this.setValue(defaultVal));
     let _lastTap = 0;
     this.canvas.addEventListener('touchend', e => {
       const now = Date.now();
-      if (now - _lastTap < 300) { e.preventDefault(); this.setValue(defaultVal); }
+      if (now - _lastTap < doubleTapMs) { e.preventDefault(); this.setValue(defaultVal); }
       _lastTap = now;
     });
 
-    // Display input editing
+    // ── Typed input editing ──────────────────────────────────────
+    // Focus → select all. Enter → commit and stay focused.
+    // Escape → revert. Blur → commit. Arrow keys → live update.
     this.display.addEventListener('focus', () => {
       this._editSnapshot = parseFloat(this.range.value);
       this.display.select();
     });
 
     const commit = () => {
-      const displayVal = parseFloat(this.display.value);
-      if (isNaN(displayVal)) { this._cancelEdit(); return; }
-      this.setValue(this.clamp(this.internalFn(displayVal)));
+      const v = parseFloat(this.display.value);
+      if (isNaN(v)) { this._cancelEdit(); return; }
+      this.setValue(this.clamp(this.internalFn(this.display.value)));
       this._editSnapshot = null;
     };
 
     this.display.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') this._arrowActive = true;
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter')  {
         commit();
-        // Stay focused, re-snapshot so next blur is a no-op
-        this._editSnapshot = parseFloat(this.range.value);
+        this._editSnapshot = parseFloat(this.range.value); // re-snapshot so blur is no-op
         this.display.select();
       }
-      if (e.key === 'Escape') { this._cancelEdit(); }
+      if (e.key === 'Escape') this._cancelEdit();
     });
+
     this.display.addEventListener('input', () => {
       if (!this._arrowActive) return;
       this._arrowActive = false;
-      const displayVal = parseFloat(this.display.value);
-      if (!isNaN(displayVal)) this.setValue(this.clamp(this.internalFn(displayVal)));
+      const v = parseFloat(this.display.value);
+      if (!isNaN(v)) this.setValue(this.clamp(this.internalFn(this.display.value)));
     });
+
     this.display.addEventListener('blur', () => {
       if (this._editSnapshot !== null) commit();
     });

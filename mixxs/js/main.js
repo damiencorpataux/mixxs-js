@@ -1,40 +1,65 @@
 // ═══════════════════════════════════════════════════════════════
-//  main.js  —  bootstrap only
+//  main.js  —  shared utilities + bootstrap
 // ═══════════════════════════════════════════════════════════════
 
-// ── Utilities (shared across UI classes) ─────────────────────
-function fmtTime(s) {
-  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
-  return `${m}:${sec.toString().padStart(2, '0')}`;
-}
-const el          = id => document.getElementById(id);
-// Volume knobs: internal 0–100 (percent), displayed as integer
-const pctDisplay  = v  => Math.round(v).toString();
-const pctInternal = d  => Math.max(0, Math.min(100, parseFloat(d)));
+// ── DOM utilities ─────────────────────────────────────────────
+
+/** Shorthand for document.getElementById */
+const el = id => document.getElementById(id);
 
 /**
- * pointerDrag — unified mouse + touch drag helper.
+ * Initialise a range input's min/max/value/defaultValue from a Config entry.
+ * Call this before constructing a Knob so the range is the single source of
+ * truth — the HTML element carries no hardcoded numeric attributes.
  *
- * Attaches mousedown + touchstart to `element`.
- * onStart(x, y)       — pointer down
- * onMove(x, y, dx, dy) — pointer moved
- * onEnd()              — pointer released
- *
- * Mouse moves are tracked on `window` to handle fast drags.
- * Touch moves are tracked on `window` with the same touch identifier.
+ * @param {HTMLInputElement} range  — the <input type="range"> element
+ * @param {object}           cfg    — a MIXXS config object with min/max/default
  */
+function initRange(range, cfg) {
+  range.min          = cfg.min;
+  range.max          = cfg.max;
+  range.value        = cfg.default;
+  range.defaultValue = cfg.default;
+}
+
+/** Format seconds as m:ss */
+function fmtTime(s) {
+  const m   = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+/** Sync a toggle button's .active class to a boolean state */
+function syncToggleBtn(id, active) {
+  document.getElementById(id)?.classList.toggle('active', active);
+}
+
+// ── pointerDrag ───────────────────────────────────────────────
+//
+//  Unified mouse + touch drag helper.
+//  Attaches to `element`; tracks moves on `window` to handle
+//  fast drags that leave the element bounds.
+//
+//  onStart(x, y)        — pointer down
+//  onMove(x, y)         — pointer moved
+//  onEnd()              — pointer released / cancelled
+
 function pointerDrag(element, onStart, onMove, onEnd) {
-  // ── Mouse ──────────────────────────────────────────────────
+  // Mouse
   element.addEventListener('mousedown', e => {
     e.preventDefault();
     onStart(e.clientX, e.clientY);
-    const move = e2 => onMove(e2.clientX, e2.clientY, e2.movementX, e2.movementY);
-    const up   = ()  => { onEnd(); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    const move = e2 => onMove(e2.clientX, e2.clientY);
+    const up   = ()  => {
+      onEnd();
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup',   up);
+    };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup',   up);
   });
 
-  // ── Touch ──────────────────────────────────────────────────
+  // Touch (single finger only — multi-finger handled separately where needed)
   element.addEventListener('touchstart', e => {
     if (e.touches.length !== 1) return;
     e.preventDefault();
@@ -45,7 +70,7 @@ function pointerDrag(element, onStart, onMove, onEnd) {
     const move = e2 => {
       const t = [...e2.changedTouches].find(t => t.identifier === t0.identifier);
       if (!t) return;
-      onMove(t.clientX, t.clientY, t.clientX - lastX, t.clientY - lastY);
+      onMove(t.clientX, t.clientY);
       lastX = t.clientX; lastY = t.clientY;
     };
     const end = () => {
@@ -61,28 +86,32 @@ function pointerDrag(element, onStart, onMove, onEnd) {
 }
 
 // ── Theme ──────────────────────────────────────────────────────
+
 const applyTheme = (light) => {
   document.documentElement.dataset.theme = light ? 'light' : '';
   el('btnTheme').textContent = light ? '🌙' : '☀';
-  try { localStorage.setItem('mixxs-theme', light ? 'light' : 'dark'); } catch(_) {}
-  // Redraw all knob canvases for the new theme
-  document.querySelectorAll('canvas.knob-canvas').forEach(c => {
-    const range = c.nextElementSibling?.type === 'range' ? c.nextElementSibling
-                : c.closest('.knob-widget, .knob-inline')?.querySelector('input[type="range"]');
-    if (range) Knob.draw(c, parseFloat(range.value), parseFloat(range.min), parseFloat(range.max));
-  });
+  try { localStorage.setItem('mixxs-theme', light ? 'light' : 'dark'); } catch (_) {}
+  Knob.redrawAll(); // repaint all knobs for the new theme colors
 };
-try { applyTheme(localStorage.getItem('mixxs-theme') === 'light'); } catch(_) { applyTheme(false); }
+
+try   { applyTheme(localStorage.getItem('mixxs-theme') === 'light'); }
+catch (_) { applyTheme(false); }
 el('btnTheme').addEventListener('click', () =>
   applyTheme(document.documentElement.dataset.theme !== 'light'));
 
 // ── Misc ───────────────────────────────────────────────────────
-if (window.location.protocol === 'file:') el('fileProtocolWarning').style.display = 'block';
+
+// Warn when running from file:// (audio device enumeration is restricted)
+if (window.location.protocol === 'file:')
+  el('fileProtocolWarning').style.display = 'block';
+
+// Prevent the browser from navigating away if a file is dropped outside a deck
 document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('drop',     e => e.preventDefault());
 
 // ── Bootstrap ─────────────────────────────────────────────────
-const mixer    = new MixerController();
-const mixerUI  = new MixerUI(mixer);
-const deck1UI  = new DeckUI(1, mixer);
-const deck2UI  = new DeckUI(2, mixer);
+
+const mixer   = new MixerController();
+const mixerUI = new MixerUI(mixer);
+const deck1UI = new DeckUI(1, mixer);
+const deck2UI = new DeckUI(2, mixer);
