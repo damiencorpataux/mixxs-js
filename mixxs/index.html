@@ -23,20 +23,20 @@
   <div class="logo">MIX<span class="logo-xs">XS</span></div>
 
   <div class="header-center">
-    <span class="master-label">CLICK</span>
-    <button class="btn-transport" id="btnClick" title="Toggle click track">♩</button>
+    <span class="master-label label">CLICK</span>
+    <button class="btn btn-sq btn-amber" id="btnClick" title="Toggle click track">♩</button>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
       <input type="range"  id="clickVol"    step="1">
       <input type="number" id="clickVolVal" step="1" class="knob-val-input">
     </div>
-    <span class="master-label">MASTER</span>
+    <span class="master-label label">MASTER</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
       <input type="range"  id="masterVol"    step="1">
       <input type="number" id="masterVolVal" step="1" class="knob-val-input">
     </div>
-    <span class="master-label">CUE</span>
+    <span class="master-label label">CUE</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
       <input type="range"  id="cueVol"    step="1">
@@ -45,13 +45,13 @@
   </div>
 
   <div class="header-right">
-    <div class="status-inline">
+    <div class="status-inline label">
       <div class="status-item">MASTER <span id="statusMaster">DEFAULT</span></div>
       <div class="status-item">CUE <span id="statusCue">DEFAULT</span></div>
     </div>
-    <button class="btn-settings" id="btnSettings">⚙ DEVICES</button>
-    <button class="btn-export"   id="btnExport">⬇ EXPORT</button>
-    <button class="btn-settings" id="btnTheme" title="Toggle light/dark mode">☀</button>
+    <button class="btn btn-pill btn-ghost btn-amber" id="btnSettings">⚙ DEVICES</button>
+    <button class="btn btn-pill btn-outlined" id="btnExport">⬇ EXPORT</button>
+    <button class="btn btn-pill btn-ghost btn-amber" id="btnTheme" title="Toggle light/dark mode">☀</button>
   </div>
 </header>
 
@@ -65,7 +65,7 @@
       <div class="waveform-header">
         <span class="deck-label">DECK <span class="deck-ab">A</span></span>
         <span class="track-name" id="trackName1">NO TRACK LOADED</span>
-        <button class="btn-load" id="btnLoad1">LOAD ▲</button>
+        <button class="btn btn-pill btn-amber" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
       <div class="waveform-wrap" id="waveWrap1">
@@ -73,7 +73,7 @@
         <div class="waveform-empty" id="waveEmpty1">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading1">
           <span>DECODING…</span>
-          <button class="btn-cancel-load" id="cancelLoad1">CANCEL</button>
+          <button class="btn btn-cancel" id="cancelLoad1">CANCEL</button>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@
       <div class="waveform-header">
         <span class="deck-label">DECK <span class="deck-ab">B</span></span>
         <span class="track-name" id="trackName2">NO TRACK LOADED</span>
-        <button class="btn-load" id="btnLoad2">LOAD ▲</button>
+        <button class="btn btn-pill btn-amber" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
       <div class="waveform-wrap" id="waveWrap2">
@@ -90,7 +90,7 @@
         <div class="waveform-empty" id="waveEmpty2">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading2">
           <span>DECODING…</span>
-          <button class="btn-cancel-load" id="cancelLoad2">CANCEL</button>
+          <button class="btn btn-cancel" id="cancelLoad2">CANCEL</button>
         </div>
       </div>
     </div>
@@ -114,22 +114,23 @@
       </div>
 
       <div class="row transport">
-        <button class="btn-transport"          id="play1"     title="Play / Pause">▶</button>
-        <button class="btn-transport"          id="stop1"     title="Stop">■</button>
-        <button class="btn-transport btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
-        <button class="btn-transport btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
+        <button class="btn btn-sq btn-amber" id="play1"     title="Play / Pause">▶</button>
+        <button class="btn btn-sq btn-amber" id="stop1"     title="Stop">■</button>
+        <button class="btn btn-sq btn-amber btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
+        <button class="btn btn-sq btn-amber btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
         <span class="spacer"></span>
-        <button class="btn-nudge" id="nudgeBack1" title="Back 1 beat">◀</button>
-        <button class="btn-nudge" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="nudgeBack1" title="Back 1 beat">◀</button>
+        <button class="btn btn-sq btn-amber" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
         <input type="number" class="bpm-input" id="bpm1" placeholder="—" step="0.1" readonly title="Detected BPM">
-        <button class="btn-sync" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
+        <button class="btn btn-pill btn-green" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
       </div>
 
       <div class="row deck-bottom-row">
-        <button class="btn-nudge btn-loop" id="loop1"          title="Toggle loop">↻</button>
-        <button class="btn-nudge"          id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
-        <button class="btn-nudge"          id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-green btn-loop" id="loop1"          title="Toggle loop">↻</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
         <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" step="1" title="Loop length in beats">
+        <span class="spacer"></span>
         <input type="range" id="speed1" class="range-hidden">
         <div class="speed-stack">
           <canvas class="knob-canvas knob-speed" id="speedKnob1" width="48" height="48"></canvas>
@@ -150,33 +151,33 @@
         <!-- Channel A (CUE left, EQ/filter/vol right) -->
         <div class="mixer-channel">
           <div class="mixer-ch-header">A</div>
-          <button class="btn-cue btn-cue-round" id="cue1" title="CUE A">CUE</button>
+          <button class="btn btn-circle btn-red" id="cue1" title="CUE A">CUE</button>
           <div class="knob-widget">
-            <div class="knob-label-top">HI</div>
+            <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqHi1"    step="0.1">
             <input type="number" id="eqHiVal1" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top filter-label">FILTER</div>
+            <div class="knob-label-top label filter-label">FILTER</div>
             <canvas class="knob-canvas" id="filterKnob1" width="48" height="48"></canvas>
             <input type="range"  id="filter1"    step="0.01">
             <input type="number" id="filterVal1" step="0.01" class="knob-val-input filter-val">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top">MID</div>
+            <div class="knob-label-top label">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqMid1"    step="0.1">
             <input type="number" id="eqMidVal1" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top">VOL</div>
+            <div class="knob-label-top label">VOL</div>
             <canvas class="knob-canvas" id="volKnob1" width="64" height="64"></canvas>
             <input type="range"  id="vol1"    step="1">
             <input type="number" id="volVal1" step="1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top">LOW</div>
+            <div class="knob-label-top label">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqLow1"    step="0.1">
             <input type="number" id="eqLowVal1" step="0.1" class="knob-val-input">
@@ -189,32 +190,32 @@
         <div class="mixer-channel">
           <div class="mixer-ch-header">B</div>
           <div class="knob-widget">
-            <div class="knob-label-top">HI</div>
+            <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqHi2"    step="0.1">
             <input type="number" id="eqHiVal2" step="0.1" class="knob-val-input">
           </div>
-          <button class="btn-cue btn-cue-round" id="cue2" title="CUE B">CUE</button>
+          <button class="btn btn-circle btn-red" id="cue2" title="CUE B">CUE</button>
           <div class="knob-widget">
-            <div class="knob-label-top">MID</div>
+            <div class="knob-label-top label">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqMid2"    step="0.1">
             <input type="number" id="eqMidVal2" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top filter-label">FILTER</div>
+            <div class="knob-label-top label filter-label">FILTER</div>
             <canvas class="knob-canvas" id="filterKnob2" width="48" height="48"></canvas>
             <input type="range"  id="filter2"    step="0.01">
             <input type="number" id="filterVal2" step="0.01" class="knob-val-input filter-val">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top">LOW</div>
+            <div class="knob-label-top label">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqLow2"    step="0.1">
             <input type="number" id="eqLowVal2" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top">VOL</div>
+            <div class="knob-label-top label">VOL</div>
             <canvas class="knob-canvas" id="volKnob2" width="64" height="64"></canvas>
             <input type="range"  id="vol2"    step="1">
             <input type="number" id="volVal2" step="1" class="knob-val-input">
@@ -244,22 +245,23 @@
       </div>
 
       <div class="row transport">
-        <button class="btn-transport"          id="play2"     title="Play / Pause">▶</button>
-        <button class="btn-transport"          id="stop2"     title="Stop">■</button>
-        <button class="btn-transport btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
-        <button class="btn-transport btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
+        <button class="btn btn-sq btn-amber" id="play2"     title="Play / Pause">▶</button>
+        <button class="btn btn-sq btn-amber" id="stop2"     title="Stop">■</button>
+        <button class="btn btn-sq btn-amber btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
+        <button class="btn btn-sq btn-amber btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
         <span class="spacer"></span>
-        <button class="btn-nudge" id="nudgeBack2" title="Back 1 beat">◀</button>
-        <button class="btn-nudge" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="nudgeBack2" title="Back 1 beat">◀</button>
+        <button class="btn btn-sq btn-amber" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
         <input type="number" class="bpm-input" id="bpm2" placeholder="—" step="0.1" readonly title="Detected BPM">
-        <button class="btn-sync" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
+        <button class="btn btn-pill btn-green" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
       </div>
 
       <div class="row deck-bottom-row">
-        <button class="btn-nudge btn-loop" id="loop2"          title="Toggle loop">↻</button>
-        <button class="btn-nudge"          id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
-        <button class="btn-nudge"          id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-green btn-loop" id="loop2"          title="Toggle loop">↻</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
         <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" step="1" title="Loop length in beats">
+        <span class="spacer"></span>
         <input type="range" id="speed2" class="range-hidden">
         <div class="speed-stack">
           <canvas class="knob-canvas knob-speed" id="speedKnob2" width="48" height="48"></canvas>
@@ -292,8 +294,8 @@
       Requires Chrome / Edge 110+. Connect multiple audio outputs before opening this panel.
     </p>
     <div class="modal-actions">
-      <button class="btn-modal"         id="btnModalClose">CANCEL</button>
-      <button class="btn-modal primary" id="btnModalApply">APPLY</button>
+      <button class="btn btn-pill btn-ghost btn-amber" id="btnModalClose">CANCEL</button>
+      <button class="btn btn-pill btn-outlined" id="btnModalApply">APPLY</button>
     </div>
   </div>
 </div>

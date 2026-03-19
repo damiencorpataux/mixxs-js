@@ -4,6 +4,8 @@
 
 - Remove export feature (it doesn't work the expected way and is not a must have)
 
+- Restore track time display - and update it to elapsed (mm:ss.dd), remaining (mm:ss), total (mm:ss)
+
 - Fix the font used for displaying numbers: the 0,2,3,6,8,9 look too similar and the dot width is too small to be clearly visible
 
 - Fix waveform playhead position is wrong when sliding the speed knob (going to 0 even bring playhead to the very start of the track)
