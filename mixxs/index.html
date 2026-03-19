@@ -20,27 +20,27 @@
 
 <!-- ── HEADER ────────────────────────────────────────────────── -->
 <header>
-  <div class="logo font-display text-amber">MIX<span class="logo-xs text-highlight">XS</span></div>
+  <div class="text-header logo">MIX<span class="text-bright">XS</span></div>
 
   <div class="header-center">
-    <span class="master-label label">CLICK</span>
+    <span class="label">CLICK</span>
     <button class="btn btn-sq btn-amber" id="btnClick" title="Toggle click track">♩</button>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
       <input type="range"  id="clickVol"    step="1">
-      <input type="number" id="clickVolVal" step="1" class="knob-val-input">
+      <input type="number" id="clickVolVal" step="1" class="control-val-input">
     </div>
-    <span class="master-label label">MASTER</span>
+    <span class="label">MASTER</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
       <input type="range"  id="masterVol"    step="1">
-      <input type="number" id="masterVolVal" step="1" class="knob-val-input">
+      <input type="number" id="masterVolVal" step="1" class="control-val-input">
     </div>
-    <span class="master-label label">CUE</span>
+    <span class="label">CUE</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
       <input type="range"  id="cueVol"    step="1">
-      <input type="number" id="cueVolVal" step="1" class="knob-val-input">
+      <input type="number" id="cueVolVal" step="1" class="control-val-input">
     </div>
   </div>
 
@@ -63,8 +63,8 @@
 
     <div class="waveform-row" id="waveformRow1">
       <div class="waveform-header">
-        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">A</span></span>
-        <span class="track-name text-muted" id="trackName1">NO TRACK LOADED</span>
+        <span class="deck-label text-header">DECK <span class="deck-ab text-bright">A</span></span>
+        <span class="track-filename text-muted" id="trackName1">NO TRACK LOADED</span>
         <button class="btn btn-pill btn-amber" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
@@ -73,15 +73,15 @@
         <div class="waveform-empty text-muted" id="waveEmpty1">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading1">
           <span>DECODING…</span>
-          <button class="btn btn-cancel" id="cancelLoad1">CANCEL</button>
+          <button class="btn btn-pill btn-red" id="cancelLoad1">CANCEL</button>
         </div>
       </div>
     </div>
 
     <div class="waveform-row" id="waveformRow2">
       <div class="waveform-header">
-        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">B</span></span>
-        <span class="track-name text-muted" id="trackName2">NO TRACK LOADED</span>
+        <span class="deck-label text-header">DECK <span class="deck-ab text-bright">B</span></span>
+        <span class="track-filename text-muted" id="trackName2">NO TRACK LOADED</span>
         <button class="btn btn-pill btn-amber" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
@@ -90,7 +90,7 @@
         <div class="waveform-empty text-muted" id="waveEmpty2">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading2">
           <span>DECODING…</span>
-          <button class="btn btn-cancel" id="cancelLoad2">CANCEL</button>
+          <button class="btn btn-pill btn-red" id="cancelLoad2">CANCEL</button>
         </div>
       </div>
     </div>
@@ -104,8 +104,8 @@
     <div class="deck-panel" id="deckPanel1">
 
       <div class="deck-top-row">
-        <div class="deck-filename text-muted text-sm" id="deckFilename1">NO TRACK LOADED</div>
-        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">A</span></span>
+        <div class="track-filename text-muted text-sm" id="deckFilename1">NO TRACK LOADED</div>
+        <span class="deck-label text-header">DECK <span class="deck-ab text-bright">A</span></span>
       </div>
 
       <div class="overview-wrap" id="overviewWrap1">
@@ -118,9 +118,9 @@
         <button class="btn btn-sq btn-amber" id="stop1"     title="Stop">■</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
-        <span class="spacer"></span>
         <button class="btn btn-sq btn-amber" id="nudgeBack1" title="Back 1 beat">◀</button>
         <button class="btn btn-sq btn-amber" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
+        <span class="spacer"></span>
         <input type="number" class="bpm-input" id="bpm1" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn btn-pill btn-green" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
       </div>
@@ -150,37 +150,37 @@
 
         <!-- Channel A (CUE left, EQ/filter/vol right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header font-display text-amber">A</div>
+          <div class="mixer-ch-header text-header">A</div>
           <button class="btn btn-circle btn-red" id="cue1" title="CUE A">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqHi1"    step="0.1">
-            <input type="number" id="eqHiVal1" step="0.1" class="knob-val-input">
+            <input type="number" id="eqHiVal1" step="0.1" class="control-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label filter-knob">FILTER</div>
             <canvas class="knob-canvas filter-knob" id="filterKnob1" width="48" height="48"></canvas>
             <input type="range"  id="filter1"    step="0.01">
-            <input type="number" id="filterVal1" step="0.01" class="knob-val-input filter-knob">
+            <input type="number" id="filterVal1" step="0.01" class="control-val-input filter-knob">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqMid1"    step="0.1">
-            <input type="number" id="eqMidVal1" step="0.1" class="knob-val-input">
+            <input type="number" id="eqMidVal1" step="0.1" class="control-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">VOL</div>
             <canvas class="knob-canvas" id="volKnob1" width="64" height="64"></canvas>
             <input type="range"  id="vol1"    step="1">
-            <input type="number" id="volVal1" step="1" class="knob-val-input">
+            <input type="number" id="volVal1" step="1" class="control-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob1" width="48" height="48"></canvas>
             <input type="range"  id="eqLow1"    step="0.1">
-            <input type="number" id="eqLowVal1" step="0.1" class="knob-val-input">
+            <input type="number" id="eqLowVal1" step="0.1" class="control-val-input">
           </div>
         </div>
 
@@ -188,44 +188,44 @@
 
         <!-- Channel B (EQ/filter/vol left, CUE right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header font-display text-amber">B</div>
+          <div class="mixer-ch-header text-header">B</div>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqHi2"    step="0.1">
-            <input type="number" id="eqHiVal2" step="0.1" class="knob-val-input">
+            <input type="number" id="eqHiVal2" step="0.1" class="control-val-input">
           </div>
           <button class="btn btn-circle btn-red" id="cue2" title="CUE B">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top label">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqMid2"    step="0.1">
-            <input type="number" id="eqMidVal2" step="0.1" class="knob-val-input">
+            <input type="number" id="eqMidVal2" step="0.1" class="control-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label filter-knob">FILTER</div>
             <canvas class="knob-canvas filter-knob" id="filterKnob2" width="48" height="48"></canvas>
             <input type="range"  id="filter2"    step="0.01">
-            <input type="number" id="filterVal2" step="0.01" class="knob-val-input filter-knob">
+            <input type="number" id="filterVal2" step="0.01" class="control-val-input filter-knob">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob2" width="48" height="48"></canvas>
             <input type="range"  id="eqLow2"    step="0.1">
-            <input type="number" id="eqLowVal2" step="0.1" class="knob-val-input">
+            <input type="number" id="eqLowVal2" step="0.1" class="control-val-input">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">VOL</div>
             <canvas class="knob-canvas" id="volKnob2" width="64" height="64"></canvas>
             <input type="range"  id="vol2"    step="1">
-            <input type="number" id="volVal2" step="1" class="knob-val-input">
+            <input type="number" id="volVal2" step="1" class="control-val-input">
           </div>
         </div>
 
       </div>
 
       <div class="mixer-xfader">
-        <div class="xfader-labels font-display text-muted"><span>A</span><span>XFADER</span><span>B</span></div>
+        <div class="xfader-labels text-muted"><span>A</span><span>XFADER</span><span>B</span></div>
         <input type="range" id="crossfader" min="0" max="1" step="0.001" value="0.5">
       </div>
 
@@ -234,9 +234,9 @@
     <!-- ── DECK B ─────────────────────────────────────────────── -->
     <div class="deck-panel" id="deckPanel2">
 
-      <div class="deck-top-row deck-top-row--right">
-        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">B</span></span>
-        <div class="deck-filename text-muted text-sm" id="deckFilename2">NO TRACK LOADED</div>
+      <div class="deck-top-row">
+        <div class="track-filename text-muted text-sm" id="deckFilename2">NO TRACK LOADED</div>
+        <span class="deck-label text-header">DECK <span class="deck-ab text-bright">B</span></span>
       </div>
 
       <div class="overview-wrap" id="overviewWrap2">
@@ -249,9 +249,9 @@
         <button class="btn btn-sq btn-amber" id="stop2"     title="Stop">■</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
-        <span class="spacer"></span>
         <button class="btn btn-sq btn-amber" id="nudgeBack2" title="Back 1 beat">◀</button>
         <button class="btn btn-sq btn-amber" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
+        <span class="spacer"></span>
         <input type="number" class="bpm-input" id="bpm2" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn btn-pill btn-green" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
       </div>
@@ -281,7 +281,7 @@
 <!-- ── SETTINGS MODAL ─────────────────────────────────────────── -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-title font-display text-amber">AUDIO DEVICES</div>
+    <div class="modal-title text-header">AUDIO DEVICES</div>
     <div class="modal-field">
       <label>MASTER OUTPUT</label>
       <select id="masterDevice"><option value="">Default Output</option></select>

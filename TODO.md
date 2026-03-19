@@ -18,6 +18,8 @@
 
 - Fix stop button click by accident: remove the button, or ask user confirmation on click on stop desk ?
 
+- Prevent right-click (contextual menu): it messes up the knob pressed state
+
 - In header, group the volume knob, device display (truncated) and device selection button (click on device display) - and remove the button "⚙ DEVICES"
 
 - Knobs bg in light mode: `--knob-body: #e4e4e4;` in `style.css`

@@ -35,12 +35,6 @@
   --font-display: 'Orbitron', monospace;
   --font-mono:    'JetBrains Mono', monospace;
 
-  /* Letter-spacing scale */
-  --ls-sm: 1px;
-  --ls-md: 2px;
-  --ls-lg: 3px;
-  --ls-xl: 4px;
-
   /* Spacing scale */
   --gap-xs: 4px;
   --gap-sm: 6px;
@@ -53,13 +47,8 @@
   --btn-pill-h:   36px;
   --btn-pill-pad: 0 12px;
 
-  /* Text highlight — bright accent used for deck A/B letters and logo accent */
-  --text-highlight: #ffffff;
-
-  /* Knob canvas arc color — overridable per-knob via CSS (read by Knob.draw) */
-  --knob-arc: var(--amber);
-
   /* Knob canvas colors (read by Knob.draw via getComputedStyle) */
+  --knob-arc:         var(--amber);
   --knob-body:        #161616;
   --knob-border:      #303030;
   --knob-track:       rgba(255,255,255,0.08);
@@ -78,8 +67,6 @@
   --text:     #1a1a1a;
   --muted:    #777777;
 
-  --text-highlight: #1a1a1a;
-
   --knob-body:        #b8b8b8;
   --knob-border:      #999999;
   --knob-track:       rgba(0,0,0,0.12);
@@ -91,9 +78,6 @@
 [data-theme="light"] .waveform-wrap,
 [data-theme="light"] canvas.overview-canvas,
 [data-theme="light"] .overview-wrap { background: #e8e8e8; }
-[data-theme="light"] .logo          { text-shadow: 0 0 20px rgba(180,83,9,0.3); }
-[data-theme="light"] .logo .logo-xs { text-shadow: 0 0 10px rgba(0,0,0,0.2); }
-[data-theme="light"] .deck-ab       { text-shadow: none; }
 
 /* ── 3. LAYOUT & TYPOGRAPHY UTILITIES ───────────────────────── */
 
@@ -102,27 +86,23 @@
 .col    { display: flex; flex-direction: column; }
 .spacer { flex: 1; min-width: 0; }
 
-/* Font family */
-.font-display { font-family: var(--font-display); }
+/* Color */
+.text-amber  { color: var(--amber); }
+.text-muted  { color: var(--muted); }
+.text-bright { color: var(--text); }  /* deck A/B letters, logo accent */
 
-/* Color utilities — semantic names for global palette use */
-.text-amber     { color: var(--amber); }
-.text-muted     { color: var(--muted); }
-.text-highlight { color: var(--text-highlight); }  /* deck A/B letter, logo accent */
-
-/* Filter knob — sets both CSS text color and canvas arc color (via --knob-arc) */
-.filter-knob { color: var(--teal); --knob-arc: var(--teal); }
+/* Header text — amber + fixed letter-spacing for all display headings */
+.text-header { color: var(--amber); letter-spacing: 3px; font-family: var(--font-display); }
 
 /* Size — base is 11px (body). Only deviations need a class. */
-.text-sm { font-size: 9px; }   /* labels, knob values */
-.text-lg { font-size: 13px; }  /* BPM display */
+.text-sm { font-size: 9px; }
+.text-lg { font-size: 13px; }
 
-/* Small muted label — most header/knob labels are this combination */
-.label {
-  font-size: 9px;
-  letter-spacing: var(--ls-md);
-  color: var(--muted);
-}
+/* Small muted label */
+.label { font-size: 9px; color: var(--muted); }
+
+/* Filter knob — teal arc color (canvas) + teal text (display input) */
+.filter-knob { color: var(--teal); --knob-arc: var(--teal); }
 
 /* ── 4. BASE ELEMENTS & INPUTS ───────────────────────────────── */
 html { overscroll-behavior: none; height: 100%; }
@@ -137,6 +117,7 @@ body {
   flex-direction: column;
   overflow-x: hidden;
   overscroll-behavior: none;
+  letter-spacing: 1.5px;
 }
 
 input[type="file"]               { display: none; }
@@ -159,7 +140,6 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--amber);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(245,158,11,0.5);
 }
 input[type="range"]::-moz-range-thumb {
   width: 14px; height: 14px;
@@ -172,38 +152,18 @@ input[type="range"]::-moz-range-thumb {
 .control-val-input {
   background: var(--surface);
   border: 1px solid var(--border);
-  color: var(--amber);           /* amber is universal for editable values */
+  color: var(--amber);
   font-family: var(--font-display);
   font-size: 10px;
-  width: 58px;
+  width: 50px;
   padding: 2px 4px;
   text-align: center;
   outline: none;
-  flex-shrink: 0;
   -moz-appearance: textfield;
 }
 .control-val-input::-webkit-outer-spin-button,
 .control-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.control-val-input:focus { border-color: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.2); }
-
-/* Number input — knob display (borderless until focused) */
-.knob-val-input {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--amber);
-  font-family: var(--font-display);
-  font-size: 9px;
-  width: 44px;
-  padding: 2px 0;
-  text-align: center;
-  outline: none;
-  cursor: default;
-  -moz-appearance: textfield;
-  border-radius: 0;
-}
-.knob-val-input::-webkit-outer-spin-button,
-.knob-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.knob-val-input:focus { border-color: var(--amber); background: var(--surface); cursor: text; }
+.control-val-input:focus { border-color: var(--amber); }
 
 /* BPM readonly display */
 .bpm-input {
@@ -218,7 +178,6 @@ input[type="range"]::-moz-range-thumb {
   outline: none;
   -moz-appearance: textfield;
   cursor: default;
-  flex-shrink: 0;
 }
 .bpm-input::-webkit-outer-spin-button,
 .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
@@ -231,33 +190,29 @@ input[type="range"]::-moz-range-thumb {
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: var(--ls-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: border-color .15s, background .15s, color .15s;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Shapes */
 .btn-sq     { width: var(--btn-sq-size); height: var(--btn-sq-size); font-size: var(--btn-sq-font); padding: 0; }
 .btn-pill   { height: var(--btn-pill-h); padding: var(--btn-pill-pad); font-size: 10px; }
-.btn-circle { width: 44px; height: 44px; border-radius: 50%; padding: 0; font-size: 8px; letter-spacing: var(--ls-sm); }
+.btn-circle { width: 44px; height: 44px; border-radius: 50%; padding: 0; font-size: 8px; }
 
 /* Colors */
 .btn-amber:hover  { border-color: var(--amber); color: var(--amber); }
 .btn-amber.active { background: var(--amber); color: #000; border-color: var(--amber); }
 
 .btn-green:hover  { border-color: var(--green); color: var(--green); }
-.btn-green.active { background: var(--green); color: #000; border-color: var(--green);
-                    box-shadow: 0 0 10px rgba(34,197,94,0.4); }
+.btn-green.active { background: var(--green); color: #000; border-color: var(--green); }
 
 .btn-red:hover    { border-color: var(--red); color: var(--red); }
-.btn-red.active   { background: var(--red); color: #fff; border-color: var(--red);
-                    box-shadow: 0 0 12px rgba(239,68,68,0.5); }
+.btn-red.active   { background: var(--red); color: #fff; border-color: var(--red); }
 
 /* Fill variants */
 .btn-outlined { background: transparent; border-color: var(--amber); color: var(--amber); }
@@ -267,20 +222,9 @@ input[type="range"]::-moz-range-thumb {
 .btn-ghost:hover { border-color: var(--border); }
 
 /* Specific modifiers */
-.btn-bend        { font-size: 18px; color: var(--muted); }
+.btn-loop,
+.btn-bend        { font-size: 18px; }
 .btn-bend.active { background: var(--amber-dk); color: var(--amber); }
-.btn-loop        { font-size: 32px; }
-
-.btn-cancel {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  color: rgba(255,255,255,0.6);
-  font-size: 9px;
-  letter-spacing: var(--ls-md);
-  padding: 3px 8px;
-  height: auto;
-}
-.btn-cancel:hover { border-color: var(--red); color: var(--red); }
 
 /* ── 6. HEADER ───────────────────────────────────────────────── */
 header {
@@ -293,26 +237,14 @@ header {
   border-bottom: 1px solid var(--border);
 }
 
-/* Logo — typography via .font-display .text-amber in HTML */
-.logo {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: var(--ls-xl);
-  text-shadow: 0 0 20px rgba(245,158,11,0.4);
-  flex-shrink: 0;
-}
-.logo span    { color: var(--text); font-weight: 400; }
-.logo .logo-xs { color: var(--text-highlight); font-weight: 900; text-shadow: 0 0 14px rgba(255,255,255,0.5); }
+/* Logo — font-weight only; color/ls from .text-header in HTML */
+.logo { font-size: 24px; font-weight: 900; }
 
 .header-center { display: flex; align-items: center; gap: var(--gap-md); flex: 1; justify-content: center; }
-.header-right  { display: flex; align-items: center; gap: var(--gap-sm); flex-shrink: 0; }
-
-.master-label  { flex-shrink: 0; }  /* typography via .label in HTML */
-
+.header-right  { display: flex; align-items: center; gap: var(--gap-sm); }
 .status-inline { display: flex; gap: var(--gap-md); }
 .status-inline .status-item span { color: var(--text); }
-
-.knob-inline { flex-direction: row !important; gap: var(--gap-sm) !important; }
+.knob-inline   { flex-direction: row !important; gap: var(--gap-sm) !important; }
 
 /* ── 7. WAVEFORMS SECTION ────────────────────────────────────── */
 .waveforms-section { display: flex; flex-direction: column; border-bottom: 2px solid var(--amber-dk); }
@@ -329,28 +261,22 @@ header {
   border-bottom: 1px solid var(--border);
 }
 
-/* Deck label — typography via .font-display .text-amber in HTML */
-.deck-label {
-  font-weight: 700;
-  letter-spacing: var(--ls-lg);
-  flex-shrink: 0;
-}
-.deck-ab { font-weight: 900; color: var(--text-highlight); text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+/* Deck label — font-weight only; color/ls from .text-header in HTML */
+.deck-label { font-weight: 700; }
+.deck-ab    { font-weight: 900; }  /* color from .text-bright in HTML */
 
-/* Track name — typography via .text-muted in HTML */
-.track-name {
+.track-filename {
   flex: 1;
-  font-size: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  margin: 0px 12px;
 }
 
 .waveform-wrap { position: relative; background: #0d0d0d; height: 90px; overflow: hidden; cursor: crosshair; }
 canvas.waveform { display: block; width: 100%; height: 100%; touch-action: none; }
 
-/* Empty state text — typography via .text-muted in HTML */
 .waveform-empty,
 .overview-empty {
   position: absolute;
@@ -359,11 +285,9 @@ canvas.waveform { display: block; width: 100%; height: 100%; touch-action: none;
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  letter-spacing: var(--ls-md);
   pointer-events: none;
 }
 
-/* Loading overlay — color inherited from .text-amber on span in HTML */
 .deck-loading {
   display: none;
   position: absolute;
@@ -372,7 +296,6 @@ canvas.waveform { display: block; width: 100%; height: 100%; touch-action: none;
   align-items: center;
   justify-content: center;
   gap: var(--gap-md);
-  letter-spacing: var(--ls-lg);
 }
 .deck-loading.active { display: flex; }
 
@@ -397,28 +320,15 @@ canvas.waveform { display: block; width: 100%; height: 100%; touch-action: none;
 .deck-panel:last-child { border-right: none; border-left: 1px solid var(--border); }
 
 .deck-top-row { display: flex; align-items: center; gap: var(--gap-sm); min-width: 0; overflow: hidden; }
-.deck-top-row--right { flex-direction: row-reverse; }
-
-/* Deck filename — typography via .text-muted .text-sm in HTML */
-.deck-filename {
-  flex: 1;
-  letter-spacing: var(--ls-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.deck-top-row--right .deck-filename { text-align: right; }
 
 .overview-wrap { position: relative; background: #0a0a0a; border: 1px solid var(--border); height: 44px; cursor: crosshair; }
 canvas.overview-canvas { display: block; width: 100%; height: 100%; }
 
-.deck-bottom-row { width: 100%; }
-.loop-beats-input { width: 44px !important; text-align: center; }
+.loop-beats-input.control-val-input { width: 36px; }
 
 .speed-stack { display: flex; align-items: center; gap: var(--gap-xs); }
-.speed-stack-vals { display: flex; flex-direction: column; gap: 2px; }
-.speed-stack-vals .control-val-input { width: 58px; }
+.deck-bottom-row { width: 100%; }
+.speed-stack-vals { display: flex; flex-direction: column; gap: var(--gap-xs); }
 
 /* ── 9. MIXER PANEL ──────────────────────────────────────────── */
 .mixer-panel {
@@ -433,46 +343,30 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   min-width: 170px;
 }
 .mixer-channels { display: flex; align-items: start; width: 100%; justify-content: center; }
-.mixer-divider  { width: 1px; align-self: stretch; background: var(--border); margin: 0 var(--gap-sm); flex-shrink: 0; }
+.mixer-divider  { width: 1px; align-self: stretch; background: var(--border); margin: 0 var(--gap-sm); }
 
 .mixer-channel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap-xs) var(--gap-sm);
+  gap: var(--gap-lg) var(--gap-xs);
   align-items: center;
   justify-items: center;
   flex: 1;
 }
 
-/* Channel header — typography via .font-display .text-amber in HTML */
-.mixer-ch-header {
-  grid-column: 1 / 3;
-  font-weight: 700;
-  letter-spacing: var(--ls-lg);
-  text-align: center;
-  padding: 4px 0 2px;
-}
+/* Channel header — font-weight only; color/ls from .text-header in HTML */
+.mixer-ch-header { grid-column: 1 / 3; font-weight: 700; text-align: center; padding: 4px 0 2px; }
 
-.knob-widget { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.knob-label-top { /* layout hook — typography via .label in HTML */ }
+.knob-widget { display: flex; flex-direction: column; align-items: center; gap: var(--gap-xs); }
+.knob-label-top { /* layout hook only — typography via .label in HTML */ }
 .knob-canvas { display: block; cursor: ns-resize; touch-action: none; }
 
-/* Crossfader */
-.mixer-xfader { display: flex; flex-direction: column; gap: 5px; width: 100%; }
-
-/* Xfader labels — typography via .font-display .text-muted in HTML */
-.xfader-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 8px;
-  letter-spacing: var(--ls-md);
-}
-#crossfader { width: 100%; height: 5px; }
+.mixer-xfader { display: flex; flex-direction: column; gap: var(--gap-sm); width: 100%; }
+.xfader-labels { display: flex; justify-content: space-between; font-size: 8px; }
 #crossfader::-webkit-slider-thumb {
   width: 20px; height: 20px;
   background: var(--text);
   border-radius: 3px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
 /* ── 10. MODAL ───────────────────────────────────────────────── */
@@ -481,10 +375,9 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
 
 .modal { background: var(--panel); border: 1px solid var(--border); padding: 24px; width: 380px; display: flex; flex-direction: column; gap: var(--gap-lg); }
 
-/* Modal title — typography via .font-display .text-amber in HTML */
-.modal-title { letter-spacing: var(--ls-lg); border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 12px; }
-
-.modal-field       { display: flex; flex-direction: column; gap: var(--gap-sm); }
+/* Modal title — font-size only; color/ls from .text-header in HTML */
+.modal-title  { font-size: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.modal-field  { display: flex; flex-direction: column; gap: var(--gap-sm); }
 .modal-field select {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -496,9 +389,7 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   cursor: pointer;
 }
 .modal-field select:focus { border-color: var(--amber); }
-
-/* Modal note — typography via .text-muted .text-sm in HTML */
-.modal-note    { line-height: 1.6; letter-spacing: var(--ls-sm); }
+.modal-note    { line-height: 1.6; }
 .modal-actions { display: flex; gap: var(--gap-sm); justify-content: flex-end; }
 
 /* ── 11. RESPONSIVE ──────────────────────────────────────────── */
@@ -512,7 +403,6 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
 @media (max-width: 700px) {
   header              { padding: 8px 12px; gap: var(--gap-sm); flex-wrap: wrap; }
   .status-inline      { display: none; }
-  .master-label       { display: none; }
   .header-center      { gap: var(--gap-sm); }
   .waveform-wrap      { height: 80px; }
   .controls-section   { display: flex; flex-direction: column; }
@@ -535,18 +425,15 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   }
   header           { padding: 4px 10px; gap: var(--gap-sm); }
   .status-inline   { display: none; }
-  .logo            { font-size: 13px; letter-spacing: var(--ls-md); }
-  .master-label    { font-size: 8px; }
+  .logo            { font-size: 13px; }
   .waveform-wrap   { height: 55px; }
   .waveform-header { padding: 2px 8px; }
   .deck-label      { font-size: 9px; }
-  .track-name      { font-size: 9px; }
-  .deck-panel      { padding: 6px 8px; gap: 5px; }
+  .track-filename  { font-size: 9px; }
+  .deck-panel      { padding: 6px 8px; gap: var(--gap-sm); }
   .overview-wrap   { height: 30px; }
   .bpm-input       { font-size: 11px; width: 52px; }
-  .mixer-panel     { padding: 6px 8px; gap: 5px; min-width: 130px; }
+  .mixer-panel     { padding: 6px 8px; gap: var(--gap-sm); min-width: 130px; }
   .mixer-ch-header { font-size: 9px; padding: 2px 0; }
   .knob-label-top  { font-size: 7px; }
-  .knob-val-input  { font-size: 8px; width: 34px; }
-  .deck-filename   { font-size: 8px; }
 }
