@@ -17,7 +17,7 @@ function fmtTime(s) {
  * value/min/max define current position.
  * Sweep: 270° from 7:30 (min) clockwise to 4:30 (max), 12 o'clock = centre.
  */
-function drawKnob(canvas, value, min, max) {
+function drawKnob(canvas, value, min, max, color = '#f59e0b') {
   const ctx  = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   const cx = W / 2, cy = H / 2;
@@ -58,7 +58,7 @@ function drawKnob(canvas, value, min, max) {
   // Value arc
   ctx.beginPath();
   ctx.arc(cx, cy, r - 6, startA, angle, false);
-  ctx.strokeStyle = '#f59e0b';
+  ctx.strokeStyle = color;
   ctx.lineWidth = 3;
   ctx.stroke();
 
@@ -85,7 +85,7 @@ function drawKnob(canvas, value, min, max) {
  *   - Enter or focusout → apply
  *   - Escape → cancel (restore previous value)
  */
-function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, internalFn) {
+function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, internalFn, color = '#f59e0b') {
   displayFn   = displayFn   || (v => Math.round(v * 100));
   internalFn  = internalFn  || (d => d / 100);
 
@@ -98,7 +98,7 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
     const v = clamp(internalVal);
     rangeInput.value        = v;
     displayInput.value      = displayFn(v);
-    drawKnob(canvas, v, parseFloat(rangeInput.min), parseFloat(rangeInput.max));
+    drawKnob(canvas, v, parseFloat(rangeInput.min), parseFloat(rangeInput.max), color);
     onChange(v);
   };
 
@@ -277,6 +277,20 @@ const dbToLinear = db => {
     );
   });
 });
+// ── Filter effect knobs ───────────────────────────────────────
+const FILTER_COLOR = '#2dd4bf';
+[1, 2].forEach(n => {
+  setupKnob(
+    document.getElementById(`filterKnob${n}`),
+    document.getElementById(`filter${n}`),
+    document.getElementById(`filterVal${n}`),
+    v => mixer[`channel${n}`]?.setFilter(v),
+    v => v.toFixed(2),
+    d => Math.max(-1, Math.min(1, parseFloat(d))),
+    FILTER_COLOR
+  );
+});
+
 // Volume: internal 0..1, display in dB
 setupKnob(
   document.getElementById('volKnob1'),

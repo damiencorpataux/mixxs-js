@@ -207,6 +207,22 @@
         </div>
       </div>
 
+      <!-- Filter effect knobs -->
+      <div class="mixer-filter">
+        <div class="knob-widget">
+          <div class="knob-label-top filter-label">FILTER A</div>
+          <canvas class="knob-canvas knob-filter" id="filterKnob1" width="48" height="48"></canvas>
+          <input type="range" id="filter1" min="-1" max="1" step="0.01" value="0">
+          <input type="number" class="knob-val-input filter-val" id="filterVal1" value="0" min="-1" max="1" step="0.01">
+        </div>
+        <div class="knob-widget">
+          <div class="knob-label-top filter-label">FILTER B</div>
+          <canvas class="knob-canvas knob-filter" id="filterKnob2" width="48" height="48"></canvas>
+          <input type="range" id="filter2" min="-1" max="1" step="0.01" value="0">
+          <input type="number" class="knob-val-input filter-val" id="filterVal2" value="0" min="-1" max="1" step="0.01">
+        </div>
+      </div>
+
       <!-- Volume knobs -->
       <div class="mixer-vols">
         <div class="knob-widget">

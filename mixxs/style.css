@@ -492,6 +492,17 @@ input[type="range"]::-moz-range-thumb {
   gap: 4px;
 }
 
+/* Filter effect */
+.mixer-filter {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+}
+.filter-label { color: #2dd4bf; }
+.knob-filter  { --knob-color: #2dd4bf; }
+.filter-val   { color: #2dd4bf !important; }
+
 /* Volume knobs */
 .mixer-vols {
   display: flex;
