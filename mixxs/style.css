@@ -1,7 +1,24 @@
-/* ── RESET & VARIABLES ──────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   MIXXS — stylesheet
+   Structure:
+     1. Reset & CSS variables
+     2. Light theme overrides
+     3. Layout utilities
+     4. Base elements
+     5. Header
+     6. Waveforms section
+     7. Controls section
+     8. Deck panel
+     9. Mixer panel
+    10. Modal
+    11. Responsive
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. RESET & CSS VARIABLES ────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* Palette */
   --bg:       #080808;
   --panel:    #111111;
   --surface:  #1a1a1a;
@@ -10,13 +27,29 @@
   --amber-dk: #78490a;
   --red:      #ef4444;
   --green:    #22c55e;
+  --teal:     #2dd4bf;
   --text:     #e5e5e5;
   --muted:    #aaaaaa;
+
+  /* Typography */
   --font-display: 'Orbitron', monospace;
   --font-mono:    'JetBrains Mono', monospace;
+
+  /* Spacing scale */
+  --gap-xs: 4px;
+  --gap-sm: 6px;
+  --gap-md: 10px;
+  --gap-lg: 16px;
+
+  /* Knob canvas colors (read by Knob.draw via getComputedStyle) */
+  --knob-body:        #161616;
+  --knob-border:      #303030;
+  --knob-track:       rgba(255,255,255,0.08);
+  --knob-neutral-dot: rgba(255,255,255,0.25);
+  --knob-pointer:     rgba(255,255,255,0.9);
 }
 
-/* ── LIGHT MODE ──────────────────────────────────────────────── */
+/* ── 2. LIGHT THEME ──────────────────────────────────────────── */
 [data-theme="light"] {
   --bg:       #f0f0f0;
   --panel:    #e2e2e2;
@@ -26,26 +59,43 @@
   --amber-dk: #fde68a;
   --text:     #1a1a1a;
   --muted:    #777777;
+
+  --knob-body:        #b8b8b8;
+  --knob-border:      #999999;
+  --knob-track:       rgba(0,0,0,0.12);
+  --knob-neutral-dot: rgba(0,0,0,0.25);
+  --knob-pointer:     rgba(0,0,0,0.8);
 }
 
 [data-theme="light"] canvas.waveform,
 [data-theme="light"] .waveform-wrap,
 [data-theme="light"] canvas.overview-canvas,
-[data-theme="light"] .overview-wrap { background: #e8e8e8; }
+[data-theme="light"] .overview-wrap     { background: #e8e8e8; }
+[data-theme="light"] .logo              { text-shadow: 0 0 20px rgba(180,83,9,0.3); }
+[data-theme="light"] .logo .logo-xs    { text-shadow: 0 0 10px rgba(0,0,0,0.2); color: #333; }
+[data-theme="light"] .deck-ab          { color: #1a1a1a; text-shadow: none; }
 
-[data-theme="light"] .logo { text-shadow: 0 0 20px rgba(180,83,9,0.3); }
-[data-theme="light"] .logo .logo-xs { text-shadow: 0 0 10px rgba(0,0,0,0.2); color: #333; }
-[data-theme="light"] .deck-ab { color: #1a1a1a; text-shadow: none; }
+/* ── 3. LAYOUT UTILITIES ─────────────────────────────────────── */
 
+/* Horizontal flex row, items vertically centred */
+.row     { display: flex; align-items: center; gap: var(--gap-sm); }
+
+/* Vertical flex column */
+.col     { display: flex; flex-direction: column; }
+
+/* Push subsequent siblings to the opposite end */
+.spacer  { flex: 1; min-width: 0; }
+
+/* ── 4. BASE ELEMENTS ────────────────────────────────────────── */
 html {
   overscroll-behavior: none;
   height: 100%;
 }
-
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-mono);
+  font-size: 11px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -53,16 +103,21 @@ body {
   overscroll-behavior: none;
 }
 
-/* ── HEADER ─────────────────────────────────────────────────── */
+input[type="file"]              { display: none; }
+.range-hidden                   { display: none; }
+.knob-widget input[type="range"]{ display: none; }
+
+/* ── 5. HEADER ───────────────────────────────────────────────── */
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  border-bottom: 1px solid var(--border);
+  gap: var(--gap-lg);
   background: var(--panel);
-  gap: 16px;
+  border-bottom: 1px solid var(--border);
 }
+
 .logo {
   font-family: var(--font-display);
   font-size: 18px;
@@ -72,33 +127,32 @@ header {
   text-shadow: 0 0 20px rgba(245,158,11,0.4);
   flex-shrink: 0;
 }
-.logo span { color: var(--text); font-weight: 400; }
+.logo span    { color: var(--text); font-weight: 400; }
 .logo .logo-xs { color: #fff; font-weight: 900; text-shadow: 0 0 14px rgba(255,255,255,0.5); }
 
 .header-center {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--gap-md);
   flex: 1;
   justify-content: center;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex-shrink: 0;
+}
+
 .master-label {
   font-size: 9px;
   letter-spacing: 2px;
   color: var(--muted);
   flex-shrink: 0;
 }
-#masterVol { display: none; }
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
 .status-inline {
   display: flex;
-  gap: 12px;
+  gap: var(--gap-md);
   font-size: 9px;
   letter-spacing: 1px;
   color: var(--muted);
@@ -117,12 +171,12 @@ header {
   transition: all .15s;
   white-space: nowrap;
 }
-.btn-settings:hover { border-color: var(--amber); color: var(--amber); }
-.btn-export { border-color: var(--amber); color: var(--amber); }
-.btn-export:hover { background: var(--amber); color: #000; }
-.btn-export:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-settings:hover            { border-color: var(--amber); color: var(--amber); }
+.btn-export                    { border-color: var(--amber); color: var(--amber); }
+.btn-export:hover              { background: var(--amber); color: #000; }
+.btn-export:disabled           { opacity: 0.3; cursor: not-allowed; }
 
-/* ── WAVEFORMS SECTION ───────────────────────────────────────── */
+/* ── 6. WAVEFORMS SECTION ────────────────────────────────────── */
 .waveforms-section {
   display: flex;
   flex-direction: column;
@@ -138,18 +192,10 @@ header {
 .waveform-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--gap-md);
   padding: 6px 14px;
   background: var(--panel);
   border-bottom: 1px solid var(--border);
-}
-.deck-label {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--amber);
-  flex-shrink: 0;
 }
 .track-name {
   flex: 1;
@@ -158,13 +204,7 @@ header {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.time-display {
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--amber);
-  flex-shrink: 0;
+  min-width: 0;
 }
 .btn-load {
   background: var(--surface);
@@ -180,9 +220,7 @@ header {
   flex-shrink: 0;
 }
 .btn-load:hover { border-color: var(--amber); color: var(--amber); }
-input[type="file"] { display: none; }
 
-/* ── WAVEFORM CANVAS ─────────────────────────────────────────── */
 .waveform-wrap {
   position: relative;
   background: #0d0d0d;
@@ -194,9 +232,10 @@ canvas.waveform {
   display: block;
   width: 100%;
   height: 100%;
-  touch-action: none; /* let JS handle all touch gestures */
+  touch-action: none;
 }
-.waveform-empty {
+.waveform-empty,
+.overview-empty {
   position: absolute;
   inset: 0;
   display: flex;
@@ -207,6 +246,7 @@ canvas.waveform {
   color: var(--muted);
   pointer-events: none;
 }
+
 .deck-loading {
   display: none;
   position: absolute;
@@ -219,6 +259,7 @@ canvas.waveform {
   color: var(--amber);
 }
 .deck-loading.active { display: flex; }
+
 .btn-cancel-load {
   background: none;
   border: 1px solid rgba(255,255,255,0.3);
@@ -227,13 +268,15 @@ canvas.waveform {
   font-size: 9px;
   letter-spacing: 2px;
   padding: 3px 8px;
-  margin-left: 12px;
+  margin-left: var(--gap-md);
   cursor: pointer;
   transition: all .15s;
 }
 .btn-cancel-load:hover { border-color: var(--red); color: var(--red); }
 
-/* ── CONTROLS SECTION ────────────────────────────────────────── */
+.drag-over { outline: 1px solid var(--amber) !important; }
+
+/* ── 7. CONTROLS SECTION ─────────────────────────────────────── */
 .controls-section {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -241,23 +284,76 @@ canvas.waveform {
   min-height: 0;
 }
 
-/* ── DECK PANEL ──────────────────────────────────────────────── */
+/* ── 8. DECK PANEL ───────────────────────────────────────────── */
 .deck-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--gap-md);
   padding: 14px 16px;
   border-right: 1px solid var(--border);
-  min-width: 0;      /* allow grid to shrink below content width */
-  overflow: hidden;  /* clip anything that still overflows */
+  min-width: 0;
+  overflow: hidden;
 }
 .deck-panel:last-child { border-right: none; border-left: 1px solid var(--border); }
 
-/* Transport */
+/* Deck label + filename */
+.deck-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+.deck-ab {
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+.deck-top-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  min-width: 0;
+  overflow: hidden;
+}
+.deck-top-row--right { flex-direction: row-reverse; }
+.deck-filename {
+  flex: 1;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.deck-top-row--right .deck-filename { text-align: right; }
+
+/* Overview strip */
+.overview-wrap {
+  position: relative;
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  height: 44px;
+  cursor: crosshair;
+}
+canvas.overview-canvas { display: block; width: 100%; height: 100%; }
+
+/* Time display */
+.time-display {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+/* Transport row */
 .transport {
   display: flex;
-  gap: 6px;
   align-items: center;
+  gap: var(--gap-sm);
 }
 .btn-transport {
   background: var(--surface);
@@ -275,58 +371,105 @@ canvas.waveform {
 }
 .btn-transport:hover  { border-color: var(--amber); }
 .btn-transport.active { background: var(--amber); color: #000; border-color: var(--amber); }
-.btn-bend { color: var(--muted); font-size: 18px; }
-.btn-bend:hover  { border-color: var(--amber); color: var(--amber); }
-.btn-bend.active { background: var(--amber-dk); border-color: var(--amber); color: var(--amber); }
-.btn-cue {
+.btn-bend             { color: var(--muted); font-size: 18px; }
+.btn-bend:hover       { border-color: var(--amber); color: var(--amber); }
+.btn-bend.active      { background: var(--amber-dk); border-color: var(--amber); color: var(--amber); }
+
+.btn-nudge {
   background: var(--surface);
   border: 1px solid var(--border);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  padding: 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  width: 36px;
   height: 36px;
   cursor: pointer;
-  margin-left: auto;
-  transition: all .15s;
-}
-.btn-cue:hover  { border-color: var(--red); color: var(--red); }
-.btn-cue.active { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 12px rgba(239,68,68,0.5); }
-
-/* Deck controls group */
-.deck-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.control-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.control-label {
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-.slider-row, .btn-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.speed-bpm-labels {
-  display: flex;
-  justify-content: space-between;
-}
-.speed-vals {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  justify-content: center;
+  transition: all .15s;
   flex-shrink: 0;
 }
+.btn-nudge:hover  { border-color: var(--amber); color: var(--amber); }
+.btn-nudge:active { background: var(--amber-dk); }
+
+.btn-loop          { font-size: 16px; }
+.btn-loop.active   { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.15); box-shadow: 0 0 10px rgba(34,197,94,0.3); }
+
+.bpm-input {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+  width: 64px;
+  padding: 3px 6px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+  cursor: default;
+  flex-shrink: 0;
+}
+.bpm-input::-webkit-outer-spin-button,
+.bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.bpm-input::placeholder { color: var(--muted); opacity: 1; }
+
+.btn-sync {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  height: 36px;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-sync:hover  { border-color: var(--green); color: var(--green); }
+.btn-sync.active { background: var(--green); color: #000; border-color: var(--green); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
+
+/* Loop + speed bottom row */
+.deck-bottom-row { width: 100%; }
+
+.loop-beats-input {
+  width: 44px !important;
+  text-align: center;
+}
+
+.speed-stack {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  margin-left: auto;
+}
+.speed-stack-vals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.speed-stack-vals .control-val-input { width: 58px; }
+
+/* Number inputs */
+.control-val-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--amber);
+  font-family: var(--font-display);
+  font-size: 10px;
+  width: 58px;
+  padding: 2px 4px;
+  text-align: center;
+  outline: none;
+  flex-shrink: 0;
+  -moz-appearance: textfield;
+}
+.control-val-input::-webkit-outer-spin-button,
+.control-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.control-val-input:focus { border-color: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.2); }
+
+/* Range inputs */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -355,107 +498,40 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* ── NUMBER INPUTS ───────────────────────────────────────────── */
-.control-val-input {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--amber);
-  font-family: var(--font-display);
-  font-size: 10px;
-  width: 58px;
-  padding: 2px 4px;
-  text-align: center;
-  outline: none;
-  flex-shrink: 0;
-  -moz-appearance: textfield;
-}
-.control-val-input::-webkit-outer-spin-button,
-.control-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.control-val-input:focus { border-color: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.2); }
-
-/* ── BPM + SYNC + NUDGE ──────────────────────────────────────── */
-.bpm-input {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--muted);
-  font-family: var(--font-display);
-  font-size: 13px;
-  width: 64px;
-  padding: 3px 6px;
-  text-align: center;
-  outline: none;
-  -moz-appearance: textfield;
-  cursor: default;
-}
-.bpm-input::-webkit-outer-spin-button,
-.bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.bpm-input::placeholder { color: var(--muted); opacity: 1; }
-
-.btn-sync {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 1px;
-  padding: 4px 8px;
-  cursor: pointer;
-  transition: all .15s;
-  white-space: nowrap;
-}
-.btn-sync:hover { border-color: var(--green); color: var(--green); }
-.btn-sync.active { background: var(--green); color: #000; border-color: var(--green); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
-.deck-bottom-row { width: 100%; }
-.speed-stack {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-.speed-stack-vals {
+/* ── 9. MIXER PANEL ──────────────────────────────────────────── */
+.mixer-panel {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-.speed-stack-vals .control-val-input { width: 58px; }
-.btn-loop { font-size: 16px; }
-.btn-loop.active { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.15); box-shadow: 0 0 10px rgba(34,197,94,0.3); }
-
-.btn-nudge {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all .15s;
-  flex-shrink: 0;
+  gap: var(--gap-md);
+  padding: 14px 20px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  min-width: 170px;
 }
-.btn-nudge:hover  { border-color: var(--amber); color: var(--amber); }
-.btn-nudge:active { background: var(--amber-dk); }
 
-/* ── MIXER CHANNEL GRID ──────────────────────────────────────── */
 .mixer-channels {
   display: flex;
   align-items: start;
   width: 100%;
   justify-content: center;
 }
+.mixer-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  margin: 0 var(--gap-sm);
+  flex-shrink: 0;
+}
 .mixer-channel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 6px;
+  gap: var(--gap-xs) var(--gap-sm);
   align-items: center;
   justify-items: center;
   flex: 1;
 }
-/* Header spans full width */
 .mixer-ch-header {
   grid-column: 1 / 3;
   font-family: var(--font-display);
@@ -466,47 +542,8 @@ input[type="range"]::-moz-range-thumb {
   text-align: center;
   padding: 4px 0 2px;
 }
-/* Vertical divider */
-.mixer-divider {
-  width: 1px;
-  align-self: stretch;
-  background: var(--border);
-  margin: 0 8px;
-  flex-shrink: 0;
-}
-/* Round CUE button */
-.btn-cue-round {
-  width: 44px;
-  height: 44px;
-  border-radius: 50% !important;
-  padding: 0;
-  font-size: 8px;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  align-self: start;
-  margin-top: 18px; /* align with knob canvas, below the label */
-}
-.mixer-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  background: var(--bg);
-  min-width: 170px;
-}
 
-/* Pan knobs row */
-.mixer-pans {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
+/* Knob widget */
 .knob-widget {
   display: flex;
   flex-direction: column;
@@ -518,21 +555,12 @@ input[type="range"]::-moz-range-thumb {
   letter-spacing: 2px;
   color: var(--muted);
 }
+.filter-label { color: var(--teal); }
+
 .knob-canvas {
   display: block;
   cursor: ns-resize;
   touch-action: none;
-}
-
-/* Hidden range input — value store only, never visible */
-.range-hidden { display: none; }
-
-/* Gap between header knob groups */
-.header-label-gap { margin-left: 12px; }
-.knob-canvas:active { cursor: ns-resize; }
-/* Pan range hidden — canvas is the visual */
-.knob-widget input[type="range"] {
-  display: none;
 }
 .knob-val-input {
   background: transparent;
@@ -550,188 +578,49 @@ input[type="range"]::-moz-range-thumb {
 }
 .knob-val-input::-webkit-outer-spin-button,
 .knob-val-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.knob-val-input:focus {
-  border-color: var(--amber);
+.knob-val-input:focus { border-color: var(--amber); background: var(--surface); cursor: text; }
+.filter-val { color: var(--teal) !important; }
+
+/* Knob inline in header */
+.knob-inline { flex-direction: row !important; gap: var(--gap-sm) !important; align-items: center !important; }
+
+/* CUE button */
+.btn-cue {
   background: var(--surface);
-  cursor: text;
-}
-
-/* EQ section */
-.mixer-eq {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  width: 100%;
-}
-.eq-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Filter effect */
-.mixer-filter {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  width: 100%;
-}
-.filter-label { color: #2dd4bf; }
-.knob-filter  { --knob-color: #2dd4bf; }
-.filter-val   { color: #2dd4bf !important; }
-
-/* Volume knobs */
-.mixer-vols {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-.mixer-vols .knob-canvas { width: 56px; height: 56px; }
-
-/* ── OVERVIEW (full-track mini waveform) ─────────────────────── */
-.overview-wrap {
-  position: relative;
-  background: #0a0a0a;
   border: 1px solid var(--border);
-  height: 44px;
-  cursor: crosshair;
-}
-canvas.overview-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.overview-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--text);
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 2px;
-  color: var(--muted);
-  pointer-events: none;
-}
-.deck-panel .time-display {
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--amber);
-  text-align: right;
-}
-
-.drag-over { outline: 1px solid var(--amber) !important; }
-
-/* BPM display with label */
-.bpm-display {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.bpm-label {
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--muted);
-}
-
-/* A/B letter highlight in deck labels */
-.deck-ab {
-  color: #fff;
-  font-weight: 900;
-  text-shadow: 0 0 10px rgba(255,255,255,0.4);
-}
-
-/* Combined label + filename row above overview in deck panel */
-.deck-top-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  overflow: hidden;
-  min-width: 0;
-}
-/* Deck A: filename left, label right */
-.deck-top-row--left  { flex-direction: row; }
-/* Deck B: label left, filename right */
-.deck-top-row--right { flex-direction: row; }
-
-/* Filename in top row: truncate */
-.deck-top-row .deck-filename {
-  flex: 1;
-  padding: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0; /* required for ellipsis in flex child */
-}
-/* Deck B filename is on the right side → right-align text */
-.deck-top-row--right .deck-filename {
-  text-align: right;
-}
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-  padding: 2px 0;
-}
-
-/* Spacer between sync and nudge in transport row */
-.transport-spacer {
-  flex: 1;
-}
-
-/* Master knob inline in header */
-.knob-inline {
-  flex-direction: row !important;
-  gap: 8px !important;
-  align-items: center !important;
-}
-.knob-inline .knob-canvas { width: 40px; height: 40px; cursor: ns-resize; }
-
-/* Detected BPM + time on same row */
-.deck-info-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.deck-info-row .bpm-input {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-/* Sync button inline with transport */
-.btn-sync-transport {
-  margin-left: auto;
+  padding: 0 12px;
   height: 36px;
-  padding: 0 10px;
-  font-size: 9px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-cue:hover  { border-color: var(--red); color: var(--red); }
+.btn-cue.active { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 12px rgba(239,68,68,0.5); }
+
+.btn-cue-round {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 8px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  align-self: start;
+  margin-top: 18px;
 }
 
-/* CUE buttons row */
-.mixer-cues {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
-.mixer-cues .btn-cue {
-  flex: 1;
-  margin-left: 0;
-  padding: 5px 8px;
-  font-size: 9px;
-  text-align: center;
-}
+/* Crossfader */
 .mixer-xfader {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 5px;
+  width: 100%;
 }
 .xfader-labels {
   display: flex;
@@ -749,12 +638,8 @@ canvas.overview-canvas {
   border-radius: 3px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
-#masterVol::-webkit-slider-thumb {
-  width: 12px;
-  height: 12px;
-}
 
-/* ── MODAL ───────────────────────────────────────────────────── */
+/* ── 10. MODAL ───────────────────────────────────────────────── */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -772,7 +657,7 @@ canvas.overview-canvas {
   width: 380px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--gap-lg);
 }
 .modal-title {
   font-family: var(--font-display);
@@ -782,9 +667,9 @@ canvas.overview-canvas {
   border-bottom: 1px solid var(--border);
   padding-bottom: 10px;
 }
-.modal-field { display: flex; flex-direction: column; gap: 6px; }
-.modal-field label { font-size: 10px; letter-spacing: 2px; color: var(--muted); }
-.modal-field select {
+.modal-field         { display: flex; flex-direction: column; gap: var(--gap-sm); }
+.modal-field label   { font-size: 10px; letter-spacing: 2px; color: var(--muted); }
+.modal-field select  {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
@@ -795,8 +680,8 @@ canvas.overview-canvas {
   cursor: pointer;
 }
 .modal-field select:focus { border-color: var(--amber); }
-.modal-note { font-size: 9px; color: var(--muted); letter-spacing: 1px; line-height: 1.6; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-note     { font-size: 9px; color: var(--muted); letter-spacing: 1px; line-height: 1.6; }
+.modal-actions  { display: flex; gap: var(--gap-sm); justify-content: flex-end; }
 .btn-modal {
   background: none;
   border: 1px solid var(--border);
@@ -809,135 +694,61 @@ canvas.overview-canvas {
   transition: all .15s;
 }
 .btn-modal.primary { border-color: var(--amber); color: var(--amber); }
-.btn-modal:hover { opacity: 0.8; }
+.btn-modal:hover   { opacity: 0.8; }
 
+/* ══ 11. RESPONSIVE ══════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── Shared mobile touch targets ─────────────────────────────── */
+/* Touch targets */
 @media (pointer: coarse) {
   .btn-transport, .btn-nudge, .btn-loop, .btn-sync, .btn-cue-round {
     min-width: 44px;
     min-height: 44px;
   }
-  .btn-sync-transport { height: 44px; }
-  .btn-cue { min-height: 36px; }
-  /* Knob drag is fine — touch events handled separately */
+  .btn-sync { min-height: 44px; }
+  .btn-cue  { min-height: 36px; }
 }
 
-/* ── PORTRAIT MOBILE (≤ 700px wide) ──────────────────────────── */
+/* Portrait mobile (≤ 700px) */
 @media (max-width: 700px) {
-
-  /* Header: compress, hide status text */
-  header { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
-  .status-inline { display: none; }
-  .master-label  { display: none; }
-  .header-center { gap: 6px; }
-  .knob-inline .knob-canvas { width: 32px !important; height: 32px !important; }
-  .knob-inline .knob-val-input { width: 36px; font-size: 9px; }
-  .btn-settings, .btn-export { font-size: 8px; padding: 5px 8px; }
-
-  /* Waveforms: taller so they're usable */
-  .waveform-wrap { height: 80px; }
-
-  /* Controls: stack vertically — deck A, mixer, deck B */
-  .controls-section {
-    display: flex;
-    flex-direction: column;
-  }
-  .deck-panel {
-    border-right: none;
-    border-left: none;
-    border-bottom: 1px solid var(--border);
-    padding: 10px 12px;
-    gap: 8px;
-  }
+  header           { padding: 8px 12px; gap: var(--gap-sm); flex-wrap: wrap; }
+  .status-inline   { display: none; }
+  .master-label    { display: none; }
+  .header-center   { gap: var(--gap-sm); }
+  .btn-settings,
+  .btn-export      { font-size: 8px; padding: 5px 8px; }
+  .waveform-wrap   { height: 80px; }
+  .controls-section { display: flex; flex-direction: column; }
+  .deck-panel      { border-right: none; border-left: none; border-bottom: 1px solid var(--border); padding: 10px 12px; gap: var(--gap-sm); }
   .deck-panel:last-child { border-left: none; border-bottom: none; }
-
-  /* Mixer: horizontal layout to save vertical space */
-  .mixer-panel {
-    min-width: unset;
-    padding: 10px 12px;
-    border-left: none;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .mixer-channels { gap: 0; }
-  .mixer-divider { margin: 0 4px; }
-
-  /* Shrink knobs in mixer on portrait */
-  .mixer-channel .knob-canvas { width: 38px !important; height: 38px !important; }
-  .mixer-vols .knob-canvas { width: 44px !important; height: 44px !important; }
-
-  /* Deck top row */
-  .deck-top-row { gap: 4px; }
-  .deck-filename { font-size: 8px; }
-
-  /* Overview */
-  .overview-wrap { height: 36px; }
+  .mixer-panel     { min-width: unset; padding: 10px 12px; border-left: none; border-right: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .overview-wrap   { height: 36px; }
+  .deck-filename   { font-size: 8px; }
 }
 
-/* ── LANDSCAPE MOBILE (≤ 900px wide, short screen) ───────────── */
+/* Landscape mobile (≤ 900px wide, short screen) */
 @media (max-width: 900px) and (max-height: 500px) {
-
-  /* Header: single compact row */
-  header { padding: 4px 10px; gap: 6px; }
-  .status-inline { display: none; }
-  .master-label  { font-size: 8px; }
-  .knob-inline .knob-canvas { width: 28px !important; height: 28px !important; }
-  .knob-inline .knob-val-input { width: 30px; font-size: 8px; }
-  .btn-settings, .btn-export { font-size: 7px; padding: 4px 6px; }
-  .logo { font-size: 13px; letter-spacing: 2px; }
-
-  /* Waveforms: reduce height */
-  .waveform-wrap { height: 55px; }
-  .waveform-header { padding: 2px 8px; }
-  .waveform-header .deck-label { font-size: 9px; }
-  .waveform-header .track-name { font-size: 9px; }
-
-  /* Controls: keep side-by-side grid but tighter */
-  .controls-section { grid-template-columns: 1fr auto 1fr; }
-
-  .deck-panel { padding: 6px 8px; gap: 5px; }
-
-  /* Smaller transport buttons */
-  .btn-transport { width: 32px; height: 32px; font-size: 11px; }
-  .btn-nudge { width: 32px; height: 32px; font-size: 11px; }
-  .btn-sync-transport { height: 32px; font-size: 8px; padding: 0 6px; }
-  .btn-loop { font-size: 13px; }
-
-  /* Overview */
-  .overview-wrap { height: 30px; }
-
-  /* Deck info row */
-  .deck-info-row { gap: 4px; }
-  .bpm-input { font-size: 11px; width: 52px; }
-  .time-display { font-size: 9px; }
-
-  /* Speed/BPM row: hide labels, compress */
-  .speed-bpm-labels { display: none; }
-  .speed-vals .control-val-input { width: 44px; font-size: 9px; }
-
-  /* Loop row: compress */
-  .loop-beats-input { width: 32px !important; }
-  .control-label { font-size: 7px; }
-
-  /* Mixer: tighter */
-  .mixer-panel { padding: 6px 8px; gap: 5px; min-width: 130px; }
-  .mixer-channel .knob-canvas { width: 34px !important; height: 34px !important; }
-  .mixer-vols .knob-canvas { width: 38px !important; height: 38px !important; }
-  .mixer-ch-header { font-size: 9px; padding: 2px 0; }
-  .mixer-divider { margin: 0 4px; }
-  .knob-label-top { font-size: 7px; }
-  .knob-val-input { font-size: 8px; width: 34px; }
-  .mixer-xfader { gap: 4px; }
-  .xfader-labels { font-size: 8px; }
-
-  /* Deck top row */
-  .deck-top-row { gap: 4px; }
-  .deck-filename { font-size: 8px; }
-  .deck-label { font-size: 9px; }
+  header              { padding: 4px 10px; gap: var(--gap-sm); }
+  .status-inline      { display: none; }
+  .logo               { font-size: 13px; letter-spacing: 2px; }
+  .master-label       { font-size: 8px; }
+  .btn-settings,
+  .btn-export         { font-size: 7px; padding: 4px 6px; }
+  .waveform-wrap      { height: 55px; }
+  .waveform-header    { padding: 2px 8px; }
+  .deck-label         { font-size: 9px; }
+  .track-name         { font-size: 9px; }
+  .deck-panel         { padding: 6px 8px; gap: 5px; }
+  .btn-transport      { width: 32px; height: 32px; font-size: 11px; }
+  .btn-nudge          { width: 32px; height: 32px; font-size: 11px; }
+  .btn-sync           { height: 32px; font-size: 8px; padding: 0 6px; }
+  .btn-loop           { font-size: 13px; }
+  .overview-wrap      { height: 30px; }
+  .bpm-input          { font-size: 11px; width: 52px; }
+  .mixer-panel        { padding: 6px 8px; gap: 5px; min-width: 130px; }
+  .mixer-ch-header    { font-size: 9px; padding: 2px 0; }
+  .knob-label-top     { font-size: 7px; }
+  .knob-val-input     { font-size: 8px; width: 34px; }
+  .mixer-xfader       { gap: 4px; }
+  .xfader-labels      { font-size: 8px; }
+  .deck-filename      { font-size: 8px; }
 }

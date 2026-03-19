@@ -81,23 +81,29 @@ class Knob {
     const valueAngle = startAngle + ((value - min) / (max - min)) * sweepAngle;
     const midAngle   = startAngle + 0.5 * sweepAngle; // 12 o'clock
 
-    const light = document.documentElement.dataset.theme === 'light';
+    // Colors from CSS variables — theme switching is handled entirely by CSS
+    const css        = getComputedStyle(canvas);
+    const bodyColor  = css.getPropertyValue('--knob-body').trim();
+    const borderColor = css.getPropertyValue('--knob-border').trim();
+    const trackColor = css.getPropertyValue('--knob-track').trim();
+    const dotColor   = css.getPropertyValue('--knob-neutral-dot').trim();
+    const pointerColor = css.getPropertyValue('--knob-pointer').trim();
 
     ctx.clearRect(0, 0, W, H);
 
     // Body
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle   = light ? '#b8b8b8' : '#161616';
+    ctx.fillStyle   = bodyColor;
     ctx.fill();
-    ctx.strokeStyle = light ? '#999999' : '#303030';
+    ctx.strokeStyle = borderColor;
     ctx.lineWidth   = 1;
     ctx.stroke();
 
     // Full-range track (dim background arc)
     ctx.beginPath();
     ctx.arc(cx, cy, r - 6, startAngle, startAngle + sweepAngle, false);
-    ctx.strokeStyle = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = trackColor;
     ctx.lineWidth   = 3;
     ctx.stroke();
 
@@ -105,7 +111,7 @@ class Knob {
     ctx.beginPath();
     ctx.arc(cx + Math.cos(midAngle) * (r - 3),
             cy + Math.sin(midAngle) * (r - 3), 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = light ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)';
+    ctx.fillStyle = dotColor;
     ctx.fill();
 
     // Value arc (colored)
@@ -119,7 +125,7 @@ class Knob {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(valueAngle) * 4,       cy + Math.sin(valueAngle) * 4);
     ctx.lineTo(cx + Math.cos(valueAngle) * (r - 9), cy + Math.sin(valueAngle) * (r - 9));
-    ctx.strokeStyle = light ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = pointerColor;
     ctx.lineWidth   = 2;
     ctx.lineCap     = 'round';
     ctx.stroke();

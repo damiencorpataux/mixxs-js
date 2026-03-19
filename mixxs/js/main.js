@@ -91,7 +91,9 @@ const applyTheme = (light) => {
   document.documentElement.dataset.theme = light ? 'light' : '';
   el('btnTheme').textContent = light ? '🌙' : '☀';
   try { localStorage.setItem('mixxs-theme', light ? 'light' : 'dark'); } catch (_) {}
-  Knob.redrawAll(); // repaint all knobs for the new theme colors
+  // Repaint knob canvases — CSS variables update automatically,
+  // but canvas pixels need an explicit redraw.
+  Knob.redrawAll();
 };
 
 try   { applyTheme(localStorage.getItem('mixxs-theme') === 'light'); }
