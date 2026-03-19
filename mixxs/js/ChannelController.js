@@ -40,7 +40,7 @@ class ChannelController {
     this.filter.Q.value = 0.7;
 
     this.fader  = ctx.createGain();
-    this.fader.gain.value = 0.8;
+    this.fader.gain.value = 0.8;  // 80% default
 
     this.panner = ctx.createStereoPanner();
     this.panner.pan.value = 0;
