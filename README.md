@@ -15,8 +15,11 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 **Decks**
 - Two independent decks — load any local audio file (MP3, WAV, FLAC, OGG…)
 - Drag & drop files onto the deck, waveform, or anywhere on the deck surface
-- Zoomable spectral waveform (scroll to zoom 0.5×–64×) with centered playhead and beat grid markers
-- Full-track overview waveform with moving playhead
+- Zoomable spectral waveform with centered playhead and beat grid markers
+  - Scroll wheel or pinch to zoom (0.5×–64×)
+  - Click/drag or touch/drag to scratch (mutes and seeks silently)
+  - Hold without moving to pause; release to resume
+- Full-track overview waveform — click or tap to seek
 - BPM auto-detection — detected tempo displayed read-only per deck
 - Playback speed control with current BPM display (editable)
 - Momentary ±4% pitch bend buttons (hold to bend, release to restore)
@@ -26,7 +29,7 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 
 **Mixer**
 - 3-band EQ per channel (High / Mid / Low, ±12 dB)
-- Filter effect per channel (lowpass ↔ highpass sweep)
+- Filter effect per channel (lowpass ↔ highpass sweep, teal knob)
 - Per-channel volume knob (dB)
 - Equal-power crossfader
 - CUE / headphone pre-listen per channel
@@ -35,11 +38,19 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 
 **Waveform colors**
 - Spectral coloring: bass energy → red, treble energy → blue
-- Upcoming (right of playhead) = bright; already played (left) = dimmed
+- Upcoming (right of playhead) = bright; already played (left) = dimmed at 75%
+- Overview stays monochrome for readability
 
 **Routing & Export**
 - Dual audio output — send master and cue to separate physical devices
 - Export mix to WAV (bakes in current gain, EQ, crossfader state)
+
+**Mobile & touch**
+- All knobs support touch drag and double-tap to reset
+- Waveform pinch-to-zoom with 50ms delay to distinguish from scratch
+- Hold-to-pause and drag-to-scratch on waveform view
+- Tap-to-seek on overview waveform
+- Pull-to-refresh disabled
 
 ---
 
@@ -99,13 +110,23 @@ FileLoader → AudioBuffer
 ### UI layer
 
 ```
-main.js  (bootstrap only)
+main.js  (33 lines — bootstrap only)
   ├── MixerController   audio orchestrator — fires CustomEvents, zero DOM access
   ├── MixerUI           mixer panel: EQ/filter/vol knobs, crossfader, CUE, header knobs,
-  │                     waveform seek/zoom, export button, settings modal
+  │                     waveform scratch/zoom/pinch, export button, settings modal
   ├── DeckUI × 2        per-deck wiring: file load, transport, bend, speed/BPM, loop
   └── Knob              reusable rotary knob widget (canvas + range + number input)
+                        supports mouse drag, touch drag, double-click/double-tap reset
 ```
+
+### Shared utilities
+
+| Utility | Location | Description |
+|---|---|---|
+| `pointerDrag(el, onStart, onMove, onEnd)` | `main.js` | Unified mouse + touch drag — tracks by touch identifier, moves on `window` |
+| `syncToggleBtn(id, active)` | `DeckUI.js` | Syncs a button's `active` CSS class to a boolean state |
+| `fmtTime(s)` | `main.js` | Formats seconds as `m:ss` |
+| `linearToDb(v)` / `dbToLinear(db)` | `main.js` | dB ↔ linear gain conversion |
 
 ### Component reference
 
@@ -129,17 +150,17 @@ main.js  (bootstrap only)
 |---|---|---|
 | `WaveformRenderer.js` | `WaveformBase` | Shared state, IIR spectral analysis, color palette, draw primitives |
 | | `WaveformView` | Zoomable CDJ-style view: centered playhead, beat grid, spectral colors, loop overlay, hatch pattern |
-| | `WaveformOverview` | Full-track strip: monochrome, moving playhead, loop overlay |
+| | `WaveformOverview` | Full-track strip: monochrome, moving playhead, loop overlay, tap-to-seek |
 
 #### Orchestration & UI
 
 | File | Class | Responsibility |
 |---|---|---|
-| `MixerController.js` | `MixerController` | Audio graph init, file loading, transport, CUE, loop, BPM sync, RAF loop — fires `mixxs:*` events |
-| `Knob.js` | `Knob` | Rotary knob: drag, double-click reset, arrow keys, typed input |
+| `MixerController.js` | `MixerController` | Audio graph init, file loading, transport, CUE, loop, BPM sync, scratch, RAF loop — fires `mixxs:*` events |
+| `Knob.js` | `Knob` | Rotary knob: mouse/touch drag, double-click/tap reset, arrow keys, typed input |
 | `DeckUI.js` | `DeckUI` | Per-deck DOM wiring + `mixxs:*` event listeners |
-| `MixerUI.js` | `MixerUI` | Mixer panel wiring: knobs, CUE, crossfader, click track, export, settings modal |
-| `main.js` | — | Bootstrap: instantiates `MixerController`, `MixerUI`, two `DeckUI`s |
+| `MixerUI.js` | `MixerUI` | Mixer panel wiring: knobs, CUE, crossfader, waveform scratch/pinch/zoom, export, settings modal |
+| `main.js` | — | Bootstrap: utilities, theme, instantiates `MixerController`, `MixerUI`, two `DeckUI`s |
 
 ---
 
@@ -155,7 +176,7 @@ main.js  (bootstrap only)
 | `mixxs:speedupdate` | `{ deckNum, rate }` | SYNC sets a new playback rate |
 | `mixxs:loopstate` | `{ deckNum, active }` | Loop toggled on or off, or reset on file load |
 | `mixxs:cuestate` | `{ deckNum, active }` | CUE toggled on or off |
-| `mixxs:loadprogress` | `{ deckNum, label, active, onCancel? }` | Loading overlay should show/hide — `onCancel` is a callback wired to the cancel button |
+| `mixxs:loadprogress` | `{ deckNum, label, active, onCancel? }` | Loading overlay should show/hide |
 | `mixxs:loadend` | `{ deckNum, filename }` | File decoded and rendered successfully |
 | `mixxs:exportstate` | `{ busy }` | Export started (`busy: true`) or finished (`busy: false`) |
 
@@ -163,22 +184,21 @@ main.js  (bootstrap only)
 
 ## Browser Support
 
-| Browser | Playback | Dual output |
-|---|---|---|
-| Chrome 110+ | ✅ | ✅ |
-| Edge 110+ | ✅ | ✅ |
-| Firefox | ✅ | ⚠️ partial |
-| Safari | ✅ | ❌ |
+| Browser | Playback | Dual output | Touch |
+|---|---|---|---|
+| Chrome 110+ | ✅ | ✅ | ✅ |
+| Edge 110+ | ✅ | ✅ | ✅ |
+| Firefox | ✅ | ⚠️ partial | ✅ |
+| Safari | ✅ | ❌ | ✅ |
 
 ---
 
 ## Roadmap
 
-- [ ] Mobile touch support (knob drag, pinch-to-zoom waveform)
-- [ ] 3rd and 4th deck support
 - [ ] Hot cues
 - [ ] Auto BPM phase sync
 - [ ] Beat phase lock (continuous)
+- [ ] 3rd and 4th deck support
 
 ---
 
