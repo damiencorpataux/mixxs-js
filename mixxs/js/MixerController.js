@@ -152,7 +152,7 @@ class MixerController {
 
   toggleCue(deckNum) {
     const channel = deckNum === 1 ? this.channel1 : this.channel2;
-    if (!channel) return;
+    if (!channel) { this._init(); return; } // init audio context but allow toggle
     const active = !this._cueState[deckNum];
     this._cueState[deckNum] = active;
     channel.setCue(active);

@@ -150,7 +150,12 @@ class Knob {
 
     this.display.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') this._arrowActive = true;
-      if (e.key === 'Enter')  { commit(); this.display.blur(); }
+      if (e.key === 'Enter') {
+        commit();
+        // Stay focused, re-snapshot so next blur is a no-op
+        this._editSnapshot = parseFloat(this.range.value);
+        this.display.select();
+      }
       if (e.key === 'Escape') { this._cancelEdit(); }
     });
     this.display.addEventListener('input', () => {

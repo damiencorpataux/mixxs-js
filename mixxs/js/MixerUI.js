@@ -21,7 +21,10 @@ class MixerUI {
 
   _wireCue() {
     [1, 2].forEach(n =>
-      el(`cue${n}`).addEventListener('click', () => this.mixer.toggleCue(n)));
+      el(`cue${n}`).addEventListener('click', () => {
+        this.mixer._init();
+        this.mixer.toggleCue(n);
+      }));
   }
 
   // ── Crossfader ────────────────────────────────────────────────

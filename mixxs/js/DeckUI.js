@@ -117,7 +117,7 @@ class DeckUI {
     let _spdArrow = false;
     spdInput.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _spdArrow = true;
-      if (e.key === 'Enter')  { spdInput.blur(); }
+      if (e.key === 'Enter')  { applySpeed(parseFloat(spdInput.value) || 1); spdInput.select(); }
       if (e.key === 'Escape') { spdInput.value = parseFloat(spdSlider.value).toFixed(3); spdInput.blur(); }
     });
     spdInput.addEventListener('input', () => {
@@ -129,7 +129,12 @@ class DeckUI {
     let _bpmArrow = false;
     currentBpmEl.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _bpmArrow = true;
-      if (e.key === 'Enter')  { currentBpmEl.blur(); }
+      if (e.key === 'Enter') {
+        const typed = parseFloat(currentBpmEl.value);
+        const bpm   = mixer[`deck${n}`]?.bpm;
+        if (!isNaN(typed) && bpm) applySpeed(typed / bpm);
+        currentBpmEl.select();
+      }
       if (e.key === 'Escape') {
         const bpm = mixer[`deck${n}`]?.bpm;
         if (bpm) currentBpmEl.value = (bpm * parseFloat(spdSlider.value)).toFixed(1);
