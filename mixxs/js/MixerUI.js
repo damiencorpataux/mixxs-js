@@ -104,6 +104,15 @@ class MixerUI {
         mixer.syncZoom(n);
       }, { passive: false });
 
+      // ── Double-click: seek ────────────────────────────────────
+      canvas.addEventListener('dblclick', e => {
+        const deck = mixer[`deck${n}`];
+        const wf   = mixer[`waveform${n}`];
+        if (!deck?.buffer || !wf) return;
+        const rect = canvas.getBoundingClientRect();
+        deck.seek(wf.getTimeAtX(e.clientX - rect.left, deck.getCurrentTime()));
+      });
+
       // ── Mouse: immediate scratch ──────────────────────────────
       let _lastX = 0, _isDragging = false;
       canvas.addEventListener('mousedown', e => {
@@ -133,6 +142,7 @@ class MixerUI {
       let _touches = {}, _pinchDist0 = null, _zoom0 = null, _pinching = false;
       let _touchScratchId = null, _scratchTimer = null, _touchLastX = 0;
       let _touchDragging = false;
+      let _lastTap = 0; // for double-tap detection
 
       const _cancelScratchTimer = () => {
         if (_scratchTimer) { clearTimeout(_scratchTimer); _scratchTimer = null; }
@@ -195,6 +205,19 @@ class MixerUI {
         if (e.touches.length === 0) {
           _cancelScratchTimer();
           if (_touchDragging) { mixer.scratchEnd(n); _touchDragging = false; }
+
+          // Double-tap → seek
+          const now = Date.now();
+          if (now - _lastTap < 300 && e.changedTouches.length === 1) {
+            const t    = e.changedTouches[0];
+            const deck = mixer[`deck${n}`];
+            const wf   = mixer[`waveform${n}`];
+            if (deck?.buffer && wf) {
+              const rect = canvas.getBoundingClientRect();
+              deck.seek(wf.getTimeAtX(t.clientX - rect.left, deck.getCurrentTime()));
+            }
+          }
+          _lastTap = now;
         }
       });
       canvas.addEventListener('touchcancel', () => {
