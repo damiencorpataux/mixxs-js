@@ -237,11 +237,11 @@ class MixerController {
     const overview = deckNum === 1 ? this.overview1 : this.overview2;
     overview.setBeatGrid(result);
     // Round to 2 decimals for display only — grid uses full float precision
-    document.getElementById(`bpm${deckNum}`).value = result.bpm.toFixed(2);
+    document.getElementById(`bpm${deckNum}`).value = result.bpm.toFixed(1);
     // Current BPM = detected × current speed (speed is 1.0 at load time)
     const speed = parseFloat(document.getElementById(`speed${deckNum}`)?.value || 1);
     const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
-    if (currentBpmEl) currentBpmEl.value = (result.bpm * speed).toFixed(2);
+    if (currentBpmEl) currentBpmEl.value = (result.bpm * speed).toFixed(1);
     return result;
   }
 
@@ -276,7 +276,7 @@ class MixerController {
     document.getElementById(`speed${deckNum}`).value    = rate;
     document.getElementById(`speedVal${deckNum}`).value = rate.toFixed(3);
     const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
-    if (currentBpmEl && thisDeck.bpm) currentBpmEl.value = (thisDeck.bpm * rate).toFixed(2);
+    if (currentBpmEl && thisDeck.bpm) currentBpmEl.value = (thisDeck.bpm * rate).toFixed(1);
   }
 
   // ── Export ────────────────────────────────────────────────────

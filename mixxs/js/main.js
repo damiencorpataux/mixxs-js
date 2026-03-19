@@ -17,7 +17,7 @@ function fmtTime(s) {
  * value/min/max define current position.
  * Sweep: 270° from 7:30 (min) clockwise to 4:30 (max), 12 o'clock = centre.
  */
-function drawKnob(canvas, value, min, max) {
+function drawKnob(canvas, value, min, max, color = '#f59e0b') {
   const ctx  = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   const cx = W / 2, cy = H / 2;
@@ -58,7 +58,7 @@ function drawKnob(canvas, value, min, max) {
   // Value arc
   ctx.beginPath();
   ctx.arc(cx, cy, r - 6, startA, angle, false);
-  ctx.strokeStyle = '#f59e0b';
+  ctx.strokeStyle = color;
   ctx.lineWidth = 3;
   ctx.stroke();
 
@@ -85,7 +85,7 @@ function drawKnob(canvas, value, min, max) {
  *   - Enter or focusout → apply
  *   - Escape → cancel (restore previous value)
  */
-function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, internalFn) {
+function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, internalFn, color = '#f59e0b') {
   displayFn   = displayFn   || (v => Math.round(v * 100));
   internalFn  = internalFn  || (d => d / 100);
 
@@ -98,7 +98,7 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
     const v = clamp(internalVal);
     rangeInput.value        = v;
     displayInput.value      = displayFn(v);
-    drawKnob(canvas, v, parseFloat(rangeInput.min), parseFloat(rangeInput.max));
+    drawKnob(canvas, v, parseFloat(rangeInput.min), parseFloat(rangeInput.max), color);
     onChange(v);
   };
 
@@ -126,21 +126,12 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
 
   // ── Editable display input ────────────────────────────────────
   displayInput.addEventListener('focus', () => {
-    editSnapshot = parseFloat(rangeInput.value); // save for Escape
+    editSnapshot = parseFloat(rangeInput.value);
     displayInput.select();
-  });
-
-  // Arrow keys apply immediately without waiting for blur
-  displayInput.addEventListener('input', () => {
-    const raw = displayInput.value;
-    if (raw === '-∞' || raw === '-Infinity') return;
-    const displayVal = parseFloat(raw);
-    if (!isNaN(displayVal)) apply(clamp(internalFn(displayVal)));
   });
 
   const commit = () => {
     const raw = displayInput.value;
-    // Handle -∞ display value (volume at 0)
     if (raw === '-∞' || raw === '-Infinity') { apply(parseFloat(rangeInput.min)); editSnapshot = null; return; }
     const displayVal  = parseFloat(raw);
     if (isNaN(displayVal)) { cancel(); return; }
@@ -156,9 +147,20 @@ function setupKnob(canvas, rangeInput, displayInput, onChange, displayFn, intern
     displayInput.blur();
   };
 
+  // Arrow keys on number inputs: apply immediately only when triggered by arrows
+  let _arrowActive = false;
   displayInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _arrowActive = true;
     if (e.key === 'Enter')  { commit(); displayInput.blur(); }
     if (e.key === 'Escape') { cancel(); }
+  });
+  displayInput.addEventListener('input', () => {
+    if (!_arrowActive) return;
+    _arrowActive = false;
+    const raw = displayInput.value;
+    if (raw === '-∞' || raw === '-Infinity') return;
+    const displayVal = parseFloat(raw);
+    if (!isNaN(displayVal)) apply(clamp(internalFn(displayVal)));
   });
 
   displayInput.addEventListener('blur', () => {
@@ -277,6 +279,20 @@ const dbToLinear = db => {
     );
   });
 });
+// ── Filter effect knobs ───────────────────────────────────────
+const FILTER_COLOR = '#2dd4bf';
+[1, 2].forEach(n => {
+  setupKnob(
+    document.getElementById(`filterKnob${n}`),
+    document.getElementById(`filter${n}`),
+    document.getElementById(`filterVal${n}`),
+    v => mixer[`channel${n}`]?.setFilter(v),
+    v => v.toFixed(2),
+    d => Math.max(-1, Math.min(1, parseFloat(d))),
+    FILTER_COLOR
+  );
+});
+
 // Volume: internal 0..1, display in dB
 setupKnob(
   document.getElementById('volKnob1'),
@@ -309,42 +325,51 @@ setupKnob(
     // Update current BPM display
     const detectedBpm = mixer[`deck${n}`]?.bpm;
     if (detectedBpm && currentBpmEl) {
-      currentBpmEl.value = (detectedBpm * v).toFixed(2);
+      currentBpmEl.value = (detectedBpm * v).toFixed(1);
     }
   };
 
   spdSlider.addEventListener('input', () => applySpeed(parseFloat(spdSlider.value)));
 
-  spdInput.addEventListener('input', () => applySpeed(parseFloat(spdInput.value) || 1));
-  spdInput.addEventListener('blur', () => {
-    applySpeed(parseFloat(spdInput.value) || 1);
-  });
+  let _spdArrow = false;
   spdInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _spdArrow = true;
     if (e.key === 'Enter')  { spdInput.blur(); }
     if (e.key === 'Escape') { spdInput.value = parseFloat(spdSlider.value).toFixed(3); spdInput.blur(); }
   });
+  spdInput.addEventListener('input', () => {
+    if (!_spdArrow) return;
+    _spdArrow = false;
+    applySpeed(parseFloat(spdInput.value) || 1);
+  });
+  spdInput.addEventListener('blur', () => { applySpeed(parseFloat(spdInput.value) || 1); });
 
-  // Current BPM input: editing sets speed = typed / detectedBpm
+  let _bpmArrow = false;
+  currentBpmEl.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') _bpmArrow = true;
+  });
   currentBpmEl.addEventListener('input', () => {
-    const typed      = parseFloat(currentBpmEl.value);
+    if (!_bpmArrow) return;
+    _bpmArrow = false;
+    const typed = parseFloat(currentBpmEl.value);
     const detectedBpm = mixer[`deck${n}`]?.bpm;
     if (!isNaN(typed) && detectedBpm) applySpeed(typed / detectedBpm);
   });
   currentBpmEl.addEventListener('blur', () => {
-    const typed       = parseFloat(currentBpmEl.value);
+    const typed = parseFloat(currentBpmEl.value);
     const detectedBpm = mixer[`deck${n}`]?.bpm;
     if (!isNaN(typed) && detectedBpm) {
       applySpeed(typed / detectedBpm);
     } else {
-      const detectedBpm2 = mixer[`deck${n}`]?.bpm;
-      if (detectedBpm2) currentBpmEl.value = (detectedBpm2 * parseFloat(spdSlider.value)).toFixed(2);
+      const d = mixer[`deck${n}`]?.bpm;
+      if (d) currentBpmEl.value = (d * parseFloat(spdSlider.value)).toFixed(1);
     }
   });
   currentBpmEl.addEventListener('keydown', e => {
     if (e.key === 'Enter')  { currentBpmEl.blur(); }
     if (e.key === 'Escape') {
-      const detectedBpm = mixer[`deck${n}`]?.bpm;
-      if (detectedBpm) currentBpmEl.value = (detectedBpm * parseFloat(spdSlider.value)).toFixed(2);
+      const d = mixer[`deck${n}`]?.bpm;
+      if (d) currentBpmEl.value = (d * parseFloat(spdSlider.value)).toFixed(1);
       currentBpmEl.blur();
     }
   });
