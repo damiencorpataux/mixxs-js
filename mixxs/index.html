@@ -26,20 +26,20 @@
     <button class="btn-transport" id="btnClick" title="Toggle click track">♩</button>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
-      <input type="range" id="clickVol" min="0" max="1" step="0.01" value="0.5">
-      <input type="number" class="knob-val-input" id="clickVolVal" min="-60" max="0" step="0.1" value="-6.0">
+      <input type="range" id="clickVol" min="0" max="100" step="1" value="50">
+      <input type="number" class="knob-val-input" id="clickVolVal" min="0" max="100" step="1" value="50">
     </div>
     <span class="master-label" style="margin-left:12px">MASTER</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="masterKnob" width="40" height="40"></canvas>
-      <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8">
-      <input type="number" class="knob-val-input" id="masterVolVal" min="-60" max="0" step="0.1" value="-1.9">
+      <input type="range" id="masterVol" min="0" max="100" step="1" value="80">
+      <input type="number" class="knob-val-input" id="masterVolVal" min="0" max="100" step="1" value="80">
     </div>
     <span class="master-label" style="margin-left:12px">CUE</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
-      <input type="range" id="cueVol" min="0" max="1" step="0.01" value="0.9">
-      <input type="number" class="knob-val-input" id="cueVolVal" min="-60" max="0" step="0.1" value="-0.9">
+      <input type="range" id="cueVol" min="0" max="100" step="1" value="90">
+      <input type="number" class="knob-val-input" id="cueVolVal" min="0" max="100" step="1" value="90">
     </div>
   </div>
   <div class="header-right">
@@ -152,8 +152,8 @@
           <div class="knob-widget">
             <div class="knob-label-top">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqHi1" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqHiVal1" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqHi1" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqHiVal1" value="0" min="-12" max="12" step="0.1">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top filter-label">FILTER</div>
@@ -164,20 +164,20 @@
           <div class="knob-widget">
             <div class="knob-label-top">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqMid1" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqMidVal1" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqMid1" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqMidVal1" value="0" min="-12" max="12" step="0.1">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">VOL</div>
             <canvas class="knob-canvas" id="volKnob1" width="64" height="64"></canvas>
-            <input type="range" id="vol1" min="0" max="1" step="0.01" value="0.8">
-            <input type="number" class="knob-val-input" id="volVal1" value="-1.9" min="-60" max="0" step="0.1">
+            <input type="range" id="vol1" min="0" max="100" step="1" value="80">
+            <input type="number" class="knob-val-input" id="volVal1" value="80" min="0" max="100" step="1">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob1" width="48" height="48"></canvas>
-            <input type="range" id="eqLow1" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqLowVal1" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqLow1" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqLowVal1" value="0" min="-12" max="12" step="0.1">
           </div>
         </div>
 
@@ -190,15 +190,15 @@
           <div class="knob-widget">
             <div class="knob-label-top">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqHi2" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqHiVal2" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqHi2" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqHiVal2" value="0" min="-12" max="12" step="0.1">
           </div>
           <button class="btn-cue btn-cue-round" id="cue2" title="CUE B">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top">MID</div>
             <canvas class="knob-canvas" id="eqMidKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqMid2" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqMidVal2" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqMid2" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqMidVal2" value="0" min="-12" max="12" step="0.1">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top filter-label">FILTER</div>
@@ -209,14 +209,14 @@
           <div class="knob-widget">
             <div class="knob-label-top">LOW</div>
             <canvas class="knob-canvas" id="eqLowKnob2" width="48" height="48"></canvas>
-            <input type="range" id="eqLow2" min="-12" max="12" step="0.5" value="0">
-            <input type="number" class="knob-val-input" id="eqLowVal2" value="0" min="-12" max="12" step="0.5">
+            <input type="range" id="eqLow2" min="-12" max="12" step="0.1" value="0">
+            <input type="number" class="knob-val-input" id="eqLowVal2" value="0" min="-12" max="12" step="0.1">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top">VOL</div>
             <canvas class="knob-canvas" id="volKnob2" width="64" height="64"></canvas>
-            <input type="range" id="vol2" min="0" max="1" step="0.01" value="0.8">
-            <input type="number" class="knob-val-input" id="volVal2" value="-1.9" min="-60" max="0" step="0.1">
+            <input type="range" id="vol2" min="0" max="100" step="1" value="80">
+            <input type="number" class="knob-val-input" id="volVal2" value="80" min="0" max="100" step="1">
           </div>
         </div>
 

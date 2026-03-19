@@ -48,7 +48,7 @@ class MixerUI {
         canvas: el(knob), range: el(range), display: el(val),
         onChange:   v => mixer[`channel${n}`]?.setEq(band, v),
         displayFn:  v => v.toFixed(1),
-        internalFn: d => parseFloat(d),
+        internalFn: d => Math.max(-12, Math.min(12, parseFloat(d))),
       }));
 
       // Filter
@@ -60,12 +60,12 @@ class MixerUI {
         color: '#2dd4bf',
       });
 
-      // Volume
+      // Volume — 0–100%, audio gets v/100
       new Knob({
         canvas: el(`volKnob${n}`), range: el(`vol${n}`), display: el(`volVal${n}`),
-        onChange:   v => mixer[`channel${n}`]?.setVolume(v),
-        displayFn:  linearToDb,
-        internalFn: dbToLinear,
+        onChange:   v => mixer[`channel${n}`]?.setVolume(v / 100),
+        displayFn:  pctDisplay,
+        internalFn: pctInternal,
       });
     });
   }
@@ -76,18 +76,18 @@ class MixerUI {
     const { mixer } = this;
     new Knob({
       canvas: el('clickKnob'), range: el('clickVol'), display: el('clickVolVal'),
-      onChange:   v => mixer.clicktrack?.setVolume(v),
-      displayFn:  linearToDb, internalFn: dbToLinear,
+      onChange:   v => mixer.clicktrack?.setVolume(v / 100),
+      displayFn:  pctDisplay, internalFn: pctInternal,
     });
     new Knob({
       canvas: el('masterKnob'), range: el('masterVol'), display: el('masterVolVal'),
-      onChange:   v => { if (mixer.audioEngine.masterGain) mixer.audioEngine.masterGain.gain.value = v; },
-      displayFn:  linearToDb, internalFn: dbToLinear,
+      onChange:   v => { if (mixer.audioEngine.masterGain) mixer.audioEngine.masterGain.gain.value = v / 100; },
+      displayFn:  pctDisplay, internalFn: pctInternal,
     });
     new Knob({
       canvas: el('cueKnob'), range: el('cueVol'), display: el('cueVolVal'),
-      onChange:   v => mixer.cueBus?.setVolume(v),
-      displayFn:  linearToDb, internalFn: dbToLinear,
+      onChange:   v => mixer.cueBus?.setVolume(v / 100),
+      displayFn:  pctDisplay, internalFn: pctInternal,
     });
   }
 

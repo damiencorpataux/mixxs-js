@@ -45,6 +45,7 @@ class Knob {
   clamp(v) { return Math.max(this.min, Math.min(this.max, v)); }
 
   setValue(internalVal) {
+    if (!Number.isFinite(internalVal)) return;
     const v = this.clamp(internalVal);
     this.range.value   = v;
     this.display.value = this.displayFn(v);
@@ -72,9 +73,9 @@ class Knob {
     // Body
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle   = light ? '#d0d0d0' : '#161616';
+    ctx.fillStyle   = light ? '#b8b8b8' : '#161616';
     ctx.fill();
-    ctx.strokeStyle = light ? '#b0b0b0' : '#303030';
+    ctx.strokeStyle = light ? '#999999' : '#303030';
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -118,7 +119,11 @@ class Knob {
     let _dragStartY = 0, _dragStartVal = 0;
     pointerDrag(
       this.canvas,
-      (_x, y) => { _dragStartY = y; _dragStartVal = parseFloat(this.range.value); },
+      (_x, y) => {
+        _dragStartY   = y;
+        const n       = this.range.valueAsNumber;
+        _dragStartVal = isNaN(n) ? this.min : n;
+      },
       (_x,  y) => {
         const span  = this.max - this.min;
         const delta = -(( y - _dragStartY) / 150) * span;
@@ -144,11 +149,7 @@ class Knob {
     });
 
     const commit = () => {
-      const raw = this.display.value;
-      if (raw === '-∞' || raw === '-Infinity') {
-        this.setValue(this.min); this._editSnapshot = null; return;
-      }
-      const displayVal = parseFloat(raw);
+      const displayVal = parseFloat(this.display.value);
       if (isNaN(displayVal)) { this._cancelEdit(); return; }
       this.setValue(this.clamp(this.internalFn(displayVal)));
       this._editSnapshot = null;
@@ -167,9 +168,7 @@ class Knob {
     this.display.addEventListener('input', () => {
       if (!this._arrowActive) return;
       this._arrowActive = false;
-      const raw = this.display.value;
-      if (raw === '-∞' || raw === '-Infinity') return;
-      const displayVal = parseFloat(raw);
+      const displayVal = parseFloat(this.display.value);
       if (!isNaN(displayVal)) this.setValue(this.clamp(this.internalFn(displayVal)));
     });
     this.display.addEventListener('blur', () => {
