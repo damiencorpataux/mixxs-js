@@ -1,30 +1,42 @@
 // ═══════════════════════════════════════════════════════════════
-//  MixerController  —  top-level orchestrator
+//  MixerController  —  top-level audio orchestrator
 //
-//  Responsibilities:
-//    - Lazy-initializes the full audio graph on first user interaction
-//    - Wires Deck → ChannelController → CrossfaderController → AudioEngine
-//    - Runs the RAF loop that syncs waveform playheads + time displays
-//    - Delegates all UI events from main.js
+//  Zero DOM knowledge — all UI communication via CustomEvents:
+//
+//  mixxs:playstate    { deckNum, isPlaying }
+//  mixxs:timeupdate   { deckNum, current, duration }
+//  mixxs:bpmupdate    { deckNum, bpm, currentBpm }
+//  mixxs:speedupdate  { deckNum, rate }
+//  mixxs:loopstate    { deckNum, active }
+//  mixxs:loadprogress { deckNum, label }      — overlay text
+//  mixxs:loadend      { deckNum, filename }   — file loaded OK
+//  mixxs:exportstate  { busy }
 // ═══════════════════════════════════════════════════════════════
 class MixerController {
   constructor() {
-    this.audioEngine = new AudioEngine();
-    this.fileLoader  = null;
-    this.cueBus      = null;
-    this.channel1    = null;
-    this.channel2    = null;
-    this.deck1       = null;
-    this.deck2       = null;
-    this.crossfader  = null;
-    this.waveform1   = null;
-    this.waveform2   = null;
-    this.overview1   = null;
-    this.overview2   = null;
-    this.exporter    = new Exporter();
-    this.clicktrack  = null;
-    this.initialized = false;
-    this.rafId       = null;
+    this.audioEngine  = new AudioEngine();
+    this.fileLoader   = null;
+    this.cueBus       = null;
+    this.channel1     = null;
+    this.channel2     = null;
+    this.deck1        = null;
+    this.deck2        = null;
+    this.crossfader   = null;
+    this.waveform1    = null;
+    this.waveform2    = null;
+    this.overview1    = null;
+    this.overview2    = null;
+    this.exporter     = new Exporter();
+    this.clicktrack   = null;
+    this.initialized  = false;
+    this.rafId        = null;
+    this._cueState    = { 1: false, 2: false }; // owned here, not in DOM
+  }
+
+  // ── Event helper ──────────────────────────────────────────────
+
+  emit(type, detail = {}) {
+    document.dispatchEvent(new CustomEvent(type, { detail }));
   }
 
   // ── Initialization ────────────────────────────────────────────
@@ -41,16 +53,13 @@ class MixerController {
     this.deck1      = new Deck(ctx, this.channel1);
     this.deck2      = new Deck(ctx, this.channel2);
     this.crossfader = new CrossfaderController(
-      this.channel1,
-      this.channel2,
-      this.audioEngine.masterGain
+      this.channel1, this.channel2, this.audioEngine.masterGain
     );
-
     this.clicktrack = new Clicktrack(this.audioEngine.masterContext);
-    this.waveform1 = new WaveformRenderer(document.getElementById('waveform1'));
-    this.waveform2 = new WaveformRenderer(document.getElementById('waveform2'));
-    this.overview1 = new OverviewRenderer(document.getElementById('overview1'), t => this.deck1?.seek(t));
-    this.overview2 = new OverviewRenderer(document.getElementById('overview2'), t => this.deck2?.seek(t));
+    this.waveform1  = new WaveformView(document.getElementById('waveform1'));
+    this.waveform2  = new WaveformView(document.getElementById('waveform2'));
+    this.overview1  = new WaveformOverview(document.getElementById('overview1'), t => this.deck1?.seek(t));
+    this.overview2  = new WaveformOverview(document.getElementById('overview2'), t => this.deck2?.seek(t));
 
     this.deck1.onEnded = () => this._onDeckEnded(1);
     this.deck2.onEnded = () => this._onDeckEnded(2);
@@ -63,73 +72,50 @@ class MixerController {
 
   async loadFile(deckNum, file) {
     this._init();
-
-    // Cancel any in-progress load for this deck
     this._cancelLoad(deckNum);
     const cancelled = { value: false };
-    // Stop deck if playing, reset loop
-    this.stopDeck(deckNum);
-    const loopBtn = document.getElementById(`loop${deckNum}`);
-    if (loopBtn) loopBtn.classList.remove('active');
-    const deckForReset = deckNum === 1 ? this.deck1 : this.deck2;
-    if (deckForReset) { deckForReset.loop = false; deckForReset.loopIn = 0; }
     this[`_loadCancel${deckNum}`] = cancelled;
 
-    const loadingEl  = document.getElementById(`loading${deckNum}`);
-    const emptyEl    = document.getElementById(`waveEmpty${deckNum}`);
-    const cancelBtn  = document.getElementById(`cancelLoad${deckNum}`);
-    const labelEl    = loadingEl.querySelector('span');
+    // Reset deck state
+    this.stopDeck(deckNum);
+    const deck = deckNum === 1 ? this.deck1 : this.deck2;
+    if (deck) { deck.loop = false; deck.loopIn = 0; }
+    this.emit('mixxs:loopstate', { deckNum, active: false });
 
-    const dismiss = () => {
-      loadingEl.classList.remove('active');
-      if (labelEl) labelEl.textContent = 'DECODING…';
-    };
-
-    if (cancelBtn) cancelBtn.onclick = () => {
+    this.emit('mixxs:loadprogress', { deckNum, label: 'DECODING…', active: true, onCancel: () => {
       cancelled.value = true;
-      dismiss();
-    };
-
-    loadingEl.classList.add('active');
-    if (labelEl) labelEl.textContent = 'DECODING…';
+      this.emit('mixxs:loadprogress', { deckNum, active: false });
+    }});
 
     try {
       const buffer = await this.fileLoader.load(file);
       if (cancelled.value) return;
 
-      const deck     = deckNum === 1 ? this.deck1     : this.deck2;
       const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
       const overview = deckNum === 1 ? this.overview1 : this.overview2;
       deck.load(buffer);
       deck.setPlaybackRate(1.0);
-      document.getElementById(`speed${deckNum}`).value    = 1;
-      document.getElementById(`speedVal${deckNum}`).value = '1.000';
+      this.emit('mixxs:speedupdate', { deckNum, rate: 1.0 });
+
       waveform.load(buffer);
-      // Sync zoom to the other deck's current visible seconds
       const otherWaveform = deckNum === 1 ? this.waveform2 : this.waveform1;
       const otherSec = otherWaveform?.getVisibleSec();
-      if (otherSec !== null && otherSec !== undefined) waveform.setVisibleSec(otherSec);
+      if (otherSec != null) waveform.setVisibleSec(otherSec);
       overview.load(buffer);
 
-      document.getElementById(`bpm${deckNum}`).value = '';
-      document.getElementById(`currentBpm${deckNum}`).value = '';
-      emptyEl.style.display = 'none';
-      const overviewEmpty = document.getElementById(`overviewEmpty${deckNum}`);
-      if (overviewEmpty) overviewEmpty.style.display = 'none';
-      document.getElementById(`trackName${deckNum}`).textContent = file.name;
-      document.getElementById(`deckFilename${deckNum}`).textContent = file.name;
-      this._updateTimeDisplay(deckNum, 0, deck.getRealDuration());
+      this.emit('mixxs:bpmupdate',  { deckNum, bpm: '', currentBpm: '' });
+      this.emit('mixxs:timeupdate', { deckNum, current: 0, duration: deck.getRealDuration() });
+      this.emit('mixxs:loadend',    { deckNum, filename: file.name });
 
-      // ── Auto-analyze BPM ──
-      if (labelEl) labelEl.textContent = 'ANALYZING…';
+      this.emit('mixxs:loadprogress', { deckNum, label: 'ANALYZING…', active: true });
       this.analyzeDeck(deckNum).then(() => {
-        if (!cancelled.value) dismiss();
+        if (!cancelled.value) this.emit('mixxs:loadprogress', { deckNum, active: false });
       }).catch(() => {
-        if (!cancelled.value) dismiss();
+        if (!cancelled.value) this.emit('mixxs:loadprogress', { deckNum, active: false });
       });
     } catch (err) {
       if (!cancelled.value) {
-        dismiss();
+        this.emit('mixxs:loadprogress', { deckNum, active: false });
         alert(`Failed to decode audio: ${err.message}`);
       }
     }
@@ -147,25 +133,19 @@ class MixerController {
     this._init();
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
     if (!deck?.buffer) return;
-    const btn  = document.getElementById(`play${deckNum}`);
     if (deck.isPlaying) {
       deck.pause();
-      btn.textContent = '▶';
-      btn.classList.remove('active');
     } else {
       deck.play();
-      btn.textContent = '⏸';
-      btn.classList.add('active');
     }
+    this.emit('mixxs:playstate', { deckNum, isPlaying: deck.isPlaying });
   }
 
   stopDeck(deckNum) {
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
     if (!deck) return;
     deck.stop();
-    const btn = document.getElementById(`play${deckNum}`);
-    btn.textContent = '▶';
-    btn.classList.remove('active');
+    this.emit('mixxs:playstate', { deckNum, isPlaying: false });
   }
 
   // ── CUE ───────────────────────────────────────────────────────
@@ -173,39 +153,38 @@ class MixerController {
   toggleCue(deckNum) {
     const channel = deckNum === 1 ? this.channel1 : this.channel2;
     if (!channel) return;
-    const btn = document.getElementById(`cue${deckNum}`);
-    const isOn = btn.classList.toggle('active');
-    channel.setCue(isOn);
+    const active = !this._cueState[deckNum];
+    this._cueState[deckNum] = active;
+    channel.setCue(active);
+    this.emit('mixxs:cuestate', { deckNum, active });
   }
 
   // ── Waveform seek ─────────────────────────────────────────────
 
   seekOnCanvas(deckNum, event) {
-    const deck     = deckNum === 1 ? this.deck1 : this.deck2;
+    const deck     = deckNum === 1 ? this.deck1     : this.deck2;
     const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
     if (!deck?.buffer) return;
-    const canvas = event.currentTarget;
-    const rect   = canvas.getBoundingClientRect();
+    const rect = event.currentTarget.getBoundingClientRect();
     deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
   }
+
+  // ── Loop ──────────────────────────────────────────────────────
 
   toggleLoop(deckNum, beats) {
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
     if (!deck?.buffer) return;
-    const btn = document.getElementById(`loop${deckNum}`);
     if (deck.loop) {
       deck.stopLoop();
-      btn?.classList.remove('active');
+      this.emit('mixxs:loopstate', { deckNum, active: false });
     } else {
       deck.startLoop(beats);
-      btn?.classList.add('active');
+      this.emit('mixxs:loopstate', { deckNum, active: true });
     }
   }
 
-  /**
-   * After a zoom change on one waveform, apply the same visible-seconds
-   * window to the other so beat grids stay visually aligned.
-   */
+  // ── Click track ───────────────────────────────────────────────
+
   toggleClick(btn) {
     if (!this.initialized) this._init();
     if (this.clicktrack.enabled) {
@@ -217,13 +196,17 @@ class MixerController {
     }
   }
 
+  // ── Zoom sync ─────────────────────────────────────────────────
+
   syncZoom(sourceNum) {
     const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
     const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
     if (!src || !dest) return;
     const sec = src.getVisibleSec();
-    if (sec !== null) dest.setVisibleSec(sec);
+    if (sec != null) dest.setVisibleSec(sec);
   }
+
+  // ── BPM analysis ──────────────────────────────────────────────
 
   async analyzeDeck(deckNum) {
     const deck = deckNum === 1 ? this.deck1 : this.deck2;
@@ -231,61 +214,46 @@ class MixerController {
     const analyzer = new BeatAnalyzer();
     const result   = await analyzer.analyze(deck.buffer);
     deck.beatGrid  = result;
-    deck.bpm       = result.bpm;  // full precision for sync ratio
+    deck.bpm       = result.bpm;
     const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
-    waveform.setBeatGrid(result);
     const overview = deckNum === 1 ? this.overview1 : this.overview2;
+    waveform.setBeatGrid(result);
     overview.setBeatGrid(result);
-    // Round to 2 decimals for display only — grid uses full float precision
-    document.getElementById(`bpm${deckNum}`).value = result.bpm.toFixed(1);
-    // Current BPM = detected × current speed (speed is 1.0 at load time)
-    const speed = parseFloat(document.getElementById(`speed${deckNum}`)?.value || 1);
-    const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
-    if (currentBpmEl) currentBpmEl.value = (result.bpm * speed).toFixed(1);
+    this.emit('mixxs:bpmupdate', {
+      deckNum,
+      bpm:        result.bpm.toFixed(1),
+      currentBpm: (result.bpm * 1.0).toFixed(1), // speed is 1.0 at load time
+    });
     return result;
   }
 
-  // ── BPM + phase sync ──────────────────────────────────────────
+  // ── BPM sync ──────────────────────────────────────────────────
 
-  /**
-   * Full sync: tempo-match slave deck to master, then phase-snap.
-   *
-   * Step 1 — Tempo: adjust slave playbackRate = masterBPM / slaveBPM
-   * Step 2 — Phase: seek slave to the beat index that aligns with master's
-   *           current position, using BeatAnalyzer.phaseSnapTime()
-   *
-   * Falls back to manual BPM field values if beatGrid is not yet available.
-   */
-  /**
-   * Sync: adjust the clicked deck's speed to match the other deck's BPM.
-   * Clicking SYNC on deck 1 → deck 1 adjusts to match deck 2's BPM.
-   * Clicking SYNC on deck 2 → deck 2 adjusts to match deck 1's BPM.
-   */
   sync(deckNum) {
     const thisDeck  = deckNum === 1 ? this.deck1 : this.deck2;
     const otherDeck = deckNum === 1 ? this.deck2 : this.deck1;
-    if (!thisDeck || !otherDeck) return;
+    if (!thisDeck || !otherDeck?.buffer) return;
 
     const thisBpm  = thisDeck.beatGrid?.bpm  ?? thisDeck.bpm;
     const otherBpm = (otherDeck.beatGrid?.bpm ?? otherDeck.bpm) * otherDeck.playbackRate;
-    if (!otherDeck.buffer) return;
     if (!thisBpm || !otherBpm) return;
 
     const rate = otherBpm / thisBpm;
     thisDeck.setPlaybackRate(rate);
-    document.getElementById(`speed${deckNum}`).value    = rate;
-    document.getElementById(`speedVal${deckNum}`).value = rate.toFixed(3);
-    const currentBpmEl = document.getElementById(`currentBpm${deckNum}`);
-    if (currentBpmEl && thisDeck.bpm) currentBpmEl.value = (thisDeck.bpm * rate).toFixed(1);
+    this.emit('mixxs:speedupdate', { deckNum, rate });
+    if (thisDeck.bpm)
+      this.emit('mixxs:bpmupdate', {
+        deckNum,
+        bpm:        thisDeck.bpm.toFixed(1),
+        currentBpm: (thisDeck.bpm * rate).toFixed(1),
+      });
   }
 
   // ── Export ────────────────────────────────────────────────────
 
   async exportMix() {
     if (!this.initialized) return;
-    const btn = document.getElementById('btnExport');
-    btn.disabled = true;
-    btn.textContent = '⏳ RENDERING…';
+    this.emit('mixxs:exportstate', { busy: true });
     try {
       await this.exporter.export(
         this.deck1, this.deck2,
@@ -296,53 +264,43 @@ class MixerController {
     } catch (err) {
       alert(err.message);
     } finally {
-      btn.disabled = false;
-      btn.textContent = '⬇ EXPORT MIX';
+      this.emit('mixxs:exportstate', { busy: false });
     }
   }
 
   // ── Private ───────────────────────────────────────────────────
 
   _onDeckEnded(deckNum) {
-    const btn = document.getElementById(`play${deckNum}`);
-    btn.textContent = '▶';
-    btn.classList.remove('active');
+    this.emit('mixxs:playstate', { deckNum, isPlaying: false });
   }
 
   _startRAF() {
     const loop = () => {
-      // Click track — follow whichever deck is playing (deck1 priority)
       if (this.clicktrack) {
         const masterDeck = this.deck1?.isPlaying ? this.deck1 : this.deck2;
         this.clicktrack.tick(masterDeck);
       }
-      if (this.deck1?.buffer) {
-        this.deck1.checkLoop();
-        const t1      = this.deck1.getCurrentTime();
-        const beatDur1 = this.deck1.beatGrid ? 60 / this.deck1.beatGrid.bpm : 60 / this.deck1.bpm;
-        this.waveform1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
-        this.overview1.setLoop(this.deck1.loop, this.deck1.loopIn, this.deck1.loopIn + this.deck1.loopBeats * beatDur1);
-        this.waveform1.draw(t1, this.deck1.isPlaying);
-        this.overview1.draw(t1);
-        this._updateTimeDisplay(1, this.deck1.getRealCurrentTime(), this.deck1.getRealDuration());
-      }
-      if (this.deck2?.buffer) {
-        this.deck2.checkLoop();
-        const t2      = this.deck2.getCurrentTime();
-        const beatDur2 = this.deck2.beatGrid ? 60 / this.deck2.beatGrid.bpm : 60 / this.deck2.bpm;
-        this.waveform2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
-        this.overview2.setLoop(this.deck2.loop, this.deck2.loopIn, this.deck2.loopIn + this.deck2.loopBeats * beatDur2);
-        this.waveform2.draw(t2, this.deck2.isPlaying);
-        this.overview2.draw(t2);
-        this._updateTimeDisplay(2, this.deck2.getRealCurrentTime(), this.deck2.getRealDuration());
-      }
+      [1, 2].forEach(n => {
+        const deck     = this[`deck${n}`];
+        const waveform = this[`waveform${n}`];
+        const overview = this[`overview${n}`];
+        if (!deck?.buffer) return;
+        deck.checkLoop();
+        const t       = deck.getCurrentTime();
+        const beatDur = deck.beatGrid ? 60 / deck.beatGrid.bpm : 60 / deck.bpm;
+        const loopOut = deck.loopIn + deck.loopBeats * beatDur;
+        waveform.setLoop(deck.loop, deck.loopIn, loopOut);
+        overview.setLoop(deck.loop, deck.loopIn, loopOut);
+        waveform.draw(t, deck.isPlaying);
+        overview.draw(t);
+        this.emit('mixxs:timeupdate', {
+          deckNum: n,
+          current:  deck.getRealCurrentTime(),
+          duration: deck.getRealDuration(),
+        });
+      });
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);
-  }
-
-  _updateTimeDisplay(deckNum, current, duration) {
-    const el = document.getElementById(`time${deckNum}`);
-    if (el) el.textContent = `${fmtTime(current)} / ${fmtTime(duration)}`;
   }
 }
