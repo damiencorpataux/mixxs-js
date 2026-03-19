@@ -225,11 +225,6 @@ class DeckUI {
       syncToggleBtn(`play${n}`, isPlaying);
     });
 
-    on('mixxs:timeupdate', ({ current, duration }) => {
-      const el = this._el('time');
-      if (el) el.textContent = `${fmtTime(current)} / ${fmtTime(duration)}`;
-    });
-
     on('mixxs:bpmupdate', ({ bpm, currentBpm }) => {
       const bpmEl = this._el('bpm');
       const curEl = this._el('currentBpm');

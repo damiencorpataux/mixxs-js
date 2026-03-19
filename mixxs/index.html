@@ -20,7 +20,7 @@
 
 <!-- ── HEADER ────────────────────────────────────────────────── -->
 <header>
-  <div class="logo">MIX<span class="logo-xs">XS</span></div>
+  <div class="logo font-display text-amber">MIX<span class="logo-xs text-highlight">XS</span></div>
 
   <div class="header-center">
     <span class="master-label label">CLICK</span>
@@ -63,14 +63,14 @@
 
     <div class="waveform-row" id="waveformRow1">
       <div class="waveform-header">
-        <span class="deck-label">DECK <span class="deck-ab">A</span></span>
-        <span class="track-name" id="trackName1">NO TRACK LOADED</span>
+        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">A</span></span>
+        <span class="track-name text-muted" id="trackName1">NO TRACK LOADED</span>
         <button class="btn btn-pill btn-amber" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
       <div class="waveform-wrap" id="waveWrap1">
         <canvas class="waveform" id="waveform1"></canvas>
-        <div class="waveform-empty" id="waveEmpty1">DROP AUDIO FILE TO LOAD</div>
+        <div class="waveform-empty text-muted" id="waveEmpty1">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading1">
           <span>DECODING…</span>
           <button class="btn btn-cancel" id="cancelLoad1">CANCEL</button>
@@ -80,14 +80,14 @@
 
     <div class="waveform-row" id="waveformRow2">
       <div class="waveform-header">
-        <span class="deck-label">DECK <span class="deck-ab">B</span></span>
-        <span class="track-name" id="trackName2">NO TRACK LOADED</span>
+        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">B</span></span>
+        <span class="track-name text-muted" id="trackName2">NO TRACK LOADED</span>
         <button class="btn btn-pill btn-amber" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
       <div class="waveform-wrap" id="waveWrap2">
         <canvas class="waveform" id="waveform2"></canvas>
-        <div class="waveform-empty" id="waveEmpty2">DROP AUDIO FILE TO LOAD</div>
+        <div class="waveform-empty text-muted" id="waveEmpty2">DROP AUDIO FILE TO LOAD</div>
         <div class="deck-loading" id="loading2">
           <span>DECODING…</span>
           <button class="btn btn-cancel" id="cancelLoad2">CANCEL</button>
@@ -104,13 +104,13 @@
     <div class="deck-panel" id="deckPanel1">
 
       <div class="deck-top-row">
-        <div class="deck-filename" id="deckFilename1">NO TRACK LOADED</div>
-        <span class="deck-label">DECK <span class="deck-ab">A</span></span>
+        <div class="deck-filename text-muted text-sm" id="deckFilename1">NO TRACK LOADED</div>
+        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">A</span></span>
       </div>
 
       <div class="overview-wrap" id="overviewWrap1">
         <canvas class="overview-canvas" id="overview1"></canvas>
-        <div class="overview-empty" id="overviewEmpty1">DROP AUDIO FILE TO LOAD</div>
+        <div class="overview-empty text-muted" id="overviewEmpty1">DROP AUDIO FILE TO LOAD</div>
       </div>
 
       <div class="row transport">
@@ -150,7 +150,7 @@
 
         <!-- Channel A (CUE left, EQ/filter/vol right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header">A</div>
+          <div class="mixer-ch-header font-display text-amber">A</div>
           <button class="btn btn-circle btn-red" id="cue1" title="CUE A">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
@@ -159,10 +159,10 @@
             <input type="number" id="eqHiVal1" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top label filter-label">FILTER</div>
-            <canvas class="knob-canvas" id="filterKnob1" width="48" height="48"></canvas>
+            <div class="knob-label-top label filter-knob">FILTER</div>
+            <canvas class="knob-canvas filter-knob" id="filterKnob1" width="48" height="48"></canvas>
             <input type="range"  id="filter1"    step="0.01">
-            <input type="number" id="filterVal1" step="0.01" class="knob-val-input filter-val">
+            <input type="number" id="filterVal1" step="0.01" class="knob-val-input filter-knob">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">MID</div>
@@ -188,7 +188,7 @@
 
         <!-- Channel B (EQ/filter/vol left, CUE right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header">B</div>
+          <div class="mixer-ch-header font-display text-amber">B</div>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
@@ -203,10 +203,10 @@
             <input type="number" id="eqMidVal2" step="0.1" class="knob-val-input">
           </div>
           <div class="knob-widget">
-            <div class="knob-label-top label filter-label">FILTER</div>
-            <canvas class="knob-canvas" id="filterKnob2" width="48" height="48"></canvas>
+            <div class="knob-label-top label filter-knob">FILTER</div>
+            <canvas class="knob-canvas filter-knob" id="filterKnob2" width="48" height="48"></canvas>
             <input type="range"  id="filter2"    step="0.01">
-            <input type="number" id="filterVal2" step="0.01" class="knob-val-input filter-val">
+            <input type="number" id="filterVal2" step="0.01" class="knob-val-input filter-knob">
           </div>
           <div class="knob-widget">
             <div class="knob-label-top label">LOW</div>
@@ -225,7 +225,7 @@
       </div>
 
       <div class="mixer-xfader">
-        <div class="xfader-labels"><span>A</span><span>XFADER</span><span>B</span></div>
+        <div class="xfader-labels font-display text-muted"><span>A</span><span>XFADER</span><span>B</span></div>
         <input type="range" id="crossfader" min="0" max="1" step="0.001" value="0.5">
       </div>
 
@@ -235,13 +235,13 @@
     <div class="deck-panel" id="deckPanel2">
 
       <div class="deck-top-row deck-top-row--right">
-        <span class="deck-label">DECK <span class="deck-ab">B</span></span>
-        <div class="deck-filename" id="deckFilename2">NO TRACK LOADED</div>
+        <span class="deck-label font-display text-amber">DECK <span class="deck-ab text-highlight">B</span></span>
+        <div class="deck-filename text-muted text-sm" id="deckFilename2">NO TRACK LOADED</div>
       </div>
 
       <div class="overview-wrap" id="overviewWrap2">
         <canvas class="overview-canvas" id="overview2"></canvas>
-        <div class="overview-empty" id="overviewEmpty2">DROP AUDIO FILE TO LOAD</div>
+        <div class="overview-empty text-muted" id="overviewEmpty2">DROP AUDIO FILE TO LOAD</div>
       </div>
 
       <div class="row transport">
@@ -281,7 +281,7 @@
 <!-- ── SETTINGS MODAL ─────────────────────────────────────────── -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-title">AUDIO DEVICES</div>
+    <div class="modal-title font-display text-amber">AUDIO DEVICES</div>
     <div class="modal-field">
       <label>MASTER OUTPUT</label>
       <select id="masterDevice"><option value="">Default Output</option></select>
@@ -290,7 +290,7 @@
       <label>CUE / HEADPHONE OUTPUT</label>
       <select id="cueDevice"><option value="">Default Output</option></select>
     </div>
-    <p class="modal-note">
+    <p class="modal-note text-muted text-sm">
       Requires Chrome / Edge 110+. Connect multiple audio outputs before opening this panel.
     </p>
     <div class="modal-actions">

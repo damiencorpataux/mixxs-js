@@ -14,23 +14,21 @@
 //    onChange(internalVal)   — called whenever the value changes
 //    displayFn(internalVal)  — converts internal value → display string
 //    internalFn(displayStr)  — converts display string → internal value
-//                              (clamping is handled automatically by Knob,
-//                               so this only needs to parse the string)
-//    color                   — arc color, default amber
+//
+//  Arc color is CSS-driven via --knob-arc (default: var(--amber)).
+//  Override per-knob with a class, e.g. .filter-knob { --knob-arc: var(--teal) }
 //
 //  Public API:
 //    knob.setValue(v)  — programmatically set value and redraw
 // ═══════════════════════════════════════════════════════════════
 class Knob {
-  constructor({ canvas, range, display, onChange,
-                displayFn, internalFn, color = '#f59e0b' }) {
+  constructor({ canvas, range, display, onChange, displayFn, internalFn }) {
     this.canvas     = canvas;
     this.range      = range;
     this.display    = display;
     this.onChange   = onChange;
     this.displayFn  = displayFn  ?? (v => v.toFixed(2));
     this.internalFn = internalFn ?? (d => parseFloat(d));
-    this.color      = color;
 
     this._editSnapshot = null;
     this._arrowActive  = false;
@@ -48,7 +46,7 @@ class Knob {
 
   static redrawAll() {
     Knob._instances.forEach(k =>
-      Knob.draw(k.canvas, parseFloat(k.range.value), k.min, k.max, k.color));
+      Knob.draw(k.canvas, parseFloat(k.range.value), k.min, k.max));
   }
 
   // ── Public ───────────────────────────────────────────────────
@@ -63,31 +61,31 @@ class Knob {
     const v = this.clamp(internalVal);
     this.range.value   = v;
     this.display.value = this.displayFn(v);
-    Knob.draw(this.canvas, v, this.min, this.max, this.color);
+    Knob.draw(this.canvas, v, this.min, this.max);
     this.onChange(v);
   }
 
   // ── Static draw ───────────────────────────────────────────────
 
-  static draw(canvas, value, min, max, color = '#f59e0b') {
+  static draw(canvas, value, min, max) {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
     const cx = W / 2, cy = H / 2;
     const r  = Math.min(W, H) / 2 - 3;
 
-    // 270° arc from 7:30 to 4:30 (clockwise)
     const startAngle = 0.75 * Math.PI;
     const sweepAngle = 1.5  * Math.PI;
     const valueAngle = startAngle + ((value - min) / (max - min)) * sweepAngle;
-    const midAngle   = startAngle + 0.5 * sweepAngle; // 12 o'clock
+    const midAngle   = startAngle + 0.5 * sweepAngle;
 
-    // Colors from CSS variables — theme switching is handled entirely by CSS
-    const css        = getComputedStyle(canvas);
-    const bodyColor  = css.getPropertyValue('--knob-body').trim();
+    // All colors from CSS variables — theme and per-knob color via CSS only
+    const css         = getComputedStyle(canvas);
+    const arcColor    = css.getPropertyValue('--knob-arc').trim();
+    const bodyColor   = css.getPropertyValue('--knob-body').trim();
     const borderColor = css.getPropertyValue('--knob-border').trim();
-    const trackColor = css.getPropertyValue('--knob-track').trim();
-    const dotColor   = css.getPropertyValue('--knob-neutral-dot').trim();
-    const pointerColor = css.getPropertyValue('--knob-pointer').trim();
+    const trackColor  = css.getPropertyValue('--knob-track').trim();
+    const dotColor    = css.getPropertyValue('--knob-neutral-dot').trim();
+    const ptrColor    = css.getPropertyValue('--knob-pointer').trim();
 
     ctx.clearRect(0, 0, W, H);
 
@@ -114,10 +112,10 @@ class Knob {
     ctx.fillStyle = dotColor;
     ctx.fill();
 
-    // Value arc (colored)
+    // Value arc (colored — uses --knob-arc, default amber, overridden by .filter-knob)
     ctx.beginPath();
     ctx.arc(cx, cy, r - 6, startAngle, valueAngle, false);
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = arcColor;
     ctx.lineWidth   = 3;
     ctx.stroke();
 
@@ -125,7 +123,7 @@ class Knob {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(valueAngle) * 4,       cy + Math.sin(valueAngle) * 4);
     ctx.lineTo(cx + Math.cos(valueAngle) * (r - 9), cy + Math.sin(valueAngle) * (r - 9));
-    ctx.strokeStyle = pointerColor;
+    ctx.strokeStyle = ptrColor;
     ctx.lineWidth   = 2;
     ctx.lineCap     = 'round';
     ctx.stroke();
