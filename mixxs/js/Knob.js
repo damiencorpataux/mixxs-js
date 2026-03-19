@@ -112,24 +112,28 @@ class Knob {
   // ── Private ───────────────────────────────────────────────────
 
   _wire() {
-    // Drag
-    this.canvas.addEventListener('mousedown', e => {
-      this._dragging = true;
-      this._startY   = e.clientY;
-      this._startVal = parseFloat(this.range.value);
-      e.preventDefault();
-    });
-    window.addEventListener('mousemove', e => {
-      if (!this._dragging) return;
-      const span  = this.max - this.min;
-      const delta = -((e.clientY - this._startY) / 150) * span;
-      this.setValue(this._startVal + delta);
-    });
-    window.addEventListener('mouseup', () => { this._dragging = false; });
+    // Drag — unified mouse + touch via pointerDrag utility (defined in main.js)
+    let _dragStartY = 0, _dragStartVal = 0;
+    pointerDrag(
+      this.canvas,
+      (_x, y) => { _dragStartY = y; _dragStartVal = parseFloat(this.range.value); },
+      (_x,  y) => {
+        const span  = this.max - this.min;
+        const delta = -(( y - _dragStartY) / 150) * span;
+        this.setValue(_dragStartVal + delta);
+      },
+      () => {}
+    );
 
-    // Double-click reset
+    // Double-click / double-tap reset
     const defaultVal = parseFloat(this.range.defaultValue ?? this.range.value);
     this.canvas.addEventListener('dblclick', () => this.setValue(defaultVal));
+    let _lastTap = 0;
+    this.canvas.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - _lastTap < 300) { e.preventDefault(); this.setValue(defaultVal); }
+      _lastTap = now;
+    });
 
     // Display input editing
     this.display.addEventListener('focus', () => {

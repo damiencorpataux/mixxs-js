@@ -88,9 +88,8 @@ class DeckUI {
           savedRate = null;
           btn.classList.remove('active');
         };
-        btn.addEventListener('mousedown',  start);
-        btn.addEventListener('mouseup',    stop);
-        btn.addEventListener('mouseleave', stop);
+        pointerDrag(btn, start, () => {}, stop);
+        // Also stop on touchcancel (handled inside pointerDrag as onEnd)
       });
   }
 

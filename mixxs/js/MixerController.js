@@ -159,16 +159,6 @@ class MixerController {
     this.emit('mixxs:cuestate', { deckNum, active });
   }
 
-  // ── Waveform seek ─────────────────────────────────────────────
-
-  seekOnCanvas(deckNum, event) {
-    const deck     = deckNum === 1 ? this.deck1     : this.deck2;
-    const waveform = deckNum === 1 ? this.waveform1 : this.waveform2;
-    if (!deck?.buffer) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    deck.seek(waveform.getTimeAtX(event.clientX - rect.left, deck.getCurrentTime()));
-  }
-
   // ── Loop ──────────────────────────────────────────────────────
 
   toggleLoop(deckNum, beats) {
@@ -249,7 +239,44 @@ class MixerController {
       });
   }
 
-  // ── Export ────────────────────────────────────────────────────
+  // ── Scratch ───────────────────────────────────────────────────
+
+  scratchStart(deckNum) {
+    const deck    = this[`deck${deckNum}`];
+    const channel = this[`channel${deckNum}`];
+    if (!deck?.buffer) return;
+    this[`_scratch${deckNum}`] = {
+      wasPlaying: deck.isPlaying,
+      savedRate:  deck.playbackRate,
+      savedVol:   channel.fader.gain.value,
+    };
+    deck.pause();
+    channel.fader.gain.value = 0; // mute while dragging
+  }
+
+  scratch(deckNum, dx, canvasWidth) {
+    const state = this[`_scratch${deckNum}`];
+    const deck  = this[`deck${deckNum}`];
+    const wf    = this[`waveform${deckNum}`];
+    if (!state || !deck?.buffer || !wf) return;
+
+    // Seek position by dx pixels worth of visible track time
+    const visibleSec = wf.getVisibleSec() ?? deck.buffer.duration;
+    const seekDelta  = -(dx / canvasWidth) * visibleSec;
+    deck.startOffset = Math.max(0, Math.min(deck.buffer.duration - 0.001,
+                         deck.startOffset + seekDelta));
+  }
+
+  scratchEnd(deckNum) {
+    const state   = this[`_scratch${deckNum}`];
+    const deck    = this[`deck${deckNum}`];
+    const channel = this[`channel${deckNum}`];
+    if (!state || !deck) return;
+    channel.fader.gain.value = state.savedVol;  // restore volume
+    deck.setPlaybackRate(state.savedRate);
+    if (state.wasPlaying) deck.play();
+    this[`_scratch${deckNum}`] = null;
+  }
 
   async exportMix() {
     if (!this.initialized) return;

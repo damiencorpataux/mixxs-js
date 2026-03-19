@@ -37,6 +37,11 @@
 [data-theme="light"] .logo .logo-xs { text-shadow: 0 0 10px rgba(0,0,0,0.2); color: #333; }
 [data-theme="light"] .deck-ab { color: #1a1a1a; text-shadow: none; }
 
+html {
+  overscroll-behavior: none;
+  height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -45,6 +50,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 /* ── HEADER ─────────────────────────────────────────────────── */
@@ -188,6 +194,7 @@ canvas.waveform {
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none; /* let JS handle all touch gestures */
 }
 .waveform-empty {
   position: absolute;
@@ -501,6 +508,7 @@ input[type="range"]::-moz-range-thumb {
 .knob-canvas {
   display: block;
   cursor: ns-resize;
+  touch-action: none;
 }
 .knob-canvas:active { cursor: ns-resize; }
 /* Pan range hidden — canvas is the visual */

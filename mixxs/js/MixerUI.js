@@ -96,11 +96,112 @@ class MixerUI {
   _wireWaveforms() {
     const { mixer } = this;
     [1, 2].forEach(n => {
-      el(`waveform${n}`).addEventListener('click', e => mixer.seekOnCanvas(n, e));
-      el(`waveform${n}`).addEventListener('wheel', e => {
+      const canvas = el(`waveform${n}`);
+
+      // ── Mouse wheel zoom ──────────────────────────────────────
+      canvas.addEventListener('wheel', e => {
         mixer[`waveform${n}`]?.onWheel(e, mixer[`deck${n}`]?.isPlaying ?? false);
         mixer.syncZoom(n);
       }, { passive: false });
+
+      // ── Mouse: immediate scratch ──────────────────────────────
+      let _lastX = 0, _isDragging = false;
+      canvas.addEventListener('mousedown', e => {
+        e.preventDefault();
+        _lastX = e.clientX; _isDragging = true;
+        mixer.scratchStart(n);
+        const move = e2 => {
+          if (!_isDragging) return;
+          const dx = e2.clientX - _lastX;
+          if (Math.abs(dx) > 2) mixer.scratch(n, dx, canvas.offsetWidth);
+          _lastX = e2.clientX;
+        };
+        const up = () => {
+          if (!_isDragging) return;
+          _isDragging = false;
+          mixer.scratchEnd(n);
+          window.removeEventListener('mousemove', move);
+          window.removeEventListener('mouseup',   up);
+        };
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup',   up);
+      });
+
+      // ── Touch: delayed scratch start to allow pinch detection ──
+      // If a second finger arrives within PINCH_DELAY ms, treat as pinch.
+      const PINCH_DELAY = 50; // ms
+      let _touches = {}, _pinchDist0 = null, _zoom0 = null, _pinching = false;
+      let _touchScratchId = null, _scratchTimer = null, _touchLastX = 0;
+      let _touchDragging = false;
+
+      const _cancelScratchTimer = () => {
+        if (_scratchTimer) { clearTimeout(_scratchTimer); _scratchTimer = null; }
+      };
+
+      canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        for (const t of e.touches)
+          _touches[t.identifier] = { x: t.clientX, y: t.clientY };
+
+        if (e.touches.length === 2) {
+          // Second finger arrived — cancel any pending scratch, end active scratch
+          _cancelScratchTimer();
+          if (_touchDragging) { mixer.scratchEnd(n); _touchDragging = false; }
+          // Start pinch
+          const [a, b] = Object.values(_touches);
+          _pinchDist0  = Math.hypot(b.x - a.x, b.y - a.y);
+          _zoom0       = mixer[`waveform${n}`]?.zoom ?? 1;
+          _pinching    = true;
+          _touchScratchId = null;
+        } else if (e.touches.length === 1) {
+          // One finger — delay before starting scratch
+          _pinching = false;
+          _touchScratchId = e.touches[0].identifier;
+          _touchLastX     = e.touches[0].clientX;
+          _cancelScratchTimer();
+          _scratchTimer = setTimeout(() => {
+            _scratchTimer = null;
+            if (!_pinching) {
+              _touchDragging = true;
+              mixer.scratchStart(n);
+            }
+          }, PINCH_DELAY);
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        for (const t of e.changedTouches)
+          if (_touches[t.identifier]) _touches[t.identifier] = { x: t.clientX, y: t.clientY };
+
+        if (_pinching && e.touches.length === 2 && _pinchDist0 !== null) {
+          const wf = mixer[`waveform${n}`]; if (!wf) return;
+          const [a, b] = Object.values(_touches);
+          const dist   = Math.hypot(b.x - a.x, b.y - a.y);
+          wf.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, _zoom0 * (dist / _pinchDist0)));
+          mixer.syncZoom(n);
+        } else if (_touchDragging && e.touches.length === 1) {
+          const t = [...e.changedTouches].find(t => t.identifier === _touchScratchId);
+          if (!t) return;
+          const dx = t.clientX - _touchLastX;
+          if (Math.abs(dx) > 2) mixer.scratch(n, dx, canvas.offsetWidth);
+          _touchLastX = t.clientX;
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchend', e => {
+        for (const t of e.changedTouches) delete _touches[t.identifier];
+        if (e.touches.length < 2) { _pinchDist0 = null; _pinching = false; }
+        if (e.touches.length === 0) {
+          _cancelScratchTimer();
+          if (_touchDragging) { mixer.scratchEnd(n); _touchDragging = false; }
+        }
+      });
+      canvas.addEventListener('touchcancel', () => {
+        _cancelScratchTimer();
+        _touches = {}; _pinchDist0 = null; _pinching = false;
+        if (_touchDragging) { mixer.scratchEnd(n); _touchDragging = false; }
+      });
     });
   }
 
