@@ -8,6 +8,4 @@
 
 - Fix waveform views sync: they must be always scroll at same "speed" (relative speed must be 0)
 
-- Fix waveform views dragging using mouse (imprecise at slow drag speed)
-
 - Make mobile compact view

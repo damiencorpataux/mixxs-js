@@ -141,19 +141,39 @@ class MixerUI {
       });
 
       // ── Mouse scratch ─────────────────────────────────────────
-      let _mouseLastX = 0, _mouseActive = false;
+      // Absolute positioning: record the clicked track offset once on mousedown,
+      // then compute position directly from total drag distance on every move.
+      // This keeps the clicked waveform point pinned under the cursor.
+      let _dragStartX      = 0;  // clientX at mousedown
+      let _dragStartOffset = 0;  // deck.startOffset at mousedown
+      let _mouseActive     = false;
+
       canvas.addEventListener('mousedown', e => {
         e.preventDefault();
-        _mouseLastX = e.clientX;
-        _mouseActive = true;
+        const deck = mixer[`deck${n}`];
+        const wf   = mixer[`waveform${n}`];
+        if (!deck?.buffer || !wf) return;
+
+        _dragStartX      = e.clientX;
+        _dragStartOffset = deck.startOffset;
+        _mouseActive     = true;
         mixer.scratchStart(n);
 
         const onMove = e2 => {
           if (!_mouseActive) return;
-          const dx = e2.clientX - _mouseLastX;
-          if (Math.abs(dx) > 2) mixer.scratch(n, dx, canvas.offsetWidth);
-          _mouseLastX = e2.clientX;
+          const deck = mixer[`deck${n}`];
+          const wf   = mixer[`waveform${n}`];
+          if (!deck?.buffer || !wf) return;
+
+          // Compute absolute offset from drag origin — no delta accumulation
+          const totalDx    = e2.clientX - _dragStartX;
+          const visibleSec = wf.getVisibleSec() ?? deck.buffer.duration;
+          deck.startOffset = Math.max(0, Math.min(
+            deck.buffer.duration - 0.001,
+            _dragStartOffset - (totalDx / canvas.offsetWidth) * visibleSec
+          ));
         };
+
         const onUp = () => {
           if (!_mouseActive) return;
           _mouseActive = false;
@@ -171,15 +191,16 @@ class MixerUI {
       // Solution: delay scratchStart by PINCH_DELAY ms — if a second
       // finger arrives in that window, cancel scratch and start pinch.
 
-      let _touches      = {};        // identifier → {x, y}
-      let _scratchTimer = null;
-      let _scratchId    = null;      // touch identifier for the scratch finger
-      let _scratchLastX = 0;
+      let _touches       = {};
+      let _scratchTimer  = null;
+      let _scratchId     = null;
+      let _scratchStartX = 0;        // touch clientX when scratchStart was called
+      let _scratchStartOffset = 0;   // deck.startOffset when scratchStart was called
       let _scratchActive = false;
-      let _pinchActive  = false;
-      let _pinchDist0   = null;
-      let _zoom0        = null;
-      let _lastTap      = 0;
+      let _pinchActive   = false;
+      let _pinchDist0    = null;
+      let _zoom0         = null;
+      let _lastTap       = 0;
 
       const cancelScratchTimer = () => {
         if (_scratchTimer) { clearTimeout(_scratchTimer); _scratchTimer = null; }
@@ -191,7 +212,6 @@ class MixerUI {
           _touches[t.identifier] = { x: t.clientX, y: t.clientY };
 
         if (e.touches.length === 2) {
-          // Second finger: cancel pending/active scratch, start pinch
           cancelScratchTimer();
           if (_scratchActive) { mixer.scratchEnd(n); _scratchActive = false; }
           const [a, b] = Object.values(_touches);
@@ -200,15 +220,17 @@ class MixerUI {
           _pinchActive = true;
           _scratchId   = null;
         } else if (e.touches.length === 1) {
-          // First finger: wait to see if a second arrives
-          _pinchActive  = false;
-          _scratchId    = e.touches[0].identifier;
-          _scratchLastX = e.touches[0].clientX;
+          _pinchActive       = false;
+          _scratchId         = e.touches[0].identifier;
+          const touchStartX  = e.touches[0].clientX;
           cancelScratchTimer();
           _scratchTimer = setTimeout(() => {
             _scratchTimer = null;
             if (!_pinchActive) {
-              _scratchActive = true;
+              // Anchor absolute position at the moment scratch becomes active
+              _scratchStartX      = touchStartX;
+              _scratchStartOffset = mixer[`deck${n}`]?.startOffset ?? 0;
+              _scratchActive      = true;
               mixer.scratchStart(n);
             }
           }, pinchDelayMs);
@@ -230,9 +252,15 @@ class MixerUI {
         } else if (_scratchActive && e.touches.length === 1) {
           const t = [...e.changedTouches].find(t => t.identifier === _scratchId);
           if (!t) return;
-          const dx = t.clientX - _scratchLastX;
-          if (Math.abs(dx) > 2) mixer.scratch(n, dx, canvas.offsetWidth);
-          _scratchLastX = t.clientX;
+          const deck = mixer[`deck${n}`];
+          const wf   = mixer[`waveform${n}`];
+          if (!deck?.buffer || !wf) return;
+          const totalDx    = t.clientX - _scratchStartX;
+          const visibleSec = wf.getVisibleSec() ?? deck.buffer.duration;
+          deck.startOffset = Math.max(0, Math.min(
+            deck.buffer.duration - 0.001,
+            _scratchStartOffset - (totalDx / canvas.offsetWidth) * visibleSec
+          ));
         }
       }, { passive: false });
 
