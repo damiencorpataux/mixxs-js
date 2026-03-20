@@ -1,6 +1,6 @@
 # MIXXS
 
-### ✨ [Try it online](https://www.mien.ch/mixxs-js/mixxs/)
+▶️ [Try it online](https://www.mien.ch/mixxs-js/mixxs/)
 
 A browser-based DJ mixer. No install, no server, no dependencies — just open `index.html` and play.
 

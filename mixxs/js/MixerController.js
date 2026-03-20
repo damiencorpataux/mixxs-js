@@ -250,8 +250,12 @@ class MixerController {
       savedRate:  deck.playbackRate,
       savedVol:   channel.fader.gain.value,
     };
-    deck.pause();
-    channel.fader.gain.value = 0; // mute while dragging
+    deck.pause(); // deck._declick fades out over 5 ms
+    // Also ramp the channel fader so any residual signal is silent while scrubbing
+    const g = channel.fader.gain, now = channel.ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(0, now + 0.005);
   }
 
   scratch(deckNum, dx, canvasWidth) {
@@ -272,9 +276,13 @@ class MixerController {
     const deck    = this[`deck${deckNum}`];
     const channel = this[`channel${deckNum}`];
     if (!state || !deck) return;
-    channel.fader.gain.value = state.savedVol;  // restore volume
+    // Restore fader before resuming so deck._fadeIn isn't fighting a zero fader
+    const g = channel.fader.gain, now = channel.ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(0, now);
+    g.linearRampToValueAtTime(state.savedVol, now + 0.005);
     deck.setPlaybackRate(state.savedRate);
-    if (state.wasPlaying) deck.play();
+    if (state.wasPlaying) deck.play(); // deck._fadeIn runs inside play()
     this[`_scratch${deckNum}`] = null;
   }
 

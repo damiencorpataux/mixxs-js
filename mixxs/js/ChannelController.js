@@ -65,7 +65,12 @@ class ChannelController {
 
   setVolume(v) { this.fader.gain.value = v; }
   setPan(v)    { this.panner.pan.value = v; }
-  setCue(on)   { this.cueSend.gain.value = on ? 1 : 0; }
+  setCue(on) {
+    const g = this.cueSend.gain, now = this.ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(on ? 1 : 0, now + 0.005);
+  }
 
   setEq(band, gainDb) {
     const node = band === 'low' ? this.eqLow : band === 'mid' ? this.eqMid : this.eqHigh;

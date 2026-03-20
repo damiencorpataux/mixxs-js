@@ -4,7 +4,9 @@
 
 ---
 
-- Update README (removed js files, etc.)
+- Update README (update removed js files, event contracts, etc.)
+
+- add vu-meter in mixer track (maybe a minimal 3 dots meter with green, orange, red)
 
 - In header, group the volume knob, device display (truncated) and device selection button (click on device display) - and remove the button "⚙ DEVICES"
 
@@ -15,3 +17,5 @@
 - Fix waveform views sync: they must be always scroll at same "speed" (relative speed must be 0)
 
 - Fix waveform views dragging using mouse (imprecise at slow drag speed)
+
+- Make mobile compact view
