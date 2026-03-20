@@ -121,6 +121,13 @@ class Deck {
   }
 
   setPlaybackRate(rate) {
+    if (this.isPlaying) {
+      // Re-anchor position before changing rate — getCurrentTime() uses
+      // startOffset + elapsed * rate, so any pending elapsed time must be
+      // committed at the OLD rate before the new one takes effect.
+      this.startOffset  = this.getCurrentTime();
+      this.startCtxTime = this.ctx.currentTime;
+    }
     this.playbackRate = rate;
     if (this.source) this.source.playbackRate.value = rate;
   }
