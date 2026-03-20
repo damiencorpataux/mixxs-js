@@ -192,8 +192,16 @@ class MixerController {
     const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
     const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
     if (!src || !dest) return;
-    const sec = src.getVisibleSec();
-    if (sec != null) dest.setVisibleSec(sec);
+
+    const requestedSec = src.getVisibleSec();
+    if (requestedSec == null) return;
+
+    dest.setVisibleSec(requestedSec);
+
+    // If dest was clamped (its track is shorter/longer and hit a zoom limit),
+    // pull source back to the same value so both always show identical seconds.
+    const actualSec = dest.getVisibleSec();
+    if (actualSec !== requestedSec) src.setVisibleSec(actualSec);
   }
 
   // ── BPM analysis ──────────────────────────────────────────────

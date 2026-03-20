@@ -6,6 +6,4 @@
 
 - Make "click" controls take less space: eg. move the controls to a modal or something
 
-- Fix waveform views sync: they must be always scroll at same "speed" (relative speed must be 0)
-
 - Make mobile compact view
