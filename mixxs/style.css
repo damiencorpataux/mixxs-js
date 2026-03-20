@@ -416,15 +416,24 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   .btn-circle { min-width: 44px; min-height: 44px; }
 }
 
+/* Mobile deck controls panel — hidden by default, shown on portrait mobile */
+.deck-mobile-controls        { display: none; flex-direction: column; gap: 3px; }
+.deck-mobile-row             { gap: 2px; }
+.deck-mobile-row .bpm-input  { flex: 1; font-size: 10px; width: auto; }
+
 @media (max-width: 700px) and (orientation: portrait) {
 
   /* Compact header */
-  header         { padding: 8px 12px; gap: var(--gap-sm); flex-wrap: wrap; }
+  header         { padding: 6px 10px; gap: var(--gap-sm); flex-wrap: wrap; }
   .status-inline { display: none; }
   .header-center { gap: var(--gap-sm); }
 
-  /* Waveforms: slightly shorter */
-  .waveform-wrap { height: 80px; }
+  /* Waveforms: shorter to save vertical space */
+  .waveform-wrap   { height: 64px; }
+  .waveform-header { padding: 4px 8px; gap: var(--gap-sm); }
+  .track-filename  { font-size: 9px; }
+  .time-display    { font-size: 9px; letter-spacing: 0; }
+  .time-remaining  { display: none; }
 
   /* Controls: deck A | deck B on top, mixer spans full width below */
   .controls-section {
@@ -438,45 +447,67 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   #deckPanel2  { grid-area: deck2; }
   .mixer-panel { grid-area: mixer; }
 
-  /* Deck panels: tight padding, hide everything except transport controls */
+  /* Deck panels: minimal padding */
   .deck-panel {
     border: none;
     border-bottom: 1px solid var(--border);
-    padding: 6px 4px;
-    gap: 4px;
+    padding: 4px 3px;
+    gap: 3px;
     overflow: visible;
   }
   #deckPanel1 { border-right: 1px solid var(--border); }
 
-  /* Hide: filename row, overview strip — already shown in waveform header */
-  .deck-top-row  { display: none; }
-  .overview-wrap { display: none; }
+  /* Hide desktop controls */
+  .deck-top-row    { display: none; }
+  .overview-wrap   { display: none; }
+  .transport       { display: none; }
+  .deck-bottom-row { display: none; }
 
-  /* Tighter button gaps on small screens */
-  .row { gap: 3px; }
+  /* Show mobile controls */
+  .deck-mobile-controls { display: flex; }
 
-  /* Slightly smaller buttons so two deck columns fit side by side */
+  /* Override pointer:coarse min-sizes — 32px max on mobile */
+  .btn-sq, .btn-circle { min-width: unset; min-height: unset; }
+  .btn-pill             { min-height: unset; }
+
+  /* LOAD button: hide text, show icon only */
+  #btnLoad1, #btnLoad2 { font-size: 0; }
+  #btnLoad1::after, #btnLoad2::after { content: '▲'; font-size: 13px; }
+
+  /* 32px buttons */
   :root {
-    --btn-sq-size:  34px;
+    --btn-sq-size:  32px;
     --btn-sq-font:  12px;
-    --btn-pill-h:   34px;
+    --btn-pill-h:   32px;
     --btn-pill-pad: 0 6px;
   }
 
-  /* Speed stack: tighter values */
-  .speed-stack { gap: 2px; }
-  .speed-stack-vals .control-val-input { width: 42px; font-size: 9px; }
-  .bpm-input   { width: 50px; font-size: 11px; }
+  /* Loop icon at 24px needs to be smaller */
+  .btn-loop { font-size: 16px; }
 
-  /* Mixer: full-width, compact padding */
+  /* Loop beats input: compact */
+  .loop-beats-input { width: 28px !important; font-size: 9px; padding: 1px 2px; }
+
+  /* Mobile speed inputs: compact */
+  .deck-mobile-row .control-val-input { width: 42px; font-size: 9px; padding: 1px 2px; }
+
+  /* Knob labels smaller */
+  .knob-label-top { font-size: 7px; }
+
+  /* Mixer: full-width, compact */
   .mixer-panel {
     min-width: unset;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-left: none;
     border-right: none;
     border-top: 2px solid var(--amber-dk);
     border-bottom: none;
   }
+
+  /* Mixer knobs slightly smaller */
+  .mixer-channel .knob-canvas { width: 40px !important; height: 40px !important; }
+  .mixer-channel .knob-canvas[id^="vol"] { width: 48px !important; height: 48px !important; }
+  .knob-val-input { font-size: 8px; width: 36px; }
 }
 
 @media (max-width: 900px) and (max-height: 500px) {
