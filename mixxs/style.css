@@ -365,7 +365,7 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
 .knob-label-top { /* layout hook only — typography via .label in HTML */ }
 .knob-canvas { display: block; cursor: ns-resize; touch-action: none; }
 
-.mixer-xfader { display: flex; flex-direction: column; gap: var(--gap-sm); width: 100%; }
+.mixer-xfader { display: flex; flex-direction: column; gap: var(--gap-sm); width: 100%; margin-top: 24px; }
 .xfader-labels { display: flex; justify-content: space-between; font-size: 8px; }
 #crossfader::-webkit-slider-thumb {
   width: 20px; height: 20px;
