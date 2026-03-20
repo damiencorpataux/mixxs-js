@@ -23,12 +23,14 @@
   <div class="text-header logo">MIX<span class="text-bright">XS</span></div>
 
   <div class="header-center">
-    <span class="label">CLICK</span>
-    <button class="btn btn-sq btn-amber" id="btnClick" title="Toggle click track">♩</button>
-    <div class="knob-widget knob-inline">
-      <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
-      <input type="range"  id="clickVol"    step="1">
-      <input type="number" id="clickVolVal" step="1" class="control-val-input">
+    <div style="display:none">
+      <span class="label">CLICK</span>
+      <button class="btn btn-sq btn-amber" id="btnClick" title="Toggle click track">♩</button>
+      <div class="knob-widget knob-inline">
+        <canvas class="knob-canvas" id="clickKnob" width="40" height="40"></canvas>
+        <input type="range"  id="clickVol"    step="1">
+        <input type="number" id="clickVolVal" step="1" class="control-val-input">
+      </div>
     </div>
     <span class="label">MASTER</span>
     <div class="knob-widget knob-inline">
