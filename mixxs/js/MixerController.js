@@ -12,6 +12,7 @@
 //  mixxs:clickstate   { active }
 //  mixxs:loadprogress { deckNum, label, active, onCancel? }
 //  mixxs:loadend      { deckNum, filename }
+//  mixxs:levelupdate  { ch1, ch2, master, cue }  — dBFS, every RAF frame
 // ═══════════════════════════════════════════════════════════════
 class MixerController {
   constructor() {
@@ -192,8 +193,16 @@ class MixerController {
     const src  = sourceNum === 1 ? this.waveform1 : this.waveform2;
     const dest = sourceNum === 1 ? this.waveform2 : this.waveform1;
     if (!src || !dest) return;
-    const sec = src.getVisibleSec();
-    if (sec != null) dest.setVisibleSec(sec);
+
+    const requestedSec = src.getVisibleSec();
+    if (requestedSec == null) return;
+
+    dest.setVisibleSec(requestedSec);
+
+    // If dest was clamped (its track is shorter/longer and hit a zoom limit),
+    // pull source back to the same value so both always show identical seconds.
+    const actualSec = dest.getVisibleSec();
+    if (actualSec !== requestedSec) src.setVisibleSec(actualSec);
   }
 
   // ── BPM analysis ──────────────────────────────────────────────
@@ -250,8 +259,12 @@ class MixerController {
       savedRate:  deck.playbackRate,
       savedVol:   channel.fader.gain.value,
     };
-    deck.pause();
-    channel.fader.gain.value = 0; // mute while dragging
+    deck.pause(); // deck._declick fades out over 5 ms
+    // Also ramp the channel fader so any residual signal is silent while scrubbing
+    const g = channel.fader.gain, now = channel.ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(0, now + 0.005);
   }
 
   scratch(deckNum, dx, canvasWidth) {
@@ -272,9 +285,13 @@ class MixerController {
     const deck    = this[`deck${deckNum}`];
     const channel = this[`channel${deckNum}`];
     if (!state || !deck) return;
-    channel.fader.gain.value = state.savedVol;  // restore volume
+    // Restore fader before resuming so deck._fadeIn isn't fighting a zero fader
+    const g = channel.fader.gain, now = channel.ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(0, now);
+    g.linearRampToValueAtTime(state.savedVol, now + 0.005);
     deck.setPlaybackRate(state.savedRate);
-    if (state.wasPlaying) deck.play();
+    if (state.wasPlaying) deck.play(); // deck._fadeIn runs inside play()
     this[`_scratch${deckNum}`] = null;
   }
 
@@ -326,6 +343,17 @@ class MixerController {
           duration: deck.getRealDuration(),
         });
       });
+
+      // VU meter levels — emit once per frame with all four readings.
+      // Falls back to -48 dBFS (silence) before audio is initialised.
+      const _db = analyser => analyser ? analyserToDb(analyser) : -48;
+      this.emit('mixxs:levelupdate', {
+        ch1:    _db(this.channel1?.analyser),
+        ch2:    _db(this.channel2?.analyser),
+        master: _db(this.audioEngine?.analyser),
+        cue:    _db(this.cueBus?.analyser),
+      });
+
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);
