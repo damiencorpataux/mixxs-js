@@ -66,7 +66,7 @@
       <div class="waveform-header">
         <span class="deck-label text-header">DECK <span class="deck-ab text-bright">A</span></span>
         <span class="track-filename text-muted" id="trackName1">NO TRACK LOADED</span>
-        <span class="time-display" id="time1">0:00.00 / 0:00 / 0:00</span>
+        <span class="time-display"><span class="time-elapsed" id="timeElapsed1">0:00.00</span><span class="time-remaining"> / <span id="timeRemaining1">0:00</span></span><span> / <span id="timeTotal1">0:00</span></span></span>
         <button class="btn btn-pill btn-amber" id="btnLoad1">LOAD ▲</button>
         <input type="file" id="file1" accept="audio/*">
       </div>
@@ -84,7 +84,7 @@
       <div class="waveform-header">
         <span class="deck-label text-header">DECK <span class="deck-ab text-bright">B</span></span>
         <span class="track-filename text-muted" id="trackName2">NO TRACK LOADED</span>
-        <span class="time-display" id="time2">0:00.00 / 0:00 / 0:00</span>
+        <span class="time-display"><span class="time-elapsed" id="timeElapsed2">0:00.00</span><span class="time-remaining"> / <span id="timeRemaining2">0:00</span></span><span> / <span id="timeTotal2">0:00</span></span></span>
         <button class="btn btn-pill btn-amber" id="btnLoad2">LOAD ▲</button>
         <input type="file" id="file2" accept="audio/*">
       </div>
@@ -120,17 +120,16 @@
         <button class="btn btn-sq btn-amber" id="play1"     title="Play / Pause">▶</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown1" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp1"   title="Speed up (hold)">+</button>
-        <button class="btn btn-sq btn-amber" id="nudgeBack1" title="Back 1 beat">◀</button>
-        <button class="btn btn-sq btn-amber" id="nudgeFwd1"  title="Forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="nudgeBack1" title="Back 1 beat"><</button>
+        <button class="btn btn-sq btn-amber" id="nudgeFwd1"  title="Forward 1 beat">></button>
         <span class="spacer"></span>
-        <input type="number" class="bpm-input" id="bpm1" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn btn-pill btn-green" id="syncFrom1" title="Match deck A tempo to deck B">SYNC</button>
       </div>
 
       <div class="row deck-bottom-row">
         <button class="btn btn-sq btn-green btn-loop" id="loop1"          title="Toggle loop">↻</button>
-        <button class="btn btn-sq btn-amber" id="loopNudgeBack1" title="Shift loop back 1 beat">◀</button>
-        <button class="btn btn-sq btn-amber" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeBack1" title="Shift loop back 1 beat"><</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeFwd1"  title="Shift loop forward 1 beat">></button>
         <input type="number" class="control-val-input loop-beats-input" id="loopBeats1" value="4" step="1" title="Loop length in beats">
         <span class="spacer"></span>
         <input type="range" id="speed1" class="range-hidden">
@@ -140,6 +139,39 @@
             <input type="number" class="control-val-input" id="currentBpm1" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
             <input type="number" class="control-val-input" id="speedVal1"   step="0.001"               title="Playback speed">
           </div>
+        </div>
+      </div>
+
+
+      <!-- ── Mobile deck controls (portrait only) ─────────────── -->
+      <div class="deck-mobile-controls">
+        <!-- Row 1: play, nudge ◀▶, bend −+ -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-amber" id="mPlay1"      title="Play / Pause">▶</button>
+          <button class="btn btn-sq btn-amber" id="mNudgeBack1" title="Back 1 beat"><</button>
+          <button class="btn btn-sq btn-amber" id="mNudgeFwd1"  title="Forward 1 beat">></button>
+          <button class="btn btn-sq btn-amber btn-bend" id="mBendDown1" title="Slow down (hold)">−</button>
+          <button class="btn btn-sq btn-amber btn-bend" id="mBendUp1"   title="Speed up (hold)">+</button>
+        </div>
+        <!-- Row 2: loop toggle, loop nudge ◀▶, beats, speed knob -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-green btn-loop" id="mLoop1"          title="Toggle loop">↻</button>
+          <button class="btn btn-sq btn-amber"          id="mLoopNudgeBack1" title="Shift loop back 1 beat"><</button>
+          <button class="btn btn-sq btn-amber"          id="mLoopNudgeFwd1"  title="Shift loop forward 1 beat">></button>
+          <input type="number" class="control-val-input loop-beats-input" id="mLoopBeats1" value="4" step="1" title="Loop beats">
+          <span class="spacer"></span>
+          <canvas class="knob-canvas knob-speed" id="mSpeedKnob1" width="36" height="36"></canvas>
+        </div>
+        <!-- Row 3: fine speed adj, current BPM + speed ratio, SYNC -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-amber" id="mSpeedDown1" title="Speed −0.001">−</button>
+          <button class="btn btn-sq btn-amber" id="mSpeedUp1"   title="Speed +0.001">+</button>
+          <span class="spacer"></span>
+          <div class="col" style="gap:2px">
+            <input type="number" class="control-val-input" id="mCurrentBpm1" step="0.1" placeholder="—" title="Current BPM">
+            <input type="number" class="control-val-input" id="mSpeedVal1"   step="0.001"               title="Speed ratio">
+          </div>
+          <button class="btn btn-pill btn-green" id="mSyncFrom1" title="Sync deck A to deck B">SYNC</button>
         </div>
       </div>
 
@@ -250,17 +282,16 @@
         <button class="btn btn-sq btn-amber" id="play2"     title="Play / Pause">▶</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendDown2" title="Slow down (hold)">−</button>
         <button class="btn btn-sq btn-amber btn-bend" id="bendUp2"   title="Speed up (hold)">+</button>
-        <button class="btn btn-sq btn-amber" id="nudgeBack2" title="Back 1 beat">◀</button>
-        <button class="btn btn-sq btn-amber" id="nudgeFwd2"  title="Forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="nudgeBack2" title="Back 1 beat"><</button>
+        <button class="btn btn-sq btn-amber" id="nudgeFwd2"  title="Forward 1 beat">></button>
         <span class="spacer"></span>
-        <input type="number" class="bpm-input" id="bpm2" placeholder="—" step="0.1" readonly title="Detected BPM">
         <button class="btn btn-pill btn-green" id="syncFrom2" title="Match deck B tempo to deck A">SYNC</button>
       </div>
 
       <div class="row deck-bottom-row">
         <button class="btn btn-sq btn-green btn-loop" id="loop2"          title="Toggle loop">↻</button>
-        <button class="btn btn-sq btn-amber" id="loopNudgeBack2" title="Shift loop back 1 beat">◀</button>
-        <button class="btn btn-sq btn-amber" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">▶</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeBack2" title="Shift loop back 1 beat"><</button>
+        <button class="btn btn-sq btn-amber" id="loopNudgeFwd2"  title="Shift loop forward 1 beat">></button>
         <input type="number" class="control-val-input loop-beats-input" id="loopBeats2" value="4" step="1" title="Loop length in beats">
         <span class="spacer"></span>
         <input type="range" id="speed2" class="range-hidden">
@@ -270,6 +301,39 @@
             <input type="number" class="control-val-input" id="currentBpm2" step="0.1" placeholder="—" title="Current BPM (detected × speed)">
             <input type="number" class="control-val-input" id="speedVal2"   step="0.001"               title="Playback speed">
           </div>
+        </div>
+      </div>
+
+
+      <!-- ── Mobile deck controls (portrait only) ─────────────── -->
+      <div class="deck-mobile-controls">
+        <!-- Row 1: play, nudge ◀▶, bend −+ -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-amber" id="mPlay2"      title="Play / Pause">▶</button>
+          <button class="btn btn-sq btn-amber" id="mNudgeBack2" title="Back 1 beat"><</button>
+          <button class="btn btn-sq btn-amber" id="mNudgeFwd2"  title="Forward 1 beat">></button>
+          <button class="btn btn-sq btn-amber btn-bend" id="mBendDown2" title="Slow down (hold)">−</button>
+          <button class="btn btn-sq btn-amber btn-bend" id="mBendUp2"   title="Speed up (hold)">+</button>
+        </div>
+        <!-- Row 2: loop toggle, loop nudge ◀▶, beats, speed knob -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-green btn-loop" id="mLoop2"          title="Toggle loop">↻</button>
+          <button class="btn btn-sq btn-amber"          id="mLoopNudgeBack2" title="Shift loop back 1 beat"><</button>
+          <button class="btn btn-sq btn-amber"          id="mLoopNudgeFwd2"  title="Shift loop forward 1 beat">></button>
+          <input type="number" class="control-val-input loop-beats-input" id="mLoopBeats2" value="4" step="1" title="Loop beats">
+          <span class="spacer"></span>
+          <canvas class="knob-canvas knob-speed" id="mSpeedKnob2" width="36" height="36"></canvas>
+        </div>
+        <!-- Row 3: fine speed adj, current BPM + speed ratio, SYNC -->
+        <div class="row deck-mobile-row">
+          <button class="btn btn-sq btn-amber" id="mSpeedDown2" title="Speed −0.001">−</button>
+          <button class="btn btn-sq btn-amber" id="mSpeedUp2"   title="Speed +0.001">+</button>
+          <span class="spacer"></span>
+          <div class="col" style="gap:2px">
+            <input type="number" class="control-val-input" id="mCurrentBpm2" step="0.1" placeholder="—" title="Current BPM">
+            <input type="number" class="control-val-input" id="mSpeedVal2"   step="0.001"               title="Speed ratio">
+          </div>
+          <button class="btn btn-pill btn-green" id="mSyncFrom2" title="Sync deck B to deck A">SYNC</button>
         </div>
       </div>
 
