@@ -12,6 +12,7 @@
 //  mixxs:clickstate   { active }
 //  mixxs:loadprogress { deckNum, label, active, onCancel? }
 //  mixxs:loadend      { deckNum, filename }
+//  mixxs:levelupdate  { ch1, ch2, master, cue }  — dBFS, every RAF frame
 // ═══════════════════════════════════════════════════════════════
 class MixerController {
   constructor() {
@@ -342,6 +343,17 @@ class MixerController {
           duration: deck.getRealDuration(),
         });
       });
+
+      // VU meter levels — emit once per frame with all four readings.
+      // Falls back to -48 dBFS (silence) before audio is initialised.
+      const _db = analyser => analyser ? analyserToDb(analyser) : -48;
+      this.emit('mixxs:levelupdate', {
+        ch1:    _db(this.channel1?.analyser),
+        ch2:    _db(this.channel2?.analyser),
+        master: _db(this.audioEngine?.analyser),
+        cue:    _db(this.cueBus?.analyser),
+      });
+
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);

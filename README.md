@@ -43,6 +43,7 @@ A browser-based DJ mixer. No install, no server, no dependencies — just open `
 
 **Audio quality**
 - Declick on all transport operations (play, pause, seek, scratch, CUE) — 5 ms fade eliminates clicks
+- VU meters — LED segment meters for channel A, channel B, master and CUE (RMS, 12 segments, green/yellow/red)
 
 **Dual output**
 - Route master and CUE to separate physical audio devices
@@ -145,6 +146,7 @@ main.js
 | `BeatAnalyzer.js` | `BeatAnalyzer` | BPM detection + beat timestamp array from `AudioBuffer` |
 | `Clicktrack.js` | `Clicktrack` | Beat-synced metronome via `OscillatorNode` |
 | `FileLoader.js` | `FileLoader` | `File` → decoded `AudioBuffer` |
+| `VUMeter.js` | `VUMeter` | LED-segment level meter canvas (horizontal or vertical, reads colors from CSS vars) |
 
 #### Rendering
 
@@ -182,6 +184,7 @@ main.js
 | `mixxs:clickstate` | `{ active }` | Click track toggled on or off |
 | `mixxs:loadprogress` | `{ deckNum, label, active, onCancel? }` | Loading overlay should show/hide |
 | `mixxs:loadend` | `{ deckNum, filename }` | File decoded and rendered successfully |
+| `mixxs:levelupdate` | `{ ch1, ch2, master, cue }` | Every RAF frame — dBFS RMS levels for all four meters |
 
 ---
 

@@ -9,6 +9,12 @@ class CueBus {
 
     this.input      = ctx.createGain();
     this.streamDest = ctx.createMediaStreamDestination();
+
+    // Analyser tap on the CUE bus — used by VU meter (stays in master context)
+    this.analyser                      = ctx.createAnalyser();
+    this.analyser.fftSize              = 1024;
+    this.analyser.smoothingTimeConstant = 0.6;
+    this.input.connect(this.analyser);
     this.input.connect(this.streamDest);
 
     this.streamSrc  = cueCtx.createMediaStreamSource(this.streamDest.stream);

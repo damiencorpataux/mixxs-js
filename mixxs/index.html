@@ -36,12 +36,14 @@
       <input type="range"  id="masterVol"    step="1">
       <input type="number" id="masterVolVal" step="1" class="control-val-input">
     </div>
+    <canvas class="vu-meter vu-meter--vertical" id="vuMaster" data-segments="6" width="6" height="40" title="Master level"></canvas>
     <span class="label">CUE</span>
     <div class="knob-widget knob-inline">
       <canvas class="knob-canvas" id="cueKnob" width="40" height="40"></canvas>
       <input type="range"  id="cueVol"    step="1">
       <input type="number" id="cueVolVal" step="1" class="control-val-input">
     </div>
+    <canvas class="vu-meter vu-meter--vertical" id="vuCue" data-segments="6" width="6" height="40" title="CUE level"></canvas>
   </div>
 
   <div class="header-right">
@@ -150,7 +152,7 @@
 
         <!-- Channel A (CUE left, EQ/filter/vol right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header text-header">A</div>
+          <div class="mixer-ch-header text-header">A <canvas class="vu-meter" id="vuCh1" width="80" height="6"></canvas></div>
           <button class="btn btn-circle btn-red" id="cue1" title="CUE A">CUE</button>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
@@ -188,7 +190,7 @@
 
         <!-- Channel B (EQ/filter/vol left, CUE right) -->
         <div class="mixer-channel">
-          <div class="mixer-ch-header text-header">B</div>
+          <div class="mixer-ch-header text-header">B <canvas class="vu-meter" id="vuCh2" width="80" height="6"></canvas></div>
           <div class="knob-widget">
             <div class="knob-label-top label">HI</div>
             <canvas class="knob-canvas" id="eqHiKnob2" width="48" height="48"></canvas>
@@ -313,6 +315,7 @@
 <script src="js/MixerController.js"></script>
 <script src="js/Knob.js"></script>
 <script src="js/DeckUI.js"></script>
+<script src="js/VUMeter.js"></script>
 <script src="js/MixerUI.js"></script>
 <script src="js/main.js"></script>
 

@@ -14,6 +14,12 @@ class AudioEngine {
     this.cueContext    = new AudioContext();
     this.masterGain    = this.masterContext.createGain();
     this.masterGain.gain.value = 0.8;
+
+    // Post-masterGain analyser tap — used by VU meter
+    this.analyser                      = this.masterContext.createAnalyser();
+    this.analyser.fftSize              = 1024;
+    this.analyser.smoothingTimeConstant = 0.6;
+    this.masterGain.connect(this.analyser);
     this.masterGain.connect(this.masterContext.destination);
   }
 

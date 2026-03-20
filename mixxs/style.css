@@ -47,6 +47,12 @@
   --btn-pill-h:   36px;
   --btn-pill-pad: 0 12px;
 
+  /* VU meter LED colors */
+  --vu-green:  #22c55e;
+  --vu-yellow: #eab308;
+  --vu-red:    #ef4444;
+  --vu-dim:    rgba(255,255,255,0.07);
+
   /* Knob canvas colors (read by Knob.draw via getComputedStyle) */
   --knob-arc:         var(--amber);
   --knob-body:        #161616;
@@ -66,6 +72,8 @@
   --amber-dk: #fde68a;
   --text:     #1a1a1a;
   --muted:    #777777;
+
+  --vu-dim:    rgba(0,0,0,0.1);
 
   --knob-body:        #e4e4e4;
   --knob-border:      #999999;
@@ -358,8 +366,13 @@ canvas.overview-canvas { display: block; width: 100%; height: 100%; }
   flex: 1;
 }
 
-/* Channel header — font-weight only; color/ls from .text-header in HTML */
-.mixer-ch-header { grid-column: 1 / 3; font-weight: 700; text-align: center; padding: 4px 0 2px; }
+/* VU meter canvases */
+.vu-meter           { display: block; flex-shrink: 0; }
+.vu-meter--vertical { align-self: center; }
+
+/* Channel header: letter + meter side by side, meter fills remaining space */
+.mixer-ch-header { grid-column: 1 / 3; font-weight: 700; display: flex; align-items: center; gap: var(--gap-sm); padding: 4px 0 2px; }
+.mixer-ch-header .vu-meter { flex: 1; height: 6px; }
 
 .knob-widget { display: flex; flex-direction: column; align-items: center; gap: var(--gap-xs); }
 .knob-label-top { /* layout hook only — typography via .label in HTML */ }

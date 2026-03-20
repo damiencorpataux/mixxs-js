@@ -15,6 +15,7 @@ class MixerUI {
     this._wireWaveforms();
     this._wireClickTrack();
     this._wireSettingsModal();
+    this._wireVUMeters();
   }
 
   // ── CUE ───────────────────────────────────────────────────────
@@ -313,6 +314,24 @@ class MixerUI {
       const btn = el('btnExport');
       btn.disabled    = e.detail.busy;
       btn.textContent = e.detail.busy ? '⏳ RENDERING…' : '⬇ EXPORT MIX';
+    });
+  }
+
+  // ── VU meters ─────────────────────────────────────────────────
+
+  _wireVUMeters() {
+    const meters = {
+      ch1:    new VUMeter(el('vuCh1')),
+      ch2:    new VUMeter(el('vuCh2')),
+      master: new VUMeter(el('vuMaster')),
+      cue:    new VUMeter(el('vuCue')),
+    };
+    document.addEventListener('mixxs:levelupdate', e => {
+      const { ch1, ch2, master, cue } = e.detail;
+      meters.ch1.draw(ch1);
+      meters.ch2.draw(ch2);
+      meters.master.draw(master);
+      meters.cue.draw(cue);
     });
   }
 

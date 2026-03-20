@@ -45,6 +45,11 @@ class ChannelController {
     this.panner = ctx.createStereoPanner();
     this.panner.pan.value = 0;
 
+    // Post-fader analyser tap — used by VU meter
+    this.analyser                      = ctx.createAnalyser();
+    this.analyser.fftSize              = 1024;
+    this.analyser.smoothingTimeConstant = 0.6;
+
     // ── CUE send (pre-fader tap) ──────────────────────────────
     this.cueSend = ctx.createGain();
     this.cueSend.gain.value = 0;
@@ -55,6 +60,7 @@ class ChannelController {
     this.eqMid.connect(this.eqHigh);
     this.eqHigh.connect(this.filter);
     this.filter.connect(this.fader);
+    this.fader.connect(this.analyser); // tap post-fader
     this.fader.connect(this.panner);
 
     this.input.connect(this.cueSend);
